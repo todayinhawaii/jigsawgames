@@ -381,7 +381,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
   <div id="topNav">
     <div>
       <div class="nav-logo">🧩 jigsaw.games</div>
-      <div class="nav-sub">Original Art Puzzles</div>
+      <div class="nav-sub">22 Original Art Puzzles</div>
     </div>
     <div class="nav-right">
       <button class="nav-btn" onclick="location.href='https://www.fab.games'">fab.games</button>
@@ -470,24 +470,36 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 // ════════════════════════════════════════════════
 
 // ── PUZZLES ──────────────────────────────────────
-function isPortrait(){ return window.innerHeight > window.innerWidth; }
-
 const PUZZLES = [
-  { portrait:'/puzzle1-portrait.jpg', landscape:'/puzzle1-landscape.jpg', title:"The Mermaid's Hawaiian Cove",    desc:'A magical underwater world of Hawaii' },
-  { portrait:'/puzzle2-portrait.jpg', landscape:'/puzzle2-landscape.jpg', title:'Christmas in the Cotswolds',     desc:'A festive English village in winter snow' },
-  { portrait:'/puzzle3-portrait.jpg', landscape:'/puzzle3-landscape.jpg', title:'Summer at Daisy Cottage',        desc:'A warm and whimsical English garden' },
-  { portrait:'/puzzle4-portrait.jpg', landscape:'/puzzle4-landscape.jpg', title:'Secret Garden of Magic',         desc:'Where flowers bloom in hidden splendour' },
-  { portrait:'/puzzle5-portrait.jpg', landscape:'/puzzle5-landscape.jpg', title:'The Old Steam Train Station',    desc:'A nostalgic journey back in time' },
-  { portrait:'/puzzle6-portrait.jpg', landscape:'/puzzle6-landscape.jpg', title:"Grandpa's Country Store",        desc:'Warm memories of simpler days' },
-  { portrait:'/puzzle7-portrait.jpg', landscape:'/puzzle7-landscape.jpg', title:'The Butterfly Garden',           desc:'A paradise of colour and wonder' },
-  { portrait:'/puzzle8-portrait.jpg', landscape:'/puzzle8-landscape.jpg', title:'Dolphins of Paradise Bay',       desc:'Dancing with dolphins in turquoise waters' },
-  { portrait:'/puzzle9-portrait.jpg', landscape:'/puzzle9-landscape.jpg', title:'London in the Snow',            desc:'The magic of a winter city in white' },
+  { src:'/puzzle1.jpg',  title:"The Mermaid's Hawaiian Cove",  desc:'A magical underwater world of Hawaii' },
+  { src:'/puzzle2.jpg',  title:'Christmas in the Cotswolds',   desc:'A festive English village in winter snow' },
+  { src:'/puzzle3.jpg',  title:'Summer at Daisy Cottage',      desc:'A warm and whimsical English garden' },
+  { src:'/puzzle4.jpg',  title:'Secret Garden of Magic',       desc:'Where flowers bloom in hidden splendour' },
+  { src:'/puzzle5.jpg',  title:'The Old Steam Train Station',  desc:'A nostalgic journey back in time' },
+  { src:'/puzzle6.jpg',  title:"Grandpa's Country Store",      desc:'Warm memories of simpler days' },
+  { src:'/puzzle7.jpg',  title:'The Butterfly Garden',         desc:'A paradise of colour and wonder' },
+  { src:'/puzzle8.jpg',  title:'Dolphins of Paradise Bay',     desc:'Dancing with dolphins in turquoise waters' },
+  { src:'/puzzle9.jpg',  title:'London in the Snow',           desc:'The magic of a winter city in white' },
+  { src:'/puzzle10.jpg', title:'Coming Soon',                  desc:'A brand new masterpiece on its way' },
+  { src:'/puzzle11.jpg', title:'Coming Soon',                  desc:'A brand new masterpiece on its way' },
+  { src:'/puzzle12.jpg', title:'Coming Soon',                  desc:'A brand new masterpiece on its way' },
+  { src:'/puzzle13.jpg', title:'Coming Soon',                  desc:'A brand new masterpiece on its way' },
+  { src:'/puzzle14.jpg', title:'Coming Soon',                  desc:'A brand new masterpiece on its way' },
+  { src:'/puzzle15.jpg', title:'Coming Soon',                  desc:'A brand new masterpiece on its way' },
+  { src:'/puzzle16.jpg', title:'Coming Soon',                  desc:'A brand new masterpiece on its way' },
+  { src:'/puzzle17.jpg', title:'Coming Soon',                  desc:'A brand new masterpiece on its way' },
+  { src:'/puzzle18.jpg', title:'Coming Soon',                  desc:'A brand new masterpiece on its way' },
+  { src:'/puzzle19.jpg', title:'Coming Soon',                  desc:'A brand new masterpiece on its way' },
+  { src:'/puzzle20.jpg', title:'Coming Soon',                  desc:'A brand new masterpiece on its way' },
+  { src:'/puzzle21.jpg', title:'Coming Soon',                  desc:'A brand new masterpiece on its way' },
+  { src:'/puzzle22.jpg', title:'Coming Soon',                  desc:'A brand new masterpiece on its way' },
 ];
 
-const ROMANS = ['I','II','III','IV','V','VI','VII','VIII','IX'];
+// Puzzle numbers auto-generated - no need to maintain a list!
+function getPuzzleNum(i){ return 'Puzzle ' + (i+1); }
 const DIFFS = {12:{cols:3,rows:4},24:{cols:4,rows:6},48:{cols:6,rows:8},70:{cols:7,rows:10}};
 
-function getSrc(p){ return isPortrait() ? p.portrait : p.landscape; }
+function getSrc(p){ return p.src; }
 
 // ── STATE ─────────────────────────────────────────
 let curIdx = 0, difficulty = 12;
@@ -518,7 +530,7 @@ function updateHero(animate=true){
     void document.getElementById('artInfo').offsetWidth;
     document.getElementById('artInfo').style.animation='infoFade 0.6s ease';
   }
-  document.getElementById('artNum').textContent = 'Puzzle '+ROMANS[curIdx]+' of IX';
+  document.getElementById('artNum').textContent = 'Puzzle '+(curIdx+1)+' of '+PUZZLES.length;
   document.getElementById('artTitle').textContent = p.title;
   document.getElementById('artDesc').textContent = p.desc;
   buildDots();
@@ -826,7 +838,7 @@ function buildCarousel(){
       card.className = 'car-card' + (i===curIdx?' active':'');
       card.innerHTML = `
         <img src="${getSrc(p)}" loading="lazy" alt="${p.title}">
-        <div class="car-card-num">${ROMANS[i]}</div>
+        <div class="car-card-num">${getPuzzleNum(i)}</div>
         <div class="car-card-label">${p.title}</div>`;
       card.addEventListener('click',()=>{
         goTo(i);
