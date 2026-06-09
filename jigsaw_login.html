@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign In — jigsaw.games</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Cinzel+Decorative:wght@900&display=block" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--gold:#c9a84c;--gold2:#ffd700;}
+body{background:#080808;color:#f0ede8;font-family:'Inter',sans-serif;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;padding:20px;}
+.logo{font-family:'Cinzel Decorative',serif;font-size:24px;font-weight:900;
+  background:linear-gradient(135deg,#ffd700,#c9a84c);-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;margin-bottom:4px;}
+.logo-sub{font-size:10px;color:rgba(201,168,76,0.5);letter-spacing:3px;text-transform:uppercase;margin-bottom:28px;}
+.card{width:100%;max-width:400px;background:#111114;border:1px solid rgba(201,168,76,0.15);
+  border-radius:20px;padding:28px 24px;}
+.card-title{font-family:'Cinzel Decorative',serif;font-size:20px;
+  background:linear-gradient(180deg,#ffd700,#c9a84c);-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;text-align:center;margin-bottom:20px;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:11px;font-weight:700;color:rgba(240,237,232,0.5);
+  text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;}
+.form-input{width:100%;padding:13px 14px;background:rgba(255,255,255,0.05);
+  border:1.5px solid rgba(255,255,255,0.08);border-radius:10px;
+  color:#fff;font-size:15px;font-family:'Inter',sans-serif;outline:none;}
+.form-input:focus{border-color:var(--gold);}
+.form-input::placeholder{color:rgba(255,255,255,0.2);}
+.btn{width:100%;padding:16px;border:none;border-radius:12px;
+  background:linear-gradient(180deg,#ffd700,#c9a84c);color:#080808;
+  font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;
+  box-shadow:0 6px 0 #7a5c14;margin-top:6px;}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #7a5c14;}
+.msg{font-size:13px;text-align:center;padding:10px;border-radius:8px;
+  margin-bottom:12px;display:none;background:rgba(255,50,50,0.1);
+  color:#ff6b6b;border:1px solid rgba(255,50,50,0.2);}
+.links{display:flex;justify-content:space-between;margin-top:16px;font-size:12px;}
+.links a{color:var(--gold);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="logo">🧩 jigsaw.games</div>
+<div class="logo-sub">Original Art Puzzles</div>
+<div class="card">
+  <div class="card-title">Welcome Back</div>
+  <div id="msgBox" class="msg"></div>
+  <div class="form-group">
+    <label class="form-label">Email Address</label>
+    <input class="form-input" id="loginEmail" type="email" placeholder="your@email.com">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Password</label>
+    <input class="form-input" id="loginPw" type="password" placeholder="Your password"
+      onkeydown="if(event.key==='Enter')signIn()">
+  </div>
+  <button class="btn" onclick="signIn()">Sign In →</button>
+  <div class="links">
+    <a href="/join">Create account</a>
+    <a href="/reset">Forgot password?</a>
+  </div>
+</div>
+<script>
+let sbClient;
+async function init(){
+  try{
+    const res=await fetch('/api/config');
+    const cfg=await res.json();
+    sbClient=window.supabase.createClient(cfg.supabase_url,cfg.supabase_anon_key);
+    const{data:{session}}=await sbClient.auth.getSession();
+    if(session) window.location='/';
+  }catch(e){}
+}
+init();
+async function signIn(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pw=document.getElementById('loginPw').value;
+  if(!email||!pw){showMsg('Please enter your email and password!');return;}
+  try{
+    const{data,error}=await sbClient.auth.signInWithPassword({email,password:pw});
+    if(error){showMsg(error.message);return;}
+    window.location='/';
+  }catch(e){showMsg('Connection error. Please try again!');}
+}
+function showMsg(m){const el=document.getElementById('msgBox');el.textContent=m;el.style.display='block';}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</body>
+</html>
