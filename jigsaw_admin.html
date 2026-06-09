@@ -110,15 +110,11 @@ body{display:flex;flex-direction:column;align-items:center;padding:30px 16px 60p
     <div class="card-title">🔐 Admin Login</div>
     <div id="loginMsg" class="msg"></div>
     <div class="form-group">
-      <label class="form-label">Email</label>
-      <input class="form-input" id="loginEmail" type="email" placeholder="your@email.com">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Password</label>
-      <input class="form-input" id="loginPw" type="password" placeholder="Password"
+      <label class="form-label">Secret Password</label>
+      <input class="form-input" id="loginPw" type="password" placeholder="Enter admin password"
         onkeydown="if(event.key==='Enter')adminLogin()">
     </div>
-    <button class="btn" onclick="adminLogin()">🔐 Login to Admin</button>
+    <button class="btn" onclick="adminLogin()">🔐 Enter Admin</button>
   </div>
 </div>
 
@@ -203,32 +199,27 @@ async function init(){
     const res = await fetch('/api/config');
     const cfg = await res.json();
     sbClient = window.supabase.createClient(cfg.supabase_url, cfg.supabase_anon_key);
-    // Check if already logged in
-    const{data:{session}} = await sbClient.auth.getSession();
-    if(session){
-      adminUser = session.user;
-      showAdmin();
-    }
   }catch(e){ console.log('Init error:',e); }
+  // Check if already logged in this session
+  if(sessionStorage.getItem('jigsaw_admin')==='yes') showAdmin();
 }
 init();
 
-// ── LOGIN ─────────────────────────────────────────
-async function adminLogin(){
-  const email = document.getElementById('loginEmail').value.trim();
-  const pw = document.getElementById('loginPw').value;
-  if(!email||!pw){ showLoginMsg('Please enter email and password!','error'); return; }
+// ── ADMIN PASSWORD ────────────────────────────────
+// Change this to your own secret password!!
+const ADMIN_PASSWORD = 'Games@5';
 
-  try{
-    const{data,error} = await sbClient.auth.signInWithPassword({email,password:pw});
-    if(error){ showLoginMsg(error.message,'error'); return; }
-    adminUser = data.user;
-    showAdmin();
-  }catch(e){ showLoginMsg('Login failed. Please try again!','error'); }
+function adminLogin(){
+  const pw = document.getElementById('loginPw').value;
+  if(!pw){ showLoginMsg('Please enter the password!','error'); return; }
+  if(pw !== ADMIN_PASSWORD){ showLoginMsg('Wrong password! Try again!!','error'); return; }
+  // Store in session so refresh works
+  sessionStorage.setItem('jigsaw_admin','yes');
+  showAdmin();
 }
 
 function adminLogout(){
-  sbClient.auth.signOut();
+  sessionStorage.removeItem('jigsaw_admin');
   document.getElementById('adminWrap').style.display='none';
   document.getElementById('loginWrap').style.display='block';
 }
