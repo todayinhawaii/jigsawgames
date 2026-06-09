@@ -65,6 +65,10 @@ def create_checkout():
 def index():
     return send_from_directory('.', 'jigsaw_games_index.html')
 
+@app.route('/admin')
+def admin():
+    return send_from_directory('.', 'jigsaw_admin.html')
+
 @app.route('/join')
 def join():
     return send_from_directory('.', 'jigsaw_join.html')
