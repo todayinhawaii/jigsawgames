@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🎨 Admin — jigsaw.games</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Cinzel+Decorative:wght@900&display=block" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--gold:#c9a84c;--gold2:#ffd700;--dark:#080808;--text:#f0ede8;--muted:rgba(240,237,232,0.5);}
+html,body{min-height:100%;background:var(--dark);color:var(--text);font-family:'Inter',system-ui,sans-serif;}
+body{display:flex;flex-direction:column;align-items:center;padding:30px 16px 60px;}
+
+/* Login */
+#loginWrap{width:100%;max-width:380px;}
+.logo{font-family:'Cinzel Decorative',serif;font-size:24px;font-weight:900;
+  background:linear-gradient(135deg,#ffd700,#c9a84c);-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;text-align:center;margin-bottom:4px;}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;
+  text-align:center;margin-bottom:28px;}
+.card{background:#111114;border:1px solid rgba(201,168,76,0.15);border-radius:20px;padding:28px 24px;width:100%;}
+.card-title{font-size:18px;font-weight:800;color:var(--gold2);text-align:center;margin-bottom:20px;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:1px;display:block;margin-bottom:6px;}
+.form-input{width:100%;padding:13px 14px;background:rgba(255,255,255,0.05);
+  border:1.5px solid rgba(255,255,255,0.08);border-radius:10px;
+  color:#fff;font-size:15px;font-family:'Inter',sans-serif;outline:none;}
+.form-input:focus{border-color:var(--gold);}
+.form-input::placeholder{color:rgba(255,255,255,0.2);}
+.btn{width:100%;padding:16px;border:none;border-radius:12px;
+  background:linear-gradient(180deg,#ffd700,#c9a84c);color:#080808;
+  font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;
+  box-shadow:0 6px 0 #7a5c14;margin-top:6px;transition:all 0.1s;}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #7a5c14;}
+.btn:disabled{opacity:0.4;cursor:not-allowed;}
+.btn.danger{background:linear-gradient(180deg,#ff4444,#cc2222);color:#fff;box-shadow:0 6px 0 #7a0000;}
+.msg{font-size:13px;text-align:center;padding:10px;border-radius:8px;margin-bottom:12px;display:none;}
+.msg.error{background:rgba(255,50,50,0.1);color:#ff6b6b;border:1px solid rgba(255,50,50,0.2);}
+.msg.success{background:rgba(50,255,100,0.1);color:#50fa7b;border:1px solid rgba(50,255,100,0.2);}
+.msg.info{background:rgba(201,168,76,0.1);color:var(--gold);border:1px solid rgba(201,168,76,0.2);}
+
+/* Admin panel */
+#adminWrap{width:100%;max-width:600px;display:none;}
+.admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:gap;}
+.admin-title{font-family:'Cinzel Decorative',serif;font-size:20px;
+  background:linear-gradient(135deg,#ffd700,#c9a84c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logout-btn{padding:8px 16px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.05);color:var(--muted);font-size:11px;cursor:pointer;}
+
+/* Add puzzle form */
+.section{background:#111114;border:1px solid rgba(201,168,76,0.15);
+  border-radius:16px;padding:24px;margin-bottom:20px;}
+.section-title{font-size:14px;font-weight:800;color:var(--gold);
+  text-transform:uppercase;letter-spacing:1px;margin-bottom:18px;
+  display:flex;align-items:center;gap:8px;}
+
+/* Image upload area */
+.upload-area{
+  border:2px dashed rgba(201,168,76,0.3);border-radius:12px;
+  padding:30px;text-align:center;cursor:pointer;
+  transition:all 0.2s;background:rgba(201,168,76,0.03);
+  position:relative;
+}
+.upload-area:hover{border-color:var(--gold);background:rgba(201,168,76,0.07);}
+.upload-area.has-file{border-color:var(--gold);border-style:solid;}
+.upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:36px;margin-bottom:8px;}
+.upload-text{font-size:13px;color:var(--muted);}
+.upload-text strong{color:var(--gold);}
+#previewThumb{
+  max-width:100%;max-height:200px;border-radius:8px;
+  margin-top:12px;display:none;object-fit:contain;
+}
+
+/* Puzzle list */
+.puzzle-list{display:flex;flex-direction:column;gap:10px;}
+.puzzle-item{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
+  border-radius:10px;padding:10px 14px;
+}
+.puzzle-item.has-image{border-color:rgba(201,168,76,0.2);}
+.puzzle-thumb{
+  width:48px;height:64px;border-radius:6px;object-fit:cover;
+  background:rgba(255,255,255,0.05);flex-shrink:0;
+}
+.puzzle-info{flex:1;}
+.puzzle-num{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;}
+.puzzle-name{font-size:13px;font-weight:700;color:var(--text);}
+.puzzle-desc{font-size:11px;color:var(--muted);}
+.puzzle-status{font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;}
+.puzzle-status.live{background:rgba(50,255,100,0.1);color:#50fa7b;border:1px solid rgba(50,255,100,0.2);}
+.puzzle-status.soon{background:rgba(255,165,0,0.1);color:#ffa500;border:1px solid rgba(255,165,0,0.2);}
+
+/* Progress */
+.progress-wrap{margin-bottom:20px;}
+.progress-text{font-size:12px;color:var(--muted);margin-bottom:6px;}
+.progress-bar{height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#ffd700,#c9a84c);border-radius:3px;transition:width 0.4s;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginWrap">
+  <div class="logo">🎨 jigsaw.games</div>
+  <div class="logo-sub">Admin Panel</div>
+  <div class="card">
+    <div class="card-title">🔐 Admin Login</div>
+    <div id="loginMsg" class="msg"></div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input class="form-input" id="loginEmail" type="email" placeholder="your@email.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="loginPw" type="password" placeholder="Password"
+        onkeydown="if(event.key==='Enter')adminLogin()">
+    </div>
+    <button class="btn" onclick="adminLogin()">🔐 Login to Admin</button>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminWrap">
+  <div class="admin-header">
+    <div class="admin-title">🎨 Puzzle Manager</div>
+    <button class="logout-btn" onclick="adminLogout()">← Log Out</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-text" id="progressText">0 of 22 puzzles live</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <!-- ADD NEW PUZZLE -->
+  <div class="section">
+    <div class="section-title">✦ Add New Puzzle</div>
+
+    <div id="addMsg" class="msg"></div>
+
+    <div class="form-group">
+      <label class="form-label">🖼️ Painting Image (JPG · 1920×1080 · under 800KB)</label>
+      <div class="upload-area" id="uploadArea">
+        <input type="file" id="imageFile" accept="image/jpeg,image/jpg,image/png,image/webp"
+          onchange="previewImage(this)">
+        <div class="upload-icon">🖼️</div>
+        <div class="upload-text">Drop your painting here or <strong>tap to choose</strong></div>
+        <img id="previewThumb" src="" alt="Preview">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">🎨 Painting Title</label>
+      <input class="form-input" id="newTitle" type="text"
+        placeholder="e.g. Sunset Over Diamond Head">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">📝 Description</label>
+      <input class="form-input" id="newDesc" type="text"
+        placeholder="e.g. A golden Hawaiian evening sky">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">🔢 Puzzle Number</label>
+      <input class="form-input" id="newNum" type="number"
+        placeholder="e.g. 10" min="1" max="999">
+    </div>
+
+    <button class="btn" id="addBtn" onclick="addPuzzle()">
+      ✦ Add This Puzzle to jigsaw.games
+    </button>
+  </div>
+
+  <!-- PUZZLE LIST -->
+  <div class="section">
+    <div class="section-title">📋 All Puzzles</div>
+    <div class="puzzle-list" id="puzzleList">
+      <div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">
+        Loading puzzles...
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ════════════════════════════════════════════════
+// JIGSAW.GAMES ADMIN PANEL
+// ════════════════════════════════════════════════
+
+// Admin email - only this email can log in!
+const ADMIN_EMAIL = 'admin@jigsaw.games'; // Change this to your email!
+
+let sbClient, adminUser;
+
+// ── INIT ─────────────────────────────────────────
+async function init(){
+  try{
+    const res = await fetch('/api/config');
+    const cfg = await res.json();
+    sbClient = window.supabase.createClient(cfg.supabase_url, cfg.supabase_anon_key);
+    // Check if already logged in
+    const{data:{session}} = await sbClient.auth.getSession();
+    if(session){
+      adminUser = session.user;
+      showAdmin();
+    }
+  }catch(e){ console.log('Init error:',e); }
+}
+init();
+
+// ── LOGIN ─────────────────────────────────────────
+async function adminLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  if(!email||!pw){ showLoginMsg('Please enter email and password!','error'); return; }
+
+  try{
+    const{data,error} = await sbClient.auth.signInWithPassword({email,password:pw});
+    if(error){ showLoginMsg(error.message,'error'); return; }
+    adminUser = data.user;
+    showAdmin();
+  }catch(e){ showLoginMsg('Login failed. Please try again!','error'); }
+}
+
+function adminLogout(){
+  sbClient.auth.signOut();
+  document.getElementById('adminWrap').style.display='none';
+  document.getElementById('loginWrap').style.display='block';
+}
+
+function showLoginMsg(msg,type){
+  const el=document.getElementById('loginMsg');
+  el.textContent=msg;el.className='msg '+type;el.style.display='block';
+}
+
+// ── ADMIN PANEL ───────────────────────────────────
+function showAdmin(){
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('adminWrap').style.display='block';
+  loadPuzzles();
+}
+
+// ── PUZZLE DATA (stored in Supabase) ─────────────
+// Puzzles stored in supabase table: jigsaw_puzzles
+// columns: id, num, title, desc, filename, created_at
+
+async function loadPuzzles(){
+  try{
+    const{data,error} = await sbClient
+      .from('jigsaw_puzzles')
+      .select('*')
+      .order('num');
+
+    if(error) throw error;
+    renderPuzzleList(data||[]);
+    updateProgress(data||[]);
+  }catch(e){
+    // Table might not exist yet - show empty state
+    renderPuzzleList([]);
+    updateProgress([]);
+  }
+}
+
+function updateProgress(puzzles){
+  const live = puzzles.length;
+  document.getElementById('progressText').textContent = live+' puzzles live on jigsaw.games';
+  document.getElementById('progressFill').style.width = Math.min(100,live*4.5)+'%';
+  // Auto-fill next puzzle number
+  if(live >= 0){
+    document.getElementById('newNum').value = live+1;
+  }
+}
+
+function renderPuzzleList(puzzles){
+  const list = document.getElementById('puzzleList');
+  if(!puzzles.length){
+    list.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No puzzles yet — add your first one above!!</div>';
+    return;
+  }
+  list.innerHTML = puzzles.map(p=>`
+    <div class="puzzle-item has-image">
+      <img class="puzzle-thumb" src="/${p.filename}" alt="${p.title}"
+        onerror="this.style.background='rgba(255,255,255,0.05)'">
+      <div class="puzzle-info">
+        <div class="puzzle-num">Puzzle ${p.num}</div>
+        <div class="puzzle-name">${p.title}</div>
+        <div class="puzzle-desc">${p.desc}</div>
+      </div>
+      <span class="puzzle-status live">✅ Live</span>
+    </div>
+  `).join('');
+}
+
+// ── PREVIEW IMAGE ─────────────────────────────────
+function previewImage(input){
+  const file = input.files[0];
+  if(!file) return;
+  const thumb = document.getElementById('previewThumb');
+  const area = document.getElementById('uploadArea');
+  thumb.src = URL.createObjectURL(file);
+  thumb.style.display = 'block';
+  area.classList.add('has-file');
+  // Check file size
+  if(file.size > 1024*1024){
+    showAddMsg(`⚠️ File is ${Math.round(file.size/1024)}KB — try to keep under 800KB for best performance!`,'info');
+  }
+}
+
+// ── ADD PUZZLE ────────────────────────────────────
+async function addPuzzle(){
+  const file = document.getElementById('imageFile').files[0];
+  const title = document.getElementById('newTitle').value.trim();
+  const desc = document.getElementById('newDesc').value.trim();
+  const num = parseInt(document.getElementById('newNum').value);
+
+  if(!file){ showAddMsg('Please choose an image file!','error'); return; }
+  if(!title){ showAddMsg('Please enter a painting title!','error'); return; }
+  if(!desc){ showAddMsg('Please enter a description!','error'); return; }
+  if(!num||num<1){ showAddMsg('Please enter a puzzle number!','error'); return; }
+
+  const btn = document.getElementById('addBtn');
+  btn.disabled=true;
+  btn.textContent='⏳ Uploading...';
+
+  try{
+    const filename = `puzzle${num}.jpg`;
+
+    // 1. Upload image to Supabase Storage
+    showAddMsg('📤 Uploading image...','info');
+    const{error:uploadError} = await sbClient.storage
+      .from('puzzles')
+      .upload(filename, file, {upsert:true, contentType:'image/jpeg'});
+
+    if(uploadError) throw new Error('Upload failed: '+uploadError.message);
+
+    // 2. Save puzzle data to database
+    showAddMsg('💾 Saving puzzle data...','info');
+    const{error:dbError} = await sbClient
+      .from('jigsaw_puzzles')
+      .upsert({num, title, desc, filename, updated_at: new Date().toISOString()});
+
+    if(dbError) throw new Error('Save failed: '+dbError.message);
+
+    // 3. Success!!
+    showAddMsg(`🎉 Puzzle ${num} "${title}" is now LIVE on jigsaw.games!!`,'success');
+    btn.textContent='✅ Added!! Add Another?';
+    btn.disabled=false;
+
+    // Reset form
+    document.getElementById('newTitle').value='';
+    document.getElementById('newDesc').value='';
+    document.getElementById('imageFile').value='';
+    document.getElementById('previewThumb').style.display='none';
+    document.getElementById('uploadArea').classList.remove('has-file');
+    document.getElementById('newNum').value=num+1;
+
+    // Reload puzzle list
+    loadPuzzles();
+
+  }catch(e){
+    showAddMsg('❌ Error: '+e.message,'error');
+    btn.disabled=false;
+    btn.textContent='✦ Add This Puzzle to jigsaw.games';
+  }
+}
+
+function showAddMsg(msg,type){
+  const el=document.getElementById('addMsg');
+  el.textContent=msg;el.className='msg '+type;el.style.display='block';
+}
+</script>
+</body>
+</html>
