@@ -117,9 +117,39 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 @keyframes ringX{0%{opacity:0.9;transform:translate(-50%,-50%) scale(0);}100%{opacity:0;transform:translate(-50%,-50%) scale(3);}}
 .snap-flash{position:fixed;inset:0;pointer-events:none;z-index:9996;background:rgba(255,215,0,0.07);animation:flashX 0.4s ease forwards;}
 @keyframes flashX{0%{opacity:1;}100%{opacity:0;}}
+
+/* ROTATE OVERLAY */
+#rotateOverlay{
+  position:fixed;inset:0;z-index:999;
+  background:radial-gradient(ellipse at center,#1a1a2e,#080808);
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:20px;text-align:center;padding:32px;
+}
+.ro-icon{font-size:72px;animation:roSpin 2.5s ease-in-out infinite;}
+@keyframes roSpin{
+  0%,40%{transform:rotate(0deg);}
+  60%,100%{transform:rotate(90deg);}
+}
+.ro-title{font-family:'Cinzel Decorative',serif;font-size:clamp(20px,5vw,28px);
+  background:linear-gradient(135deg,#ffd700,#c9a84c);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.ro-sub{font-size:14px;color:rgba(255,255,255,0.65);line-height:1.7;max-width:300px;font-family:'Cinzel',serif;}
+.ro-btn{padding:14px 32px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,#ffd700,#c9a84c);
+  color:#080808;font-size:14px;font-weight:800;cursor:pointer;
+  font-family:'Cinzel',serif;letter-spacing:1px;
+  box-shadow:0 6px 0 #7a5c14;}
+.ro-btn:active{transform:translateY(4px);box-shadow:0 2px 0 #7a5c14;}
 </style>
 </head>
 <body>
+<div id="rotateOverlay">
+  <div class="ro-icon">📱</div>
+  <div class="ro-title">Rotate Your Phone</div>
+  <div class="ro-sub">jigsaw.games is best experienced in landscape mode — please turn your phone sideways to play!!</div>
+  <button class="ro-btn" onclick="forcePlay()">Play Anyway →</button>
+</div>
 <div id="heroBg"></div>
 <div id="heroBgNext"></div>
 <div id="bottomGrad"></div>
@@ -259,8 +289,25 @@ function buildCarousel(){
 }
 
 // ── START GAME ────────────────────────────────
+function showRotateOverlay(){
+  document.getElementById('rotateOverlay').style.display='flex';
+}
+function hideRotateOverlay(){
+  document.getElementById('rotateOverlay').style.display='none';
+}
+function forcePlay(){
+  hideRotateOverlay();
+  startDesktop();
+}
 function startGame(){
-  if(!PUZZLES.length)return;
+  if(!PUZZLES.length) return;
+  const isMobile = window.innerWidth < 1024 && 'ontouchstart' in window;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  if(isMobile && isPortrait){
+    showRotateOverlay();
+    return;
+  }
+  hideRotateOverlay();
   startDesktop();
 }
 
@@ -755,17 +802,39 @@ document.getElementById('heroStage').addEventListener('touchend',e=>{const dx=e.
 
 // ── RESIZE ───────────────────────────────────
 window.addEventListener('resize',()=>{
-  if(running){setTimeout(()=>{canvas.width=canvas.offsetWidth||innerWidth;canvas.height=canvas.offsetHeight||(innerHeight-52);ghostCanvas=null;initDesktop();},150);}
+  const isPortrait = window.innerHeight > window.innerWidth;
+  const isMobile = window.innerWidth < 1024 && 'ontouchstart' in window;
+  if(isMobile && isPortrait && running){
+    showRotateOverlay();
+  } else if(!isPortrait){
+    hideRotateOverlay();
+    if(running){
+      setTimeout(()=>{
+        canvas.width=canvas.offsetWidth||innerWidth;
+        canvas.height=canvas.offsetHeight||(innerHeight-52);
+        ghostCanvas=null;initDesktop();
+      },150);
+    }
+  }
 });
 window.addEventListener('orientationchange',()=>{
   setTimeout(()=>{
-    if(document.getElementById('mobileGame').style.display==='flex'){
-      const p=PUZZLES[curIdx];
-      document.getElementById('mobBoard').querySelectorAll('.mob-piece').forEach(e=>e.remove());
-      initMobile(p);
+    const isPortrait = window.innerHeight > window.innerWidth;
+    const isMobile = window.innerWidth < 1024 && 'ontouchstart' in window;
+    if(isMobile && isPortrait && running){
+      // Rotated to portrait - show overlay, pause game
+      showRotateOverlay();
+    } else if(!isPortrait){
+      // Rotated to landscape - hide overlay, resume/restart
+      hideRotateOverlay();
+      if(running){
+        canvas.width=canvas.offsetWidth||innerWidth;
+        canvas.height=canvas.offsetHeight||(innerHeight-52);
+        ghostCanvas=null;
+        initDesktop();
+      }
     }
-    if(running){canvas.width=canvas.offsetWidth||innerWidth;canvas.height=canvas.offsetHeight||(innerHeight-52);ghostCanvas=null;initDesktop();}
-    if(PUZZLES.length)buildCarousel();
+    if(PUZZLES.length) buildCarousel();
   },500);
 });
 </script>
