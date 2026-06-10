@@ -69,12 +69,12 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 #gameCanvas{display:block;touch-action:none;flex:1;width:100%;}
 
 /* ── PIECE TRAY ── */
-#pieceTray{position:fixed;bottom:68px;left:0;right:0;height:108px;z-index:52;background:rgba(235,207,178,0.65);border-top:1px solid rgba(201,168,76,0.2);overflow-x:auto;overflow-y:visible;display:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+#pieceTray{position:fixed;bottom:62px;left:0;right:0;height:154px;z-index:52;background:rgba(235,207,178,0.75);border-top:2px solid rgba(201,168,76,0.3);overflow-x:auto;overflow-y:visible;display:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 #pieceTray::-webkit-scrollbar{display:none;}
 #trayInner{display:flex;align-items:center;gap:10px;padding:8px 12px;height:100%;width:max-content;}
-.tray-piece{flex-shrink:0;width:90px;height:90px;border-radius:0;overflow:visible;border:none;cursor:grab;transition:transform 0.1s ease;position:relative;background:transparent;}
+.tray-piece{flex-shrink:0;width:130px;height:130px;overflow:visible;border:none;cursor:grab;transition:transform 0.12s ease;position:relative;background:transparent;}
 .tray-piece canvas{display:block;}
-.tray-piece:hover,.tray-piece.lifted{transform:scale(1.2) translateY(-8px);z-index:53;}
+.tray-piece:hover,.tray-piece.lifted{transform:scale(1.18) translateY(-10px);z-index:53;}
 .tray-piece canvas{
   width:100%;height:100%;display:block;
 }
@@ -367,7 +367,7 @@ function quitGame(){ stopTimer();running=false;document.getElementById('gameScre
 // When dragged out it grows to full size
 // When returned it shrinks back
 
-const SMALL = 90; // tray piece size px
+const SMALL = 130; // tray piece size px
 let trayPieces = []; // pieces still in tray
 let activePiece = null; // piece being dragged from tray
 
@@ -384,7 +384,7 @@ function initPuzzle(){
   // Board takes 80% of canvas, centered
   let bw=cw*0.8,bh=bw/imgAR;
   if(bh>ch*0.78){bh=ch*0.78;bw=bh*imgAR;}
-  const bx=(cw-bw)/2,by=Math.max(10,(ch-bh)/2-96);
+  const bx=(cw-bw)/2,by=Math.max(8,(ch-bh)/2-130);
   const pw=bw/cols,ph=bh/rows,TAB=Math.min(pw,ph)*0.22;
 
   const hTab=Array.from({length:rows-1},()=>Array.from({length:cols},()=>Math.random()>.5?1:-1));
@@ -446,55 +446,59 @@ function buildTray(){
 
     // Draw mini piece thumbnail with REAL jigsaw shape!!
     const c=document.createElement('canvas');
-    c.width=SMALL;c.height=SMALL;
+    c.width=SMALL; c.height=SMALL;
     const cx2=c.getContext('2d');
 
-    // BIG padding so tabs fully fit inside canvas (tabs are ~22% of piece size)
-    const pad=SMALL*0.18;
-    const scale=Math.min((SMALL-pad*2)/p.w,(SMALL-pad*2)/p.h);
-    const sw=p.w*scale,sh=p.h*scale;
-    const ox=(SMALL-sw)/2,oy=(SMALL-sh)/2;
-    const T=p.tab*scale;
+    // 20% padding ensures tabs always fit (tab=22% of piece, need 17% min)
+    const pad = SMALL * 0.20;
+    const scale = Math.min((SMALL-pad*2)/p.w, (SMALL-pad*2)/p.h);
+    const sw = p.w*scale, sh = p.h*scale;
+    const ox = (SMALL-sw)/2, oy = (SMALL-sh)/2;
+    const T = p.tab * scale;
+    const s = p.sides;
 
-    // Draw real jigsaw shape path scaled to thumbnail
-    cx2.beginPath();
-    cx2.moveTo(ox,oy);
-    // TOP
-    const s=p.sides;
-    if(s.top===0){cx2.lineTo(ox+sw,oy);}
-    else{cx2.lineTo(ox+sw*.37,oy);cx2.bezierCurveTo(ox+sw*.37,oy+s.top*T*.6,ox+sw*.18,oy+s.top*T,ox+sw*.5,oy+s.top*T);cx2.bezierCurveTo(ox+sw*.82,oy+s.top*T,ox+sw*.63,oy+s.top*T*.6,ox+sw*.63,oy);cx2.lineTo(ox+sw,oy);}
-    // RIGHT
-    if(s.right===0){cx2.lineTo(ox+sw,oy+sh);}
-    else{cx2.lineTo(ox+sw,oy+sh*.37);cx2.bezierCurveTo(ox+sw-s.right*T*.6,oy+sh*.37,ox+sw-s.right*T,oy+sh*.18,ox+sw-s.right*T,oy+sh*.5);cx2.bezierCurveTo(ox+sw-s.right*T,oy+sh*.82,ox+sw-s.right*T*.6,oy+sh*.63,ox+sw,oy+sh*.63);cx2.lineTo(ox+sw,oy+sh);}
-    // BOTTOM
-    if(s.bottom===0){cx2.lineTo(ox,oy+sh);}
-    else{cx2.lineTo(ox+sw*.63,oy+sh);cx2.bezierCurveTo(ox+sw*.63,oy+sh-s.bottom*T*.6,ox+sw*.82,oy+sh-s.bottom*T,ox+sw*.5,oy+sh-s.bottom*T);cx2.bezierCurveTo(ox+sw*.18,oy+sh-s.bottom*T,ox+sw*.37,oy+sh-s.bottom*T*.6,ox+sw*.37,oy+sh);cx2.lineTo(ox,oy+sh);}
-    // LEFT
-    if(s.left===0){cx2.lineTo(ox,oy);}
-    else{cx2.lineTo(ox,oy+sh*.63);cx2.bezierCurveTo(ox+s.left*T*.6,oy+sh*.63,ox+s.left*T,oy+sh*.82,ox+s.left*T,oy+sh*.5);cx2.bezierCurveTo(ox+s.left*T,oy+sh*.18,ox+s.left*T*.6,oy+sh*.37,ox,oy+sh*.37);cx2.lineTo(ox,oy);}
-    cx2.closePath();
+    // Build jigsaw path
+    function jigsawPath(){
+      cx2.beginPath(); cx2.moveTo(ox, oy);
+      // TOP
+      if(s.top===0){cx2.lineTo(ox+sw,oy);}
+      else{cx2.lineTo(ox+sw*.37,oy);cx2.bezierCurveTo(ox+sw*.37,oy+s.top*T*.6,ox+sw*.18,oy+s.top*T,ox+sw*.5,oy+s.top*T);cx2.bezierCurveTo(ox+sw*.82,oy+s.top*T,ox+sw*.63,oy+s.top*T*.6,ox+sw*.63,oy);cx2.lineTo(ox+sw,oy);}
+      // RIGHT
+      if(s.right===0){cx2.lineTo(ox+sw,oy+sh);}
+      else{cx2.lineTo(ox+sw,oy+sh*.37);cx2.bezierCurveTo(ox+sw-s.right*T*.6,oy+sh*.37,ox+sw-s.right*T,oy+sh*.18,ox+sw-s.right*T,oy+sh*.5);cx2.bezierCurveTo(ox+sw-s.right*T,oy+sh*.82,ox+sw-s.right*T*.6,oy+sh*.63,ox+sw,oy+sh*.63);cx2.lineTo(ox+sw,oy+sh);}
+      // BOTTOM
+      if(s.bottom===0){cx2.lineTo(ox,oy+sh);}
+      else{cx2.lineTo(ox+sw*.63,oy+sh);cx2.bezierCurveTo(ox+sw*.63,oy+sh-s.bottom*T*.6,ox+sw*.82,oy+sh-s.bottom*T,ox+sw*.5,oy+sh-s.bottom*T);cx2.bezierCurveTo(ox+sw*.18,oy+sh-s.bottom*T,ox+sw*.37,oy+sh-s.bottom*T*.6,ox+sw*.37,oy+sh);cx2.lineTo(ox,oy+sh);}
+      // LEFT
+      if(s.left===0){cx2.lineTo(ox,oy);}
+      else{cx2.lineTo(ox,oy+sh*.63);cx2.bezierCurveTo(ox+s.left*T*.6,oy+sh*.63,ox+s.left*T,oy+sh*.82,ox+s.left*T,oy+sh*.5);cx2.bezierCurveTo(ox+s.left*T,oy+sh*.18,ox+s.left*T*.6,oy+sh*.37,ox,oy+sh*.37);cx2.lineTo(ox,oy);}
+      cx2.closePath();
+    }
 
-    // Fill with image
-    cx2.save();cx2.clip();
+    // Draw shadow behind piece so shape pops off background
+    cx2.save();
+    cx2.shadowColor='rgba(0,0,0,0.45)';
+    cx2.shadowBlur=6; cx2.shadowOffsetX=2; cx2.shadowOffsetY=3;
+    cx2.fillStyle='rgba(0,0,0,0.01)';
+    jigsawPath(); cx2.fill();
+    cx2.restore();
+
+    // Clip to jigsaw shape and fill with image
+    jigsawPath();
+    cx2.save(); cx2.clip();
     const srcX=(p.c/p.cols)*puzzleImg.naturalWidth;
     const srcY=(p.r/p.rows)*puzzleImg.naturalHeight;
     const srcW=puzzleImg.naturalWidth/p.cols;
     const srcH=puzzleImg.naturalHeight/p.rows;
-    cx2.drawImage(puzzleImg,srcX,srcY,srcW,srcH,ox,oy,sw,sh);
+    cx2.drawImage(puzzleImg, srcX,srcY,srcW,srcH, ox,oy,sw,sh);
     cx2.restore();
 
-    // Drop shadow first
-    cx2.save();
-    cx2.shadowColor='rgba(0,0,0,0.4)';
-    cx2.shadowBlur=4;cx2.shadowOffsetX=1;cx2.shadowOffsetY=2;
-    cx2.strokeStyle='rgba(0,0,0,0.0)';cx2.lineWidth=1;cx2.stroke();
-    cx2.restore();
-    // Gold outline on jigsaw shape
-    cx2.strokeStyle='rgba(150,100,20,0.9)';
-    cx2.lineWidth=1.5;
-    cx2.stroke();
+    // Gold outline
+    jigsawPath();
+    cx2.strokeStyle='rgba(140,90,10,0.85)';
+    cx2.lineWidth=1.5; cx2.stroke();
 
-    div.appendChild(c);
+        div.appendChild(c);
 
     // Touch/mouse events for tray pieces
     div.addEventListener('mousedown', e=>liftFromTray(e,p,div));
