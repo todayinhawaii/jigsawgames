@@ -68,6 +68,41 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 .hud-timer{font-size:22px;font-weight:900;color:var(--gold2);font-variant-numeric:tabular-nums;font-family:'Cinzel',serif;}
 #gameCanvas{display:block;touch-action:none;flex:1;width:100%;}
 
+/* ── PIECE TRAY ── */
+#pieceTray{
+  position:fixed;bottom:70px;left:0;right:0;
+  height:90px;z-index:52;
+  background:rgba(0,0,0,0.7);
+  border-top:1px solid rgba(201,168,76,0.15);
+  overflow-x:auto;overflow-y:hidden;
+  display:none;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+#pieceTray::-webkit-scrollbar{display:none;}
+#trayInner{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 10px;height:100%;
+  width:max-content;
+}
+.tray-piece{
+  flex-shrink:0;
+  width:54px;height:54px;
+  border-radius:8px;overflow:hidden;
+  border:1.5px solid rgba(201,168,76,0.2);
+  cursor:grab;transition:all 0.15s;
+  position:relative;background:var(--dark3);
+}
+.tray-piece:hover,.tray-piece.lifted{
+  border-color:var(--gold2);
+  transform:scale(1.15);
+  box-shadow:0 0 12px rgba(255,215,0,0.4);
+  z-index:53;
+}
+.tray-piece canvas{
+  width:100%;height:100%;display:block;
+}
+
 #gameBtnBar{position:fixed;bottom:0;left:0;right:0;display:none;gap:10px;padding:10px 14px 18px;background:rgba(0,0,0,0.92);border-top:1px solid rgba(60,160,60,0.2);z-index:51;}
 @keyframes hudBtnPulse{
   0%,100%{box-shadow:0 0 6px rgba(255,215,0,0.2);border-color:rgba(60,160,60,0.5);background:linear-gradient(135deg,#0f2a0f,#0a1a0a);}
@@ -161,6 +196,12 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
     <div class="hud-timer" id="hudTimer">0:00</div>
   </div>
   <canvas id="gameCanvas"></canvas>
+
+  <!-- PIECE TRAY - small pieces waiting to be placed -->
+  <div id="pieceTray">
+    <div id="trayInner"></div>
+  </div>
+
   <div id="gameBtnBar">
     <button class="hud-btn-pulse" onclick="peekImage()">👁 TAKE A PEEK</button>
     <button class="hud-btn-pulse" onclick="quitGame()">🎨 CHANGE PUZZLE</button>
@@ -325,37 +366,140 @@ function startGame(){
 }
 
 function restartSame(){ document.getElementById('winScreen').style.display='none'; startGame(); }
-function closeGame(){ stopTimer();running=false;document.getElementById('gameScreen').style.display='none';document.getElementById('gameBtnBar').style.display='none';document.getElementById('winScreen').style.display='none'; }
-function quitGame(){ stopTimer();running=false;document.getElementById('gameScreen').style.display='none';document.getElementById('gameBtnBar').style.display='none'; }
+function closeGame(){ stopTimer();running=false;document.getElementById('gameScreen').style.display='none';document.getElementById('gameBtnBar').style.display='none';document.getElementById('winScreen').style.display='none';document.getElementById('pieceTray').style.display='none'; }
+function quitGame(){ stopTimer();running=false;document.getElementById('gameScreen').style.display='none';document.getElementById('gameBtnBar').style.display='none';document.getElementById('pieceTray').style.display='none'; }
+
+// ── TRAY SYSTEM ──────────────────────────────────
+// Each piece starts SMALL in the tray
+// When dragged out it grows to full size
+// When returned it shrinks back
+
+const SMALL = 54; // tray piece size px
+let trayPieces = []; // pieces still in tray
+let activePiece = null; // piece being dragged from tray
 
 function initPuzzle(){
   const cfg=DIFFS[difficulty];
   const cols=cfg.cols,rows=cfg.rows;
-  total=cols*rows;placed=0;maxZ=100;pieces=[];
+  total=cols*rows;placed=0;maxZ=100;pieces=[];trayPieces=[];activePiece=null;
+
   const cw=canvas.width,ch=canvas.height;
   const imgAR=puzzleImg.naturalWidth/puzzleImg.naturalHeight;
-  let bw=cw*0.72,bh=bw/imgAR;
-  if(bh>ch*0.84){bh=ch*0.84;bw=bh*imgAR;}
+
+  // Board takes 80% of canvas, centered
+  let bw=cw*0.8,bh=bw/imgAR;
+  if(bh>ch*0.78){bh=ch*0.78;bw=bh*imgAR;}
   const bx=(cw-bw)/2,by=(ch-bh)/2;
-  const pw=bw/cols,ph=bh/rows,TAB=Math.min(pw,ph)*0.24;
+  const pw=bw/cols,ph=bh/rows,TAB=Math.min(pw,ph)*0.22;
+
   const hTab=Array.from({length:rows-1},()=>Array.from({length:cols},()=>Math.random()>.5?1:-1));
   const vTab=Array.from({length:rows},()=>Array.from({length:cols-1},()=>Math.random()>.5?1:-1));
+
   for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
-    pieces.push({id:r*cols+c,r,c,cols,rows,cx:bx+c*pw,cy:by+r*ph,x:bx+c*pw,y:by+r*ph,w:pw,h:ph,tab:TAB,
-      sides:{top:r>0?-hTab[r-1][c]:0,bottom:r<rows-1?hTab[r][c]:0,left:c>0?-vTab[r][c-1]:0,right:c<cols-1?vTab[r][c]:0},
-      placed:false,z:r*cols+c});
+    const p={
+      id:r*cols+c,r,c,cols,rows,
+      cx:bx+c*pw,cy:by+r*ph,
+      x:0,y:0, // will be set when pulled from tray
+      w:pw,h:ph,tab:TAB,
+      sides:{top:r>0?-hTab[r-1][c]:0,bottom:r<rows-1?hTab[r][c]:0,
+             left:c>0?-vTab[r][c-1]:0,right:c<cols-1?vTab[r][c]:0},
+      placed:false,inTray:true,z:r*cols+c,
+      // Current display size (grows when lifted)
+      dispW:pw,dispH:ph,
+    };
+    pieces.push(p);
+    trayPieces.push(p);
   }
-  scramble(bx,by,bw,bh);updateHud();startTimer();running=true;requestAnimationFrame(renderLoop);
+
+  // Shuffle tray order
+  trayPieces.sort(()=>Math.random()-0.5);
+
+  buildTray();
+  updateHud();
+  startTimer();
+  running=true;
+  document.getElementById('pieceTray').style.display='block';
+  requestAnimationFrame(renderLoop);
 }
 
-function scramble(bx,by,bw,bh){
-  const cw=canvas.width,ch=canvas.height;
-  pieces.forEach((p,i)=>{
-    let x,y,t=0;
-    do{x=p.tab+Math.random()*(cw-p.w-p.tab*2);y=p.tab+Math.random()*(ch-p.h-p.tab*2);t++;}
-    while(t<30&&x<bx+bw+10&&x+p.w>bx-10&&y<by+bh+10&&y+p.h>by-10);
-    p.x=x;p.y=y;p.placed=false;p.z=i;
+// ── BUILD TRAY ────────────────────────────────────
+function buildTray(){
+  const inner = document.getElementById('trayInner');
+  inner.innerHTML='';
+  trayPieces.filter(p=>!p.placed&&p.inTray).forEach(p=>{
+    const div=document.createElement('div');
+    div.className='tray-piece';
+    div.dataset.id=p.id;
+
+    // Draw mini piece thumbnail
+    const c=document.createElement('canvas');
+    c.width=SMALL;c.height=SMALL;
+    const cx2=c.getContext('2d');
+
+    // Draw image clipped to piece shape at small scale
+    const scale=SMALL/Math.max(p.w,p.h);
+    const sw=p.w*scale,sh=p.h*scale;
+    const ox=(SMALL-sw)/2,oy=(SMALL-sh)/2;
+
+    cx2.save();
+    // Simple rect clip for thumbnail
+    cx2.beginPath();cx2.rect(ox,oy,sw,sh);cx2.clip();
+    const srcX=(p.c/p.cols)*puzzleImg.naturalWidth;
+    const srcY=(p.r/p.rows)*puzzleImg.naturalHeight;
+    const srcW=puzzleImg.naturalWidth/p.cols;
+    const srcH=puzzleImg.naturalHeight/p.rows;
+    cx2.drawImage(puzzleImg,srcX,srcY,srcW,srcH,ox,oy,sw,sh);
+    cx2.restore();
+
+    // Gold border
+    cx2.strokeStyle='rgba(201,168,76,0.4)';
+    cx2.lineWidth=1;
+    cx2.strokeRect(ox,oy,sw,sh);
+
+    div.appendChild(c);
+
+    // Touch/mouse events for tray pieces
+    div.addEventListener('mousedown', e=>liftFromTray(e,p,div));
+    div.addEventListener('touchstart', e=>liftFromTray(e,p,div),{passive:false});
+
+    inner.appendChild(div);
+    p.trayEl=div;
   });
+}
+
+// ── LIFT FROM TRAY ────────────────────────────────
+function liftFromTray(e, p, div){
+  e.preventDefault();
+  if(p.placed||!p.inTray) return;
+
+  const src = e.touches ? e.touches[0] : e;
+
+  // Move piece to canvas at full size centered on finger
+  p.inTray=false;
+  p.x = src.clientX - p.w/2;
+  p.y = src.clientY - p.h/2;
+  p.z = ++maxZ;
+
+  // Hide tray element
+  div.style.opacity='0.3';
+  div.style.pointerEvents='none';
+
+  dragging=p;
+  dragOffX=p.w/2;
+  dragOffY=p.h/2;
+
+  activePiece=p;
+}
+
+// ── RETURN TO TRAY ────────────────────────────────
+function returnToTray(p){
+  p.inTray=true;
+  p.x=0;p.y=0;
+  if(p.trayEl){
+    p.trayEl.style.opacity='1';
+    p.trayEl.style.pointerEvents='auto';
+  }
+  dragging=null;activePiece=null;
 }
 
 function buildPath(p){
@@ -374,12 +518,24 @@ function renderLoop(){
   ctx.clearRect(0,0,cw,ch);ctx.fillStyle='#080808';ctx.fillRect(0,0,cw,ch);
   if(pieces.length){
     const p0=pieces[0];
-    ctx.strokeStyle='rgba(201,168,76,0.18)';ctx.lineWidth=2;
-    ctx.strokeRect(p0.cx-1,p0.cy-1,p0.cols*p0.w+2,p0.rows*p0.h+2);
-    ctx.save();ctx.globalAlpha=0.1;ctx.drawImage(puzzleImg,p0.cx,p0.cy,p0.cols*p0.w,p0.rows*p0.h);ctx.restore();
+    const bx=p0.cx,by=p0.cy,bw=p0.cols*p0.w,bh=p0.rows*p0.h;
+
+    // Background art at 50% opacity - always visible as guide!!
+    ctx.save();ctx.globalAlpha=0.5;
+    ctx.drawImage(puzzleImg,bx,by,bw,bh);
+    ctx.restore();
+
+    // Board border
+    ctx.strokeStyle='rgba(201,168,76,0.3)';ctx.lineWidth=2;
+    ctx.strokeRect(bx-1,by-1,bw+2,bh+2);
   }
+
+  // Draw placed pieces (seamless on top of ghost)
   pieces.filter(p=>p.placed).forEach(drawPiece);
-  [...pieces].filter(p=>!p.placed).sort((a,b)=>a.z-b.z).forEach(drawPiece);
+
+  // Draw only pieces NOT in tray (being dragged on canvas)
+  [...pieces].filter(p=>!p.placed&&!p.inTray).sort((a,b)=>a.z-b.z).forEach(drawPiece);
+
   requestAnimationFrame(renderLoop);
 }
 
@@ -394,9 +550,12 @@ function drawPiece(p){
 }
 
 function trySnap(p){
-  const thr=Math.min(p.w,p.h)*0.32;
+  const thr=Math.min(p.w,p.h)*0.38;
   if(Math.abs(p.x-p.cx)<thr&&Math.abs(p.y-p.cy)<thr){
-    p.x=p.cx;p.y=p.cy;p.placed=true;placed++;
+    p.x=p.cx;p.y=p.cy;p.placed=true;p.inTray=false;placed++;
+    // Remove from tray
+    if(p.trayEl) p.trayEl.remove();
+    trayPieces=trayPieces.filter(tp=>tp.id!==p.id);
     updateHud();snapFx(p.cx+p.w/2,p.cy+p.h/2);
     if(placed>=total)setTimeout(winGame,500);
     return true;
@@ -415,12 +574,54 @@ function hitTest(x,y){
     }
   }return null;
 }
-canvas.addEventListener('mousedown',e=>{e.preventDefault();const{x,y}=getXY(e);const p=hitTest(x,y);if(p){dragging=p;dragOffX=x-p.x;dragOffY=y-p.y;maxZ++;p.z=maxZ;}});
-canvas.addEventListener('mousemove',e=>{if(!dragging)return;e.preventDefault();const{x,y}=getXY(e);dragging.x=x-dragOffX;dragging.y=y-dragOffY;});
-canvas.addEventListener('mouseup',()=>{if(!dragging)return;trySnap(dragging);dragging=null;});
-canvas.addEventListener('touchstart',e=>{e.preventDefault();const{x,y}=getXY(e);const p=hitTest(x,y);if(p){dragging=p;dragOffX=x-p.x;dragOffY=y-p.y;maxZ++;p.z=maxZ;}},{passive:false});
-canvas.addEventListener('touchmove',e=>{if(!dragging)return;e.preventDefault();const{x,y}=getXY(e);dragging.x=x-dragOffX;dragging.y=y-dragOffY;},{passive:false});
-canvas.addEventListener('touchend',()=>{if(!dragging)return;trySnap(dragging);dragging=null;},{passive:false});
+// Global move/up handlers - work for both tray lifts and canvas drags
+function onGlobalMove(e){
+  if(!dragging)return;
+  e.preventDefault();
+  const src=e.touches?e.touches[0]:e;
+  dragging.x=src.clientX-dragOffX;
+  dragging.y=src.clientY-dragOffY;
+}
+
+function onGlobalUp(e){
+  if(!dragging)return;
+  const p=dragging;
+
+  // Check if dropped near correct position
+  const snapped=trySnap(p);
+  if(!snapped){
+    // Check if dropped back over tray area
+    const src=e.changedTouches?e.changedTouches[0]:e;
+    const tray=document.getElementById('pieceTray');
+    const tr=tray.getBoundingClientRect();
+    if(src.clientY>tr.top){
+      returnToTray(p);
+    }
+    // Otherwise leave on canvas
+  }
+  dragging=null;activePiece=null;
+}
+
+// Canvas click to pick up pieces already on canvas
+canvas.addEventListener('mousedown',e=>{
+  if(dragging)return;
+  e.preventDefault();
+  const{x,y}=getXY(e);
+  const p=hitTest(x,y);
+  if(p&&!p.placed&&!p.inTray){dragging=p;dragOffX=x-p.x;dragOffY=y-p.y;maxZ++;p.z=maxZ;}
+});
+canvas.addEventListener('touchstart',e=>{
+  if(dragging)return;
+  e.preventDefault();
+  const{x,y}=getXY(e);
+  const p=hitTest(x,y);
+  if(p&&!p.placed&&!p.inTray){dragging=p;dragOffX=x-p.x;dragOffY=y-p.y;maxZ++;p.z=maxZ;}
+},{passive:false});
+
+window.addEventListener('mousemove',onGlobalMove);
+window.addEventListener('touchmove',onGlobalMove,{passive:false});
+window.addEventListener('mouseup',onGlobalUp);
+window.addEventListener('touchend',onGlobalUp,{passive:false});
 
 let swX=0;
 document.getElementById('heroStage').addEventListener('touchstart',e=>{swX=e.touches[0].clientX;},{passive:true});
@@ -466,6 +667,7 @@ function showShareToast(msg){
 function winGame(){
   stopTimer();running=false;
   document.getElementById('gameBtnBar').style.display='none';
+  document.getElementById('pieceTray').style.display='none';
   const m=Math.floor(elapsed/60),s=elapsed%60;
   document.getElementById('winTime').textContent=m+':'+(s<10?'0':'')+s;
   document.getElementById('winPieces').textContent=total;
