@@ -9,7 +9,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
 :root{--gold:#c9a84c;--gold2:#ffd700;--dark:#080808;--text:#f0ede8;--muted:rgba(240,237,232,0.5);}
-html{position:fixed;width:100%;height:100%;}
+html{width:100%;height:100%;}
 body{height:100%;background:var(--dark);font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;}
 
 /* BACKGROUNDS */
@@ -56,10 +56,8 @@ body{height:100%;background:var(--dark);font-family:'Inter',system-ui,sans-serif
 
 /* CAROUSEL */
 #carousel{position:fixed;bottom:0;left:0;right:0;z-index:15;padding:16px 0 24px;background:linear-gradient(0deg,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.4) 70%,transparent 100%);overflow:hidden;}
-@media(max-width:767px){#carousel{overflow-x:auto;-webkit-overflow-scrolling:touch;}}
 #carousel::-webkit-scrollbar{display:none;}
 .carousel-track{display:flex;gap:20px;padding:0 20px;animation:carouselScroll 45s linear infinite;width:max-content;}
-@media(max-width:767px){.carousel-track{animation:none;}}
 .car-card:hover,.car-card.active{border-color:var(--gold2);box-shadow:0 0 0 2px var(--gold),0 6px 20px rgba(255,215,0,0.35);}
 .car-card{flex-shrink:0;width:210px;height:118px;border-radius:10px;overflow:hidden;border:2px solid rgba(201,168,76,0.2);cursor:pointer;position:relative;transition:border-color 0.2s,box-shadow 0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.5);}
 .car-card img{width:100%;height:100%;object-fit:cover;display:block;}
@@ -69,21 +67,30 @@ body{height:100%;background:var(--dark);font-family:'Inter',system-ui,sans-serif
 
 /* GAME SCREEN */
 #gameScreen{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;background:#ebcfb2;}
+/* Mobile tray zone - canvas must not intercept here */
+@media(max-width:767px){
+  #gameCanvas{margin-bottom:0;}
+}
 #gameHud{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;flex-shrink:0;background:rgba(0,0,0,0.85);border-bottom:1px solid rgba(201,168,76,0.12);}
 .hud-title{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);font-weight:700;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .hud-pieces{font-size:10px;color:var(--muted);margin-top:2px;}
 .hud-bar{height:3px;background:rgba(201,168,76,0.15);border-radius:2px;margin-top:4px;width:120px;overflow:hidden;}
 .hud-bar-fill{height:100%;background:linear-gradient(90deg,#ffd700,#c9a84c);border-radius:2px;transition:width 0.4s;}
 .hud-timer{font-size:22px;font-weight:900;color:var(--gold2);font-variant-numeric:tabular-nums;font-family:'Cinzel',serif;}
-#gameCanvas{display:block;touch-action:none;flex:1;width:100%;margin-bottom:96px;}
+#gameCanvas{display:block;touch-action:none;flex:1;width:100%;margin-bottom:0;}
 
 /* TRAY */
-#pieceTray{position:fixed;bottom:62px;left:0;right:0;height:140px;z-index:52;background:rgba(235,207,178,0.75);border-top:2px solid rgba(201,168,76,0.3);overflow-x:auto;overflow-y:visible;display:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-x!important;}
+#pieceTray{position:fixed;bottom:62px;left:0;right:0;height:140px;z-index:200;background:rgba(235,207,178,0.75);border-top:2px solid rgba(201,168,76,0.3);overflow-x:auto;overflow-y:hidden;display:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-x;pointer-events:all;}
 #pieceTray::-webkit-scrollbar{display:none;}
-#trayInner{display:flex;align-items:center;gap:10px;padding:8px 12px;height:100%;width:max-content;touch-action:pan-x!important;}
-.tray-piece{flex-shrink:0;width:120px;height:120px;overflow:hidden;border-radius:6px;border:2px solid rgba(201,168,76,0.4);cursor:grab;transition:transform 0.12s,box-shadow 0.12s;position:relative;background:#c8a96e;box-shadow:0 3px 10px rgba(0,0,0,0.3);}
+#trayInner{display:flex;align-items:center;gap:10px;padding:8px 12px;height:100%;width:max-content;touch-action:pan-x;}
+.tray-piece{flex-shrink:0;width:90px;height:90px;overflow:hidden;border-radius:6px;border:2px solid rgba(201,168,76,0.4);cursor:grab;transition:transform 0.12s,box-shadow 0.12s;position:relative;background:#c8a96e;box-shadow:0 3px 10px rgba(0,0,0,0.3);}
 .tray-piece:hover,.tray-piece.lifted{transform:scale(1.15) translateY(-8px);box-shadow:0 0 0 2px var(--gold2),0 8px 20px rgba(255,215,0,0.4);border-color:var(--gold2);}
-.tray-piece canvas{display:block;width:120px!important;height:120px!important;}
+.tray-piece canvas{display:block;width:90px!important;height:90px!important;}
+@media(max-width:767px){
+  .tray-piece{width:75px;height:75px;}
+  .tray-piece canvas{width:75px!important;height:75px!important;}
+  #pieceTray{height:100px;}
+}
 
 /* GAME BUTTONS */
 #gameBtnBar{position:fixed;bottom:0;left:0;right:0;display:none;gap:10px;padding:8px 14px 14px;background:rgba(0,0,0,0.92);border-top:1px solid rgba(60,160,60,0.2);z-index:51;}
@@ -166,7 +173,7 @@ body{height:100%;background:var(--dark);font-family:'Inter',system-ui,sans-serif
 
 <div id="prevArrow" onclick="prevPuzzle()"><span class="arrow-icon">‹</span></div>
 <div id="nextArrow" onclick="nextPuzzle()"><span class="arrow-icon">›</span></div>
-<div id="carousel"><div class="carousel-track" id="carouselTrack"></div></div>
+<div id="carousel"><div class="carousel-track" id="carouselTrack"></div><div id="mobileCarousel" id="mobileCarouselTrack"></div></div>
 
 <div id="gameScreen">
   <div id="gameHud">
@@ -178,7 +185,7 @@ body{height:100%;background:var(--dark);font-family:'Inter',system-ui,sans-serif
     <div class="hud-timer" id="hudTimer">0:00</div>
   </div>
   <canvas id="gameCanvas"></canvas>
-  <div id="pieceTray"><div id="trayInner"></div></div>
+  <div id="pieceTray" ontouchmove="event.stopPropagation()" ontouchstart="event.stopPropagation()"><div id="trayInner"></div></div>
   <div id="gameBtnBar">
     <button class="hud-btn-pulse" onclick="peekImage()">👁 TAKE A PEEK</button>
     <button class="hud-btn-pulse" onclick="quitGame()">🎨 CHANGE PUZZLE</button>
@@ -277,6 +284,7 @@ function setDiff(el){document.querySelectorAll('.diff-pill').forEach(b=>b.classL
 
 // ── CAROUSEL ─────────────────────────────────────
 function buildCarousel(){
+  buildMobileCarousel();
   const track=document.getElementById('carouselTrack');
   track.innerHTML='';
   [0,1].forEach(()=>{
@@ -294,6 +302,24 @@ function buildCarousel(){
     });
   });
 }
+function buildMobileCarousel(){
+  const track = document.getElementById('mobileCarouselTrack');
+  if(!track) return;
+  track.innerHTML='';
+  PUZZLES.forEach((p,i)=>{
+    const card=document.createElement('div');
+    card.className='car-card'+(i===curIdx?' active':'');
+    card.innerHTML=`<img src="${p.src}" loading="lazy" alt="${p.title}"><div class="car-card-num">${i+1}</div><div class="car-card-label">${p.title}</div>`;
+    card.addEventListener('click',()=>{
+      goTo(i);
+      const btn=document.getElementById('playBtn');
+      btn.style.transform='scale(1.15)';btn.style.transition='transform 0.3s';
+      setTimeout(()=>{btn.style.transform='scale(1)';},400);
+    });
+    track.appendChild(card);
+  });
+}
+
 function updateCarouselActive(){
   document.querySelectorAll('.car-card').forEach((c,i)=>{c.classList.toggle('active',i%PUZZLES.length===curIdx);});
 }
@@ -327,9 +353,21 @@ function initPuzzle(){
   total=cols*rows;placed=0;maxZ=100;pieces=[];trayPieces=[];activePiece=null;
   const cw=canvas.width,ch=canvas.height;
   const imgAR=puzzleImg.naturalWidth/puzzleImg.naturalHeight;
-  let bw=cw*0.8,bh=bw/imgAR;
-  if(bh>ch*0.78){bh=ch*0.78;bw=bh*imgAR;}
-  const bx=(cw-bw)/2,by=Math.max(8,(ch-bh)/2-140);
+  const isPortrait = ch > cw;
+  let bw,bh;
+  if(isPortrait){
+    // Portrait mobile: fill width, image near top
+    bw = cw * 0.96;
+    bh = bw / imgAR;
+    // If still too tall, constrain height
+    const maxH = ch * 0.52;
+    if(bh > maxH){ bh = maxH; bw = bh * imgAR; }
+  } else {
+    // Landscape desktop: original calculation
+    bw = cw * 0.8; bh = bw / imgAR;
+    if(bh > ch*0.78){ bh = ch*0.78; bw = bh*imgAR; }
+  }
+  const bx=(cw-bw)/2, by=isPortrait ? 10 : Math.max(8,(ch-bh)/2-140);
   const pw=bw/cols,ph=bh/rows,TAB=Math.min(pw,ph)*0.22;
   const hTab=Array.from({length:rows-1},()=>Array.from({length:cols},()=>Math.random()>.5?1:-1));
   const vTab=Array.from({length:rows},()=>Array.from({length:cols-1},()=>Math.random()>.5?1:-1));
@@ -382,7 +420,10 @@ function buildTray(){
     div.addEventListener('mouseenter',e=>showPiecePreview(e,p));
     div.addEventListener('mouseleave',hidePiecePreview);
     div.addEventListener('mousedown',e=>{hidePiecePreview();liftFromTray(e,p,div);});
-    div.addEventListener('touchstart',e=>liftFromTray(e,p,div),{passive:false});
+    div.addEventListener('touchstart',e=>{
+      e.stopPropagation(); // Stop canvas from seeing this touch!!
+      liftFromTray(e,p,div);
+    },{passive:false});
     inner.appendChild(div);p.trayEl=div;
   });
 }
@@ -493,12 +534,14 @@ function hitTest(x,y){
 }
 
 function onGlobalMove(e){
-  if(!dragging)return;
+  if(!dragging) return;
   const src=e.touches?e.touches[0]:e;
   const tray=document.getElementById('pieceTray');
   const tr=tray?tray.getBoundingClientRect():null;
-  if(tr&&src.clientY>=tr.top-10)return;
-  e.preventDefault();
+  // If touch is over tray - let tray scroll, don't preventDefault!
+  if(tr && src.clientY >= tr.top-10) return;
+  // Only preventDefault when dragging a piece on the canvas
+  if(e.cancelable) e.preventDefault();
   const r=canvas.getBoundingClientRect();
   dragging.x=(src.clientX-r.left)-dragOffX;
   dragging.y=(src.clientY-r.top)-dragOffY;
@@ -516,6 +559,19 @@ function onGlobalUp(e){
   dragging=null;activePiece=null;
 }
 
+// Separate active touchmove ONLY for canvas dragging
+canvas.addEventListener('touchmove',e=>{
+  if(!dragging) return;
+  const src=e.touches[0];
+  const tray=document.getElementById('pieceTray');
+  const tr=tray?tray.getBoundingClientRect():null;
+  if(tr&&src.clientY>=tr.top-10) return;
+  if(e.cancelable) e.preventDefault();
+  const r=canvas.getBoundingClientRect();
+  dragging.x=(src.clientX-r.left)-dragOffX;
+  dragging.y=(src.clientY-r.top)-dragOffY;
+},{passive:false});
+
 canvas.addEventListener('mousedown',e=>{
   if(dragging)return;e.preventDefault();
   const{x,y}=getXY(e);const p=hitTest(x,y);
@@ -523,23 +579,65 @@ canvas.addEventListener('mousedown',e=>{
 });
 canvas.addEventListener('touchstart',e=>{
   if(dragging)return;
+  // Hard stop - if touch Y is in tray zone, do nothing
   const tray=document.getElementById('pieceTray');
-  const tr=tray?tray.getBoundingClientRect():null;
-  const ty=e.touches[0].clientY;
-  if(tr&&ty>=tr.top-10)return;
+  if(tray&&tray.style.display!=='none'){
+    const tr=tray.getBoundingClientRect();
+    if(e.touches[0].clientY>=tr.top)return; // tray handles its own touches
+  }
   const{x,y}=getXY(e);const p=hitTest(x,y);
-  if(p&&!p.placed&&!p.inTray){e.preventDefault();dragging=p;dragOffX=x-p.x;dragOffY=y-p.y;maxZ++;p.z=maxZ;}
+  if(p&&!p.placed&&!p.inTray){
+    e.preventDefault();
+    dragging=p;dragOffX=x-p.x;dragOffY=y-p.y;maxZ++;p.z=maxZ;
+  }
 },{passive:false});
 
 window.addEventListener('mousemove',onGlobalMove);
-window.addEventListener('touchmove',onGlobalMove,{passive:false});
+window.addEventListener('touchmove',onGlobalMove,{passive:true});
 window.addEventListener('mouseup',onGlobalUp);
 window.addEventListener('touchend',onGlobalUp,{passive:false});
 
+// ── CAROUSEL TOUCH SCROLL ────────────────────────
+(function(){
+  const car=document.getElementById('carousel');
+  const track=document.getElementById('carouselTrack');
+  let isDown=false,startX=0,scrollLeft=0;
+
+  // On mobile: stop animation, make scrollable
+  if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
+    car.style.overflowX='auto';
+    car.style.webkitOverflowScrolling='touch';
+    track.style.animation='none';
+  }
+
+  car.addEventListener('touchstart',e=>{
+    isDown=true;
+    startX=e.touches[0].pageX - car.offsetLeft;
+    scrollLeft=car.scrollLeft;
+  },{passive:true});
+  car.addEventListener('touchmove',e=>{
+    if(!isDown)return;
+    const x=e.touches[0].pageX - car.offsetLeft;
+    car.scrollLeft=scrollLeft-(x-startX);
+  },{passive:true});
+  car.addEventListener('touchend',()=>{isDown=false;});
+})();
+
 // ── SWIPE HOME ───────────────────────────────────
 let swX=0;
-document.getElementById('heroStage').addEventListener('touchstart',e=>{swX=e.touches[0].clientX;},{passive:true});
-document.getElementById('heroStage').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-swX;if(Math.abs(dx)>50){dx<0?nextPuzzle():prevPuzzle();}},{passive:true});
+document.getElementById('heroStage').addEventListener('touchstart',e=>{
+  // Don't interfere with carousel
+  const car=document.getElementById('carousel');
+  const cr=car.getBoundingClientRect();
+  if(e.touches[0].clientY>=cr.top) return;
+  swX=e.touches[0].clientX;
+},{passive:true});
+document.getElementById('heroStage').addEventListener('touchend',e=>{
+  if(!swX) return;
+  const dx=e.changedTouches[0].clientX-swX;
+  if(Math.abs(dx)>60){dx<0?nextPuzzle():prevPuzzle();}
+  swX=0;
+},{passive:true});
 
 // ── PEEK ─────────────────────────────────────────
 let peekTO=null;
@@ -630,4 +728,3 @@ window.addEventListener('load',async()=>{
 </script>
 </body>
 </html>
-
