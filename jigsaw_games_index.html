@@ -49,8 +49,14 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);touch-action:man
 #prevArrow:hover,#nextArrow:hover{background:rgba(201,168,76,0.2);}
 .arrow-icon{font-size:22px;color:rgba(255,255,255,0.6);}
 
-#carousel{position:fixed;bottom:0;left:0;right:0;z-index:15;padding:16px 0 24px;background:linear-gradient(0deg,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.5) 60%,transparent 100%);overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+#carousel{position:fixed;bottom:0;left:0;right:0;z-index:15;padding:16px 0 24px;background:linear-gradient(0deg,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.5) 60%,transparent 100%);overflow:hidden;}
 .carousel-track{display:flex;gap:20px;padding:0 20px;animation:carouselScroll 45s linear infinite;width:max-content;}
+/* Mobile: native scrollable carousel */
+@media(max-width:767px){
+  #carousel{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  #carousel::-webkit-scrollbar{display:none;}
+  .carousel-track{animation:none;width:max-content;}
+}
 .carousel-track:hover{animation-play-state:paused;}
 #carousel::-webkit-scrollbar{display:none;}
 @keyframes carouselScroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
@@ -337,11 +343,6 @@ function buildCarousel(){
     });
   });
 
-  // On mobile, stop auto-scroll animation and use native touch scroll
-  if(window.innerWidth < 768){
-    track.style.animation = 'none';
-    track.style.width = 'max-content';
-  }
 }
 
 function updateCarouselActive(){
