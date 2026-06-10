@@ -6,7 +6,6 @@
 <title>🧩 Jigsaw Games — Beautiful Puzzles</title>
 <meta name="description" content="Beautifully illustrated jigsaw puzzles. Original artwork, drag and drop pieces, satisfying snap. Play free on any device.">
 <link rel="icon" href="/icon-192.png">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&display=block" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
@@ -859,6 +858,8 @@ function updateCarouselActive(){
 
 // ── INIT ─────────────────────────────────────────
 window.addEventListener('load', async ()=>{
+  // Wait briefly for Supabase CDN to initialise
+  await new Promise(r=>setTimeout(r,200));
   // Load puzzles from database first
   await loadPuzzlesFromDB();
 
@@ -878,5 +879,6 @@ window.addEventListener('load', async ()=>{
   buildCarousel();
 });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>
 </html>
