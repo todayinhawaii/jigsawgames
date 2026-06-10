@@ -76,8 +76,8 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 .hud-btn-pulse{flex:1;padding:13px 10px;border-radius:12px;border:1.5px solid rgba(60,160,60,0.5);background:linear-gradient(135deg,#0f2a0f,#0a1a0a);color:#7db87d;font-size:12px;font-weight:800;cursor:pointer;letter-spacing:0.5px;text-transform:uppercase;font-family:'Inter',system-ui,sans-serif;animation:hudBtnPulse 2.5s ease-in-out infinite;transition:transform 0.1s;}
 .hud-btn-pulse:active{transform:scale(0.95);}
 
-#winScreen{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(0,0,0,0.93);backdrop-filter:blur(16px);}
-.win-art{max-width:min(75vw,240px);max-height:32vh;border-radius:12px;object-fit:contain;box-shadow:0 0 0 2px var(--gold),0 0 40px rgba(201,168,76,0.4);}
+#winScreen{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;align-items:center;justify-content:flex-start;gap:14px;background:rgba(0,0,0,0.95);backdrop-filter:blur(16px);overflow-y:auto;padding:20px 16px 40px;}
+.win-art{max-width:min(96vw,600px);max-height:55vh;border-radius:14px;object-fit:contain;box-shadow:0 0 0 3px var(--gold),0 0 60px rgba(201,168,76,0.5);}
 .win-title{font-family:'Cinzel Decorative',serif;font-size:clamp(20px,5vw,30px);background:linear-gradient(180deg,#ffd700,#c9a84c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .win-stats{display:flex;gap:20px;}
 .win-stat{text-align:center;}
@@ -87,9 +87,14 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 .win-btn{padding:14px 22px;border-radius:12px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;}
 .win-btn.gold{background:linear-gradient(135deg,#ffd700,#c9a84c);color:#080808;}
 .win-btn.ghost{background:rgba(255,255,255,0.07);color:var(--text);border:1.5px solid rgba(255,255,255,0.12);}
+.win-btn.share{background:linear-gradient(135deg,#1a6b3a,#0d4a25);color:#7dffb0;border:1.5px solid rgba(100,255,150,0.3);}
 
-#peekOverlay{position:fixed;inset:0;z-index:55;pointer-events:none;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);}
-#peekOverlay img{max-width:min(85vw,320px);max-height:70vh;border-radius:14px;object-fit:contain;box-shadow:0 0 0 3px var(--gold),0 0 40px rgba(201,168,76,0.4);}
+#peekOverlay{position:fixed;inset:0;z-index:55;pointer-events:none;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);}
+#peekOverlay img{max-width:96vw;max-height:90vh;border-radius:14px;object-fit:contain;box-shadow:0 0 0 3px var(--gold),0 0 60px rgba(201,168,76,0.5);}
+#peekLabel{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:56;
+  font-family:'Cinzel',serif;font-size:13px;color:var(--gold);
+  background:rgba(0,0,0,0.7);padding:6px 16px;border-radius:20px;
+  border:1px solid rgba(201,168,76,0.3);}
 
 @keyframes popFly{0%{opacity:1;transform:translate(-50%,-50%) scale(0.3);}35%{opacity:1;transform:translate(-50%,-60%) scale(1.6);}100%{opacity:0;transform:translate(-50%,-160%) scale(1);}}
 .snap-pop{position:fixed;pointer-events:none;z-index:9999;font-size:28px;font-weight:900;color:var(--gold2);font-family:'Cinzel',serif;animation:popFly 1s ease forwards;transform:translate(-50%,-50%);}
@@ -172,11 +177,15 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
   <div class="win-btns">
     <button class="win-btn gold" onclick="restartSame()">🔄 Play Again</button>
     <button class="win-btn ghost" onclick="nextAndClose()">▶ Next Puzzle</button>
+    <button class="win-btn share" onclick="sharePuzzle()">📤 Share This Puzzle</button>
     <button class="win-btn ghost" onclick="closeGame()">🎨 All Puzzles</button>
   </div>
 </div>
 
-<div id="peekOverlay"><img id="peekImg" src="" alt=""></div>
+<div id="peekOverlay">
+  <div id="peekLabel">👁 TAKE A PEEK — Memorise it!!</div>
+  <img id="peekImg" src="" alt="">
+</div>
 
 <script>
 // ════════════════════════════════════════════════
@@ -200,14 +209,17 @@ const ctx = canvas.getContext('2d');
 // ── LOAD FROM SUPABASE ───────────────────────────
 async function loadPuzzlesFromDB(){
   try{
-    const res = await fetch('/api/config');
-    const cfg = await res.json();
-    sbClient = window.supabase.createClient(cfg.supabase_url, cfg.supabase_anon_key);
+    // Direct Supabase connection - anon key is safe to be public
+    sbClient = window.supabase.createClient(
+      'https://xbzeakoypdyslnnriaef.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiemVha295cGR5c2xubnJpYWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NDI5MzIsImV4cCI6MjA5NjIxODkzMn0.-pS2FE-Q-_EetM5ONbJycZWFm336wJ-z4MTOGCdA1LE'
+    );
     const {data, error} = await sbClient
       .from('jigsaw_puzzles')
       .select('*')
       .order('num');
-    if(error) throw error;
+    if(error){ console.error('Supabase query error:', JSON.stringify(error)); throw error; }
+    console.log('Raw data from Supabase:', JSON.stringify(data));
     if(data && data.length > 0){
       PUZZLES = data.map(p=>({
         src: STORAGE_URL + p.filename,
@@ -217,7 +229,7 @@ async function loadPuzzlesFromDB(){
       console.log('Loaded', PUZZLES.length, 'puzzles');
     }
   }catch(e){
-    console.error('Could not load puzzles:', e);
+    console.error('Could not load puzzles:', JSON.stringify(e), e.message, e.code, e.details, e.hint);
   }
 }
 
@@ -420,6 +432,36 @@ function peekImage(){const ov=document.getElementById('peekOverlay');ov.style.di
 function updateHud(){document.getElementById('hudPieces').textContent=placed+' / '+total+' placed';document.getElementById('hudBar').style.width=Math.round(placed/total*100)+'%';}
 function startTimer(){stopTimer();elapsed=0;timerInt=setInterval(()=>{elapsed++;const m=Math.floor(elapsed/60),s=elapsed%60;document.getElementById('hudTimer').textContent=m+':'+(s<10?'0':'')+s;},1000);}
 function stopTimer(){clearInterval(timerInt);}
+
+function sharePuzzle(){
+  const p = PUZZLES[curIdx];
+  const shareText = `🧩 I just completed "${p.title}" on jigsaw.games!! Can you beat my time?? Try it FREE!! 🎨`;
+  const shareUrl = 'https://www.jigsaw.games';
+  // Try native share first (mobile)
+  if(navigator.share){
+    navigator.share({
+      title: '🧩 ' + p.title + ' — jigsaw.games',
+      text: shareText,
+      url: shareUrl
+    }).catch(()=>{});
+  } else {
+    // Desktop fallback - copy to clipboard
+    const fullText = shareText + ' ' + shareUrl;
+    navigator.clipboard.writeText(fullText).then(()=>{
+      showShareToast('✅ Copied to clipboard!! Paste and share!!');
+    }).catch(()=>{
+      // Last resort - open share in new window
+      window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(shareText)+'&url='+encodeURIComponent(shareUrl),'_blank');
+    });
+  }
+}
+
+function showShareToast(msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(50,200,100,0.95);color:#fff;padding:12px 24px;border-radius:12px;font-size:13px;font-weight:700;font-family:Inter,sans-serif;white-space:nowrap;';
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
 
 function winGame(){
   stopTimer();running=false;
