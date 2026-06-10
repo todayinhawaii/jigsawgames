@@ -49,15 +49,15 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 #prevArrow:hover,#nextArrow:hover{background:rgba(201,168,76,0.2);}
 .arrow-icon{font-size:22px;color:rgba(255,255,255,0.6);}
 
-#carousel{position:fixed;bottom:0;left:0;right:0;z-index:15;padding:12px 0 24px;background:linear-gradient(0deg,rgba(0,0,0,0.85) 0%,transparent 100%);overflow:hidden;}
+#carousel{position:fixed;bottom:0;left:0;right:0;z-index:15;padding:10px 0 22px;background:linear-gradient(0deg,rgba(0,0,0,0.9) 0%,transparent 100%);overflow:hidden;}
 .carousel-track{display:flex;gap:12px;padding:0 16px;animation:carouselScroll 40s linear infinite;width:max-content;}
 .carousel-track:hover{animation-play-state:paused;}
 @keyframes carouselScroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
-.car-card{flex-shrink:0;width:90px;height:120px;border-radius:10px;overflow:hidden;border:2px solid rgba(201,168,76,0.15);cursor:pointer;position:relative;transition:all 0.25s;box-shadow:0 4px 16px rgba(0,0,0,0.5);}
-.car-card:hover,.car-card.active{border-color:var(--gold2);transform:scale(1.08) translateY(-4px);box-shadow:0 0 0 1px var(--gold),0 8px 24px rgba(255,215,0,0.3);}
+.car-card{flex-shrink:0;width:192px;height:108px;border-radius:10px;overflow:hidden;border:2px solid rgba(201,168,76,0.15);cursor:pointer;position:relative;transition:all 0.25s;box-shadow:0 4px 16px rgba(0,0,0,0.5);}
+.car-card:hover,.car-card.active{border-color:var(--gold2);transform:scale(1.06) translateY(-4px);box-shadow:0 0 0 1px var(--gold),0 8px 24px rgba(255,215,0,0.3);}
 .car-card img{width:100%;height:100%;object-fit:cover;display:block;}
-.car-card-label{position:absolute;bottom:0;left:0;right:0;padding:14px 5px 5px;background:linear-gradient(0deg,rgba(0,0,0,0.9),transparent);font-size:8px;font-weight:700;color:#fff;text-align:center;line-height:1.3;}
-.car-card-num{position:absolute;top:4px;left:5px;font-size:8px;color:var(--gold);font-family:'Cinzel',serif;font-weight:700;}
+.car-card-label{position:absolute;bottom:0;left:0;right:0;padding:20px 8px 7px;background:linear-gradient(0deg,rgba(0,0,0,0.9),transparent);font-size:10px;font-weight:700;color:#fff;text-align:center;line-height:1.3;}
+.car-card-num{position:absolute;top:5px;left:7px;font-size:9px;color:var(--gold);font-family:'Cinzel',serif;font-weight:700;}
 
 #gameScreen{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;background:#e7cf7d;}
 #gameHud{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;flex-shrink:0;background:rgba(0,0,0,0.9);border-bottom:1px solid rgba(201,168,76,0.12);}
@@ -71,7 +71,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 /* ── PIECE TRAY ── */
 #pieceTray{
   position:fixed;bottom:70px;left:0;right:0;
-  height:106px;z-index:52;
+  height:128px;z-index:52;
   background:rgba(180,140,40,0.85);
   border-top:1px solid rgba(201,168,76,0.15);
   overflow-x:auto;overflow-y:hidden;
@@ -87,7 +87,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 }
 .tray-piece{
   flex-shrink:0;
-  width:81px;height:81px;
+  width:105px;height:105px;
   border-radius:8px;overflow:hidden;
   border:1.5px solid rgba(201,168,76,0.2);
   cursor:grab;transition:transform 0.08s ease,box-shadow 0.08s ease;
@@ -95,7 +95,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 }
 .tray-piece:hover,.tray-piece.lifted{
   border-color:var(--gold2);
-  transform:scale(1.3);
+  transform:scale(1.3) translateY(-8px);
   box-shadow:0 0 16px rgba(255,215,0,0.5);
   z-index:53;
   transition:transform 0.1s ease,box-shadow 0.1s ease;
@@ -375,7 +375,7 @@ function quitGame(){ stopTimer();running=false;document.getElementById('gameScre
 // When dragged out it grows to full size
 // When returned it shrinks back
 
-const SMALL = 81; // tray piece size px
+const SMALL = 105; // tray piece size px
 let trayPieces = []; // pieces still in tray
 let activePiece = null; // piece being dragged from tray
 
@@ -390,7 +390,7 @@ function initPuzzle(){
   // Board takes 80% of canvas, centered
   let bw=cw*0.8,bh=bw/imgAR;
   if(bh>ch*0.78){bh=ch*0.78;bw=bh*imgAR;}
-  const bx=(cw-bw)/2,by=(ch-bh)/2;
+  const bx=(cw-bw)/2,by=Math.max(10,(ch-bh)/2-96);
   const pw=bw/cols,ph=bh/rows,TAB=Math.min(pw,ph)*0.22;
 
   const hTab=Array.from({length:rows-1},()=>Array.from({length:cols},()=>Math.random()>.5?1:-1));
@@ -526,8 +526,14 @@ function renderLoop(){
     ctx.drawImage(puzzleImg,bx,by,bw,bh);
     ctx.restore();
 
-    // Board border
-    ctx.strokeStyle='rgba(201,168,76,0.3)';ctx.lineWidth=2;
+    // Outer green accent line
+    ctx.strokeStyle='rgba(80,180,80,0.6)';ctx.lineWidth=1.5;
+    ctx.strokeRect(bx-5,by-5,bw+10,bh+10);
+    // Golden frame - thick
+    ctx.strokeStyle='rgba(201,168,76,0.9)';ctx.lineWidth=4;
+    ctx.strokeRect(bx-3,by-3,bw+6,bh+6);
+    // Inner gold highlight
+    ctx.strokeStyle='rgba(255,215,0,0.4)';ctx.lineWidth=1;
     ctx.strokeRect(bx-1,by-1,bw+2,bh+2);
   }
 
