@@ -337,10 +337,10 @@ function buildDesktopTray(){
     div.addEventListener('mouseenter',e=>showPreview(e,p));
     div.addEventListener('mouseleave',hidePreview);
     div.addEventListener('mousedown',e=>{hidePreview();liftFromTray(e,p,div);});
-    // Mobile: touchstart on tray piece - show preview then lift
+    // Mobile: touchstart - lift immediately, no delay
     div.addEventListener('touchstart',e=>{
-      // Show preview briefly then lift
-      showMobPiecePreview(e,p,div);
+      e.preventDefault();
+      liftFromTray(e,p,div);
     },{passive:false});
     inner.appendChild(div);p.trayEl=div;
   });
@@ -367,17 +367,7 @@ function showPreview(e,p){
 }
 function hidePreview(){previewCanvas.style.display='none';}
 
-// Mobile: show piece preview on touch, then lift after brief delay
-function showMobPiecePreview(e,p,div){
-  e.preventDefault();
-  // Show the desktop preview canvas immediately
-  showPreview({currentTarget:div},p);
-  // After short delay, hide preview and lift piece
-  setTimeout(()=>{
-    hidePreview();
-    liftFromTray(e,p,div);
-  },300);
-}
+
 
 function liftFromTray(e,p,div){
   e.preventDefault();if(p.placed||!p.inTray)return;
