@@ -9,7 +9,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
 :root{--gold:#c9a84c;--gold2:#ffd700;--gold3:#e8c86a;--dark:#080808;--dark2:#111114;--dark3:#1a1a1f;--text:#f0ede8;--muted:rgba(240,237,232,0.5);}
-html,body{height:100%;overflow:hidden;background:var(--dark);}
+html,body{height:100%;overflow:hidden;background:#e7cf7d;}
 body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 
 #heroBg,#heroBgNext{position:fixed;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;filter:brightness(0.55);}
@@ -59,7 +59,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 .car-card-label{position:absolute;bottom:0;left:0;right:0;padding:14px 5px 5px;background:linear-gradient(0deg,rgba(0,0,0,0.9),transparent);font-size:8px;font-weight:700;color:#fff;text-align:center;line-height:1.3;}
 .car-card-num{position:absolute;top:4px;left:5px;font-size:8px;color:var(--gold);font-family:'Cinzel',serif;font-weight:700;}
 
-#gameScreen{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;background:var(--dark);}
+#gameScreen{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;background:#e7cf7d;}
 #gameHud{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;flex-shrink:0;background:rgba(0,0,0,0.9);border-bottom:1px solid rgba(201,168,76,0.12);}
 .hud-title{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);font-weight:700;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .hud-pieces{font-size:10px;color:var(--muted);margin-top:2px;}
@@ -71,8 +71,8 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 /* ── PIECE TRAY ── */
 #pieceTray{
   position:fixed;bottom:70px;left:0;right:0;
-  height:90px;z-index:52;
-  background:rgba(0,0,0,0.7);
+  height:106px;z-index:52;
+  background:rgba(180,140,40,0.85);
   border-top:1px solid rgba(201,168,76,0.15);
   overflow-x:auto;overflow-y:hidden;
   display:none;
@@ -87,17 +87,18 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 }
 .tray-piece{
   flex-shrink:0;
-  width:54px;height:54px;
+  width:81px;height:81px;
   border-radius:8px;overflow:hidden;
   border:1.5px solid rgba(201,168,76,0.2);
-  cursor:grab;transition:all 0.15s;
-  position:relative;background:var(--dark3);
+  cursor:grab;transition:transform 0.08s ease,box-shadow 0.08s ease;
+  position:relative;background:#d4b86a;
 }
 .tray-piece:hover,.tray-piece.lifted{
   border-color:var(--gold2);
-  transform:scale(1.15);
-  box-shadow:0 0 12px rgba(255,215,0,0.4);
+  transform:scale(1.3);
+  box-shadow:0 0 16px rgba(255,215,0,0.5);
   z-index:53;
+  transition:transform 0.1s ease,box-shadow 0.1s ease;
 }
 .tray-piece canvas{
   width:100%;height:100%;display:block;
@@ -374,7 +375,7 @@ function quitGame(){ stopTimer();running=false;document.getElementById('gameScre
 // When dragged out it grows to full size
 // When returned it shrinks back
 
-const SMALL = 54; // tray piece size px
+const SMALL = 81; // tray piece size px
 let trayPieces = []; // pieces still in tray
 let activePiece = null; // piece being dragged from tray
 
@@ -515,13 +516,13 @@ function buildPath(p){
 function renderLoop(){
   if(!running)return;
   const cw=canvas.width,ch=canvas.height;
-  ctx.clearRect(0,0,cw,ch);ctx.fillStyle='#080808';ctx.fillRect(0,0,cw,ch);
+  ctx.clearRect(0,0,cw,ch);ctx.fillStyle='#e7cf7d';ctx.fillRect(0,0,cw,ch);
   if(pieces.length){
     const p0=pieces[0];
     const bx=p0.cx,by=p0.cy,bw=p0.cols*p0.w,bh=p0.rows*p0.h;
 
     // Background art at 50% opacity - always visible as guide!!
-    ctx.save();ctx.globalAlpha=0.5;
+    ctx.save();ctx.globalAlpha=0.38;
     ctx.drawImage(puzzleImg,bx,by,bw,bh);
     ctx.restore();
 
