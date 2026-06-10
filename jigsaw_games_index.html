@@ -10,7 +10,7 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
 :root{--gold:#c9a84c;--gold2:#ffd700;--dark:#080808;--text:#f0ede8;--muted:rgba(240,237,232,0.5);}
 html{width:100%;height:100%;}
-body{height:100%;background:var(--dark);font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;}
+body{height:100%;background:var(--dark);font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;position:fixed;width:100%;}
 
 /* BACKGROUNDS */
 #heroBg,#heroBgNext{position:fixed;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;filter:brightness(0.55);}
@@ -134,6 +134,300 @@ body{height:100%;background:var(--dark);font-family:'Inter',system-ui,sans-serif
 #rotateNudge{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(0,0,0,0.75);padding:8px 16px;display:none;align-items:center;justify-content:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.8);font-family:'Inter',sans-serif;border-bottom:1px solid rgba(201,168,76,0.2);}
 .nudge-icon{font-size:18px;animation:nudgeSpin 2s ease-in-out infinite;}
 @keyframes nudgeSpin{0%,100%{transform:rotate(0deg);}50%{transform:rotate(90deg);}}
+
+/* ══ MOBILE PUZZLE SYSTEM ══ */
+#mobilePuzzle{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;background:#ebcfb2;}
+#mobileHud{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;flex-shrink:0;background:rgba(0,0,0,0.85);border-bottom:1px solid rgba(201,168,76,0.12);}
+.mob-title{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);font-weight:700;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mob-timer{font-size:20px;font-weight:900;color:var(--gold2);font-family:'Cinzel',serif;}
+/* Board area */
+#mobileBoard{position:relative;flex:1;overflow:hidden;touch-action:none;}
+#mobileBoardImg{position:absolute;background-size:100% 100%;background-repeat:no-repeat;opacity:0.4;pointer-events:none;}
+/* Ghost grid lines */
+.mob-slot{position:absolute;border:1px solid rgba(201,168,76,0.3);pointer-events:none;border-radius:2px;}
+/* Pieces on board */
+.mob-piece{position:absolute;background-size:cover;background-repeat:no-repeat;cursor:grab;border:1.5px solid rgba(255,255,255,0.3);border-radius:2px;transition:box-shadow 0.1s;touch-action:none;z-index:10;}
+.mob-piece.placed{border-color:transparent;z-index:5;cursor:default;}
+.mob-piece.dragging{box-shadow:0 8px 24px rgba(0,0,0,0.6),0 0 0 2px rgba(255,215,0,0.8);z-index:100;border-color:rgba(255,215,0,0.8);}
+/* Mobile tray */
+#mobileTray{position:fixed;bottom:58px;left:0;right:0;height:120px;background:rgba(235,207,178,0.85);border-top:2px solid rgba(201,168,76,0.3);overflow-x:scroll;overflow-y:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-x;display:none;scrollbar-width:none;z-index:52;}
+#mobileTray::-webkit-scrollbar{display:none;}
+#mobileTrayInner{display:flex;align-items:center;gap:8px;padding:8px 12px;height:100%;width:max-content;touch-action:pan-x;}
+.mob-tray-piece{flex-shrink:0;width:90px;height:90px;background-size:cover;background-repeat:no-repeat;border:2px solid rgba(201,168,76,0.5);border-radius:6px;cursor:grab;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,0.3);position:relative;}
+.mob-tray-piece:active{transform:scale(1.1);border-color:var(--gold2);}
+/* Mobile buttons */
+#mobileBtnBar{position:fixed;bottom:0;left:0;right:0;display:none;gap:10px;padding:8px 14px 12px;background:rgba(0,0,0,0.92);border-top:1px solid rgba(60,160,60,0.2);z-index:51;}
+
+/* ══ MOBILE PUZZLE SYSTEM ══ */
+/* Only shows on phones */
+#mobileGame{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;background:#ebcfb2;}
+#mobileHud{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(0,0,0,0.85);border-bottom:1px solid rgba(201,168,76,0.12);flex-shrink:0;}
+.mob-title{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);font-weight:700;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mob-timer{font-size:18px;font-weight:900;color:var(--gold2);font-family:'Cinzel',serif;}
+#mobilePuzzleArea{position:relative;flex:1;overflow:hidden;touch-action:none;}
+#mobilePuzzleImg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:94%;max-height:94%;opacity:0.4;border-radius:4px;pointer-events:none;}
+.mob-piece{position:absolute;cursor:grab;touch-action:none;transition:box-shadow 0.1s;}
+.mob-piece img{display:block;pointer-events:none;border-radius:2px;}
+.mob-piece.placed{box-shadow:none!important;}
+#mobileTray{height:110px;background:rgba(235,207,178,0.85);border-top:2px solid rgba(201,168,76,0.3);overflow-x:scroll;overflow-y:hidden;-webkit-overflow-scrolling:touch;flex-shrink:0;scroll-behavior:smooth;}
+#mobileTrayInner{display:flex;align-items:center;gap:8px;padding:8px 12px;height:100%;width:max-content;}
+.mob-thumb{flex-shrink:0;width:85px;height:85px;border-radius:6px;overflow:hidden;border:2px solid rgba(201,168,76,0.4);cursor:pointer;background:#c8a96e;transition:transform 0.1s,border-color 0.1s;}
+.mob-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.mob-thumb:active{transform:scale(0.95);}
+.mob-thumb.in-play{opacity:0.35;border-color:rgba(255,255,255,0.2);}
+#mobileBtns{display:flex;gap:8px;padding:8px 12px 14px;background:rgba(0,0,0,0.92);}
+.mob-btn{flex:1;padding:12px;border-radius:10px;border:1.5px solid rgba(60,160,60,0.5);background:linear-gradient(135deg,#0f2a0f,#0a1a0a);color:#7db87d;font-size:11px;font-weight:800;cursor:pointer;letter-spacing:0.5px;text-transform:uppercase;font-family:'Inter',sans-serif;}
+
+/* ══ MOBILE SPECIFIC ══ */
+@media(max-width:767px){
+
+  /* Smaller HUD on mobile */
+  #gameHud{padding:8px 10px;}
+  .hud-title{font-size:10px;max-width:100px;}
+  .hud-timer{font-size:18px;}
+  .hud-bar{width:80px;}
+
+  /* Canvas fills remaining space */
+  #gameCanvas{margin-bottom:0 !important;}
+
+  /* Hide desktop tray on mobile */
+  #pieceTray{display:none !important;}
+
+  /* Mobile tray - pure HTML, native scroll GUARANTEED */
+  #mobileTray{
+    position:fixed;bottom:56px;left:0;right:0;
+    height:130px;z-index:52;
+    background:rgba(235,207,178,0.9);
+    border-top:2px solid rgba(201,168,76,0.4);
+    overflow-x:scroll;overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    display:none;
+    touch-action:pan-x;
+    cursor:grab;
+  }
+  #mobileTray::-webkit-scrollbar{display:none;}
+  #mobileTrayInner{
+    display:flex;align-items:center;
+    gap:8px;padding:6px 10px;
+    height:100%;width:max-content;
+    touch-action:pan-x;
+  }
+  .mob-piece{
+    flex-shrink:0;width:110px;height:110px;
+    border-radius:6px;overflow:hidden;
+    border:2px solid rgba(201,168,76,0.4);
+    cursor:pointer;background:#c8a96e;
+    transition:transform 0.1s,border-color 0.1s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mob-piece.selected{
+    border-color:var(--gold2);
+    transform:scale(1.1);
+    box-shadow:0 0 0 2px var(--gold2),0 4px 12px rgba(255,215,0,0.4);
+  }
+  .mob-piece img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}
+
+  /* Selected piece indicator on canvas */
+  #selectedPieceHint{
+    position:fixed;bottom:190px;left:50%;transform:translateX(-50%);
+    z-index:53;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
+    color:var(--gold2);font-size:12px;font-weight:700;
+    padding:6px 14px;border-radius:20px;border:1px solid rgba(255,215,0,0.3);
+    display:none;font-family:'Cinzel',serif;
+  }
+
+  /* Game buttons closer on mobile */
+  #gameBtnBar{padding:6px 10px 10px;}
+  .hud-btn-pulse{font-size:11px;padding:10px 8px;}
+}
+@media(min-width:768px){
+  #mobileTray{display:none !important;}
+  #selectedPieceHint{display:none !important;}
+}
+
+/* ══ MOBILE PUZZLE SYSTEM ══ */
+/* Only shows on phones, hidden on desktop */
+#mobileGame{display:none;position:fixed;inset:0;z-index:50;flex-direction:column;background:#ebcfb2;}
+@media(max-width:767px){
+  #gameScreen{display:none!important;}  /* hide desktop game on mobile */
+}
+
+/* Mobile HUD */
+#mobileHud{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(0,0,0,0.85);border-bottom:1px solid rgba(201,168,76,0.15);flex-shrink:0;}
+.mob-title{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);font-weight:700;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mob-timer{font-size:18px;font-weight:900;color:var(--gold2);font-family:'Cinzel',serif;}
+
+/* Mobile puzzle board - the image */
+#mobileBoardWrap{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+#mobileBoard{position:relative;}
+#mobileBoardImg{display:block;opacity:0.4;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none;}
+
+/* Placed pieces on board */
+.mob-placed{position:absolute;pointer-events:none;}
+
+/* Mobile tray - native scroll, proven to work!! */
+#mobileTray{
+  height:130px;flex-shrink:0;
+  background:rgba(235,207,178,0.85);
+  border-top:2px solid rgba(201,168,76,0.3);
+  overflow-x:scroll;overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  touch-action:pan-x;
+}
+#mobileTray::-webkit-scrollbar{display:none;}
+#mobileTrayInner{display:flex;align-items:center;gap:10px;padding:8px 14px;height:100%;width:max-content;}
+
+/* Mobile tray piece - pure HTML, no canvas conflicts!! */
+.mob-piece{
+  flex-shrink:0;
+  width:110px;height:110px;
+  border-radius:8px;
+  overflow:hidden;
+  border:2px solid rgba(201,168,76,0.4);
+  cursor:pointer;
+  position:relative;
+  box-shadow:0 3px 10px rgba(0,0,0,0.3);
+  background-size:cover;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform 0.1s,box-shadow 0.1s;
+}
+.mob-piece:active{transform:scale(1.1);box-shadow:0 0 0 2px var(--gold2);}
+.mob-piece.selected{border-color:var(--gold2);box-shadow:0 0 0 3px var(--gold2),0 6px 20px rgba(255,215,0,0.4);transform:scale(1.08) translateY(-6px);}
+.mob-piece.placed{display:none;}
+
+/* Mobile btn bar */
+#mobileBtnBar{display:flex;gap:10px;padding:8px 14px 14px;background:rgba(0,0,0,0.92);border-top:1px solid rgba(60,160,60,0.2);}
+
+/* Mobile snap overlay */
+#mobileSnapOverlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);}
+#mobileSnapCard{background:#1a1a1f;border:2px solid var(--gold);border-radius:16px;padding:20px;max-width:90vw;text-align:center;}
+.snap-img-preview{max-width:80vw;max-height:40vh;border-radius:8px;margin-bottom:12px;object-fit:contain;}
+.snap-title{font-family:'Cinzel',serif;font-size:13px;color:var(--gold);margin-bottom:16px;}
+.snap-btn{padding:14px 28px;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;}
+.snap-btn.place{background:linear-gradient(135deg,#ffd700,#c9a84c);color:#080808;}
+.snap-btn.back{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);}
+
+/* Mobile progress bar */
+#mobProgressWrap{height:4px;background:rgba(201,168,76,0.15);flex-shrink:0;}
+#mobProgressFill{height:100%;background:linear-gradient(90deg,#ffd700,#c9a84c);transition:width 0.4s;}
+
+/* ══ MOBILE GAME - separate div-based system ══ */
+@media(max-width:767px){
+  /* Force landscape hint */
+  #portraitWarning{
+    display:flex!important;
+  }
+}
+#portraitWarning{
+  display:none;
+  position:fixed;inset:0;z-index:1000;
+  background:#000;
+  flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;text-align:center;padding:24px;
+}
+.pw-icon{font-size:60px;animation:pwSpin 2s ease infinite;}
+@keyframes pwSpin{0%,100%{transform:rotate(0deg);}50%{transform:rotate(90deg);}}
+.pw-title{font-family:'Cinzel Decorative',serif;font-size:22px;color:var(--gold2);}
+.pw-sub{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.6;max-width:280px;}
+.pw-btn{padding:14px 32px;border:none;border-radius:12px;background:linear-gradient(135deg,#ffd700,#c9a84c);color:#000;font-size:15px;font-weight:800;cursor:pointer;font-family:'Cinzel',serif;}
+
+#mobileGame{
+  position:fixed;inset:0;z-index:50;
+  display:none;flex-direction:column;
+  background:#ebcfb2;
+}
+#mobileHud{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;flex-shrink:0;
+  background:rgba(0,0,0,0.85);
+}
+.mob-title{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);font-weight:700;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mob-timer{font-size:18px;font-weight:900;color:var(--gold2);font-family:'Cinzel',serif;}
+.mob-btn{padding:5px 10px;border-radius:8px;border:1.5px solid rgba(60,160,60,0.5);background:linear-gradient(135deg,#0f2a0f,#0a1a0a);color:#7db87d;font-size:10px;font-weight:800;cursor:pointer;}
+
+/* Mobile board - fixed in center */
+#mobileBoard{
+  position:relative;
+  flex-shrink:0;
+  overflow:hidden;
+}
+#mobileBoardImg{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:fill;opacity:0.38;
+}
+#mobileBoardFrame{
+  position:absolute;inset:-3px;
+  border:3px solid rgba(201,168,76,0.9);
+  box-shadow:0 0 0 1px rgba(80,180,80,0.5), inset 0 0 0 1px rgba(255,215,0,0.3);
+  pointer-events:none;z-index:5;
+}
+.mob-piece{
+  position:absolute;
+  cursor:grab;
+  touch-action:none;
+  border-radius:3px;
+  overflow:hidden;
+  border:1.5px solid rgba(255,255,255,0.6);
+  box-shadow:0 2px 8px rgba(0,0,0,0.4);
+  z-index:10;
+  transition:box-shadow 0.1s;
+  background-size:cover;
+}
+.mob-piece.placed{
+  border:none!important;
+  box-shadow:none!important;
+  z-index:1!important;
+}
+.mob-piece.dragging{
+  z-index:999!important;
+  box-shadow:0 8px 24px rgba(0,0,0,0.6),0 0 0 2px var(--gold2)!important;
+  cursor:grabbing;
+}
+
+/* Mobile tray - horizontal scrolling shelf */
+#mobileTray{
+  flex:1;
+  overflow-x:scroll;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  background:rgba(235,207,178,0.8);
+  border-top:2px solid rgba(201,168,76,0.3);
+  display:flex;align-items:center;
+  padding:8px 10px;
+  gap:8px;
+  scrollbar-width:none;
+  touch-action:pan-x;
+}
+#mobileTray::-webkit-scrollbar{display:none;}
+.tray-thumb{
+  flex-shrink:0;
+  width:70px;height:70px;
+  border-radius:6px;
+  overflow:hidden;
+  border:2px solid rgba(201,168,76,0.3);
+  cursor:pointer;
+  transition:transform 0.15s,border-color 0.15s;
+  background-size:cover;
+  background-position:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
+.tray-thumb:active{transform:scale(0.95);}
+.tray-thumb.selected{border-color:var(--gold2);box-shadow:0 0 0 2px var(--gold);}
+
+/* Mobile buttons */
+#mobileBtns{
+  display:flex;gap:8px;padding:8px 10px 12px;
+  background:rgba(0,0,0,0.85);flex-shrink:0;
+}
+.mob-action-btn{
+  flex:1;padding:10px 8px;border-radius:10px;
+  border:1.5px solid rgba(60,160,60,0.5);
+  background:linear-gradient(135deg,#0f2a0f,#0a1a0a);
+  color:#7db87d;font-size:11px;font-weight:800;cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.5px;
+}
 </style>
 </head>
 <body>
@@ -175,7 +469,32 @@ body{height:100%;background:var(--dark);font-family:'Inter',system-ui,sans-serif
 <div id="nextArrow" onclick="nextPuzzle()"><span class="arrow-icon">›</span></div>
 <div id="carousel"><div class="carousel-track" id="carouselTrack"></div><div id="mobileCarousel" id="mobileCarouselTrack"></div></div>
 
+<!-- MOBILE PUZZLE SYSTEM - uses HTML divs, no canvas fighting! -->
+<div id="mobileGame">
+  <div id="mobileHud">
+    <div class="mob-title" id="mobTitle"></div>
+    <div class="mob-timer" id="mobTimer">0:00</div>
+  </div>
+  <div id="mobilePuzzleArea">
+    <img id="mobilePuzzleImg" src="" alt="">
+    <!-- pieces injected by JS -->
+  </div>
+  <div id="mobileTray">
+    <div id="mobileTrayInner">
+      <!-- thumbs injected by JS -->
+    </div>
+  </div>
+  <div id="mobileBtns">
+    <button class="mob-btn" onclick="mobilePeek()">👁 PEEK</button>
+    <button class="mob-btn" onclick="closeMobileGame()">🎨 PUZZLES</button>
+  </div>
+</div>
+
 <div id="gameScreen">
+  <!-- Mobile tap hint -->
+  <div id="mobileHint" style="display:none;text-align:center;padding:4px;background:rgba(201,168,76,0.15);font-size:10px;color:rgba(255,215,0,0.8);font-family:'Inter',sans-serif;">
+    Tap a piece below → Tap its position on the puzzle ✦
+  </div>
   <div id="gameHud">
     <div>
       <div class="hud-title" id="hudTitle"></div>
@@ -186,10 +505,29 @@ body{height:100%;background:var(--dark);font-family:'Inter',system-ui,sans-serif
   </div>
   <canvas id="gameCanvas"></canvas>
   <div id="pieceTray" ontouchmove="event.stopPropagation()" ontouchstart="event.stopPropagation()"><div id="trayInner"></div></div>
+  <!-- MOBILE TRAY - pure HTML divs, native scroll on ALL phones!! -->
+  <div id="mobileTray"><div id="mobileTrayInner"></div></div>
+  <div id="selectedPieceHint">Tap where to place it!!</div>
   <div id="gameBtnBar">
     <button class="hud-btn-pulse" onclick="peekImage()">👁 TAKE A PEEK</button>
     <button class="hud-btn-pulse" onclick="quitGame()">🎨 CHANGE PUZZLE</button>
   </div>
+</div>
+
+<!-- MOBILE PUZZLE SYSTEM -->
+<div id="mobilePuzzle">
+  <div id="mobileHud">
+    <div class="mob-title" id="mobTitle"></div>
+    <div class="mob-timer" id="mobTimer">0:00</div>
+  </div>
+  <div id="mobileBoard" id="mobileBoard">
+    <div id="mobileBoardImg"></div>
+  </div>
+</div>
+<div id="mobileTray"><div id="mobileTrayInner"></div></div>
+<div id="mobileBtnBar">
+  <button class="hud-btn-pulse" onclick="mobPeek()">👁 TAKE A PEEK</button>
+  <button class="hud-btn-pulse" onclick="quitMobile()">🎨 CHANGE PUZZLE</button>
 </div>
 
 <div id="winScreen">
@@ -207,505 +545,74 @@ body{height:100%;background:var(--dark);font-family:'Inter',system-ui,sans-serif
   </div>
 </div>
 
+<!-- MOBILE GAME - pure HTML, no canvas blocking -->
+<div id="mobileGame" style="display:none;position:fixed;inset:0;z-index:50;background:#ebcfb2;flex-direction:column;overflow:hidden;">
+  <!-- Mobile HUD -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(0,0,0,0.85);border-bottom:1px solid rgba(201,168,76,0.15);flex-shrink:0;">
+    <div>
+      <div id="mobTitle" style="font-family:Cinzel,serif;font-size:10px;color:#c9a84c;font-weight:700;max-width:160px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;"></div>
+      <div id="mobPieces" style="font-size:9px;color:rgba(240,237,232,0.5);margin-top:1px;">0 / 0 placed</div>
+    </div>
+    <div id="mobTimer" style="font-size:20px;font-weight:900;color:#ffd700;font-family:Cinzel,serif;">0:00</div>
+    <button onclick="quitMobileGame()" style="padding:6px 12px;border-radius:8px;border:1px solid rgba(201,168,76,0.3);background:rgba(0,0,0,0.4);color:#c9a84c;font-size:10px;font-weight:700;cursor:pointer;">✕ Quit</button>
+  </div>
+  <!-- Puzzle board image -->
+  <div style="flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+    <img id="mobBoardImg" src="" style="max-width:100%;max-height:100%;object-fit:contain;opacity:0.45;border:3px solid rgba(201,168,76,0.8);" alt="">
+    <!-- Placed pieces overlay -->
+    <canvas id="mobCanvas" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none;"></canvas>
+  </div>
+  <!-- Piece tray - pure HTML scroll -->
+  <div style="flex-shrink:0;background:rgba(235,207,178,0.85);border-top:2px solid rgba(201,168,76,0.3);padding:8px 12px;">
+    <div style="font-size:9px;color:rgba(100,60,0,0.6);font-weight:700;text-align:center;margin-bottom:4px;font-family:Cinzel,serif;letter-spacing:1px;">← SWIPE TO BROWSE PIECES →</div>
+    <div id="mobTray" style="display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none;">
+    </div>
+  </div>
+  <!-- Bottom buttons -->
+  <div style="display:flex;gap:8px;padding:8px 12px 16px;background:rgba(0,0,0,0.85);">
+    <button onclick="mobPeek()" style="flex:1;padding:11px;border-radius:10px;border:1.5px solid rgba(60,160,60,0.5);background:linear-gradient(135deg,#0f2a0f,#0a1a0a);color:#7db87d;font-size:11px;font-weight:800;cursor:pointer;text-transform:uppercase;">👁 PEEK</button>
+    <button onclick="quitMobileGame()" style="flex:1;padding:11px;border-radius:10px;border:1.5px solid rgba(60,160,60,0.5);background:linear-gradient(135deg,#0f2a0f,#0a1a0a);color:#7db87d;font-size:11px;font-weight:800;cursor:pointer;text-transform:uppercase;">🎨 GALLERY</button>
+  </div>
+</div>
+
 <div id="peekOverlay"><div id="peekLabel">👁 TAKE A PEEK — Memorise it!!</div><img id="peekImg" src="" alt=""></div>
 <canvas id="piecePreview"></canvas>
 
-<script>
-const STORAGE_URL='https://xbzeakoypdyslnnriaef.supabase.co/storage/v1/object/public/puzzles/';
-const DIFFS={12:{cols:3,rows:4},24:{cols:4,rows:6},48:{cols:6,rows:8},70:{cols:7,rows:10}};
-let PUZZLES=[],sbClient=null,curIdx=0,difficulty=12;
-let pieces=[],dragging=null,dragOffX=0,dragOffY=0;
-let timerInt=null,elapsed=0,running=false,placed=0,total=0,maxZ=100;
-let puzzleImg=null,ghostCanvas=null,trayPieces=[],activePiece=null;
-const SMALL=120;
-const canvas=document.getElementById('gameCanvas');
-const ctx=canvas.getContext('2d');
-const previewCanvas=document.getElementById('piecePreview');
-const pCtx=previewCanvas.getContext('2d');
+<!-- ══ MOBILE GAME - separate system, proven scroll ══ -->
+<div id="mobileGame">
+  <div id="mobileHud">
+    <div>
+      <div class="mob-title" id="mobTitle"></div>
+      <div style="font-size:9px;color:var(--muted);margin-top:2px;" id="mobPieces">0/0 placed</div>
+    </div>
+    <div class="mob-timer" id="mobTimer">0:00</div>
+  </div>
+  <div id="mobProgressWrap"><div id="mobProgressFill" style="width:0%"></div></div>
+  <div id="mobileBoardWrap">
+    <div id="mobileBoard">
+      <img id="mobileBoardImg" src="" alt="">
+    </div>
+  </div>
+  <div id="mobileTray"><div id="mobileTrayInner"></div></div>
+  <div id="mobileBtnBar">
+    <button class="hud-btn-pulse" style="flex:1;" onclick="mobPeek()">👁 PEEK</button>
+    <button class="hud-btn-pulse" style="flex:1;" onclick="quitMobileGame()">🎨 CHANGE</button>
+  </div>
+</div>
 
-// ── LOAD FROM SUPABASE ───────────────────────────
-async function loadPuzzlesFromDB(){
-  try{
-    // Wait for Supabase CDN to be ready
-    let tries=0;
-    while(!window.supabase && tries<30){
-      await new Promise(r=>setTimeout(r,100));
-      tries++;
-    }
-    if(!window.supabase){ console.error('Supabase CDN not loaded!'); return; }
-    sbClient=window.supabase.createClient(
-      'https://xbzeakoypdyslnnriaef.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiemVha295cGR5c2xubnJpYWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NDI5MzIsImV4cCI6MjA5NjIxODkzMn0.-pS2FE-Q-_EetM5ONbJycZWFm336wJ-z4MTOGCdA1LE'
-    );
-    const{data,error}=await sbClient.from('jigsaw_puzzles').select('*').order('num');
-    if(error) throw error;
-    if(data&&data.length>0){
-      PUZZLES=data.map(p=>({src:STORAGE_URL+p.filename,title:p.title,desc:p.desc}));
-    }
-  }catch(e){console.error('Load puzzles error details:',e.message,e.code,e.details,e.hint,JSON.stringify(e));}
-}
+<!-- Mobile snap overlay - tap piece then tap board position -->
+<div id="mobileSnapOverlay">
+  <div id="mobileSnapCard">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-family:'Cinzel',serif;">TAP WHERE THIS PIECE GOES</div>
+    <img class="snap-img-preview" id="snapPieceImg" src="" alt="">
+    <div class="snap-title" id="snapPieceTitle"></div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="snap-btn back" onclick="cancelSnap()">← Back</button>
+    </div>
+  </div>
+</div>
 
-// ── HERO ──────────────────────────────────────────
-function buildDots(){
-  const wrap=document.getElementById('puzzleDots');
-  wrap.innerHTML='';
-  PUZZLES.forEach((_,i)=>{
-    const d=document.createElement('div');
-    d.className='pdot'+(i===curIdx?' active':'');
-    d.onclick=()=>goTo(i);
-    wrap.appendChild(d);
-  });
-}
-function updateHero(){
-  if(!PUZZLES.length)return;
-  const p=PUZZLES[curIdx];
-  document.getElementById('artInfo').style.animation='none';
-  void document.getElementById('artInfo').offsetWidth;
-  document.getElementById('artInfo').style.animation='infoFade 0.6s ease';
-  document.getElementById('artNum').textContent='Puzzle '+(curIdx+1)+' of '+PUZZLES.length;
-  document.getElementById('artTitle').textContent=p.title;
-  document.getElementById('artDesc').textContent=p.desc;
-  buildDots();
-  updateCarouselActive();
-}
-function transitionBg(src){
-  const bg=document.getElementById('heroBg'),next=document.getElementById('heroBgNext');
-  next.style.backgroundImage=`url(${src})`;next.style.opacity='1';
-  setTimeout(()=>{bg.style.backgroundImage=`url(${src})`;next.style.opacity='0';},800);
-}
-function goTo(idx){
-  curIdx=((idx%PUZZLES.length)+PUZZLES.length)%PUZZLES.length;
-  transitionBg(PUZZLES[curIdx].src);updateHero();
-}
-function prevPuzzle(){if(PUZZLES.length)goTo(curIdx-1);}
-function nextPuzzle(){if(PUZZLES.length)goTo(curIdx+1);}
-function nextAndClose(){closeGame();goTo(curIdx+1);}
-function setDiff(el){document.querySelectorAll('.diff-pill').forEach(b=>b.classList.remove('active'));el.classList.add('active');difficulty=parseInt(el.dataset.d);}
 
-// ── CAROUSEL ─────────────────────────────────────
-function buildCarousel(){
-  buildMobileCarousel();
-  const track=document.getElementById('carouselTrack');
-  track.innerHTML='';
-  [0,1].forEach(()=>{
-    PUZZLES.forEach((p,i)=>{
-      const card=document.createElement('div');
-      card.className='car-card'+(i===curIdx?' active':'');
-      card.innerHTML=`<img src="${p.src}" loading="lazy" alt="${p.title}"><div class="car-card-num">${i+1}</div><div class="car-card-label">${p.title}</div>`;
-      card.addEventListener('click',()=>{
-        goTo(i);
-        const btn=document.getElementById('playBtn');
-        btn.style.transform='scale(1.15)';btn.style.transition='transform 0.3s';
-        setTimeout(()=>{btn.style.transform='scale(1)';},400);
-      });
-      track.appendChild(card);
-    });
-  });
-}
-function buildMobileCarousel(){
-  const track = document.getElementById('mobileCarouselTrack');
-  if(!track) return;
-  track.innerHTML='';
-  PUZZLES.forEach((p,i)=>{
-    const card=document.createElement('div');
-    card.className='car-card'+(i===curIdx?' active':'');
-    card.innerHTML=`<img src="${p.src}" loading="lazy" alt="${p.title}"><div class="car-card-num">${i+1}</div><div class="car-card-label">${p.title}</div>`;
-    card.addEventListener('click',()=>{
-      goTo(i);
-      const btn=document.getElementById('playBtn');
-      btn.style.transform='scale(1.15)';btn.style.transition='transform 0.3s';
-      setTimeout(()=>{btn.style.transform='scale(1)';},400);
-    });
-    track.appendChild(card);
-  });
-}
-
-function updateCarouselActive(){
-  document.querySelectorAll('.car-card').forEach((c,i)=>{c.classList.toggle('active',i%PUZZLES.length===curIdx);});
-}
-
-// ── GAME ─────────────────────────────────────────
-function startGame(){
-  if(!PUZZLES.length)return;
-  document.getElementById('gameScreen').style.display='flex';
-  document.getElementById('gameBtnBar').style.display='flex';
-  document.getElementById('winScreen').style.display='none';
-  canvas.width=canvas.offsetWidth||window.innerWidth;
-  canvas.height=canvas.offsetHeight||(window.innerHeight-52);
-  const p=PUZZLES[curIdx];
-  document.getElementById('hudTitle').textContent=p.title;
-  document.getElementById('peekImg').src=p.src;
-  document.getElementById('winArt').src=p.src;
-  puzzleImg=new Image();
-  puzzleImg.crossOrigin='anonymous';
-  puzzleImg.onload=initPuzzle;
-  puzzleImg.onerror=()=>{puzzleImg=new Image();puzzleImg.onload=initPuzzle;puzzleImg.src=p.src;};
-  puzzleImg.src=p.src;
-}
-function restartSame(){document.getElementById('winScreen').style.display='none';startGame();}
-function closeGame(){stopTimer();running=false;document.getElementById('gameScreen').style.display='none';document.getElementById('gameBtnBar').style.display='none';document.getElementById('winScreen').style.display='none';document.getElementById('pieceTray').style.display='none';}
-function quitGame(){stopTimer();running=false;document.getElementById('gameScreen').style.display='none';document.getElementById('gameBtnBar').style.display='none';document.getElementById('pieceTray').style.display='none';}
-
-// ── INIT PUZZLE ──────────────────────────────────
-function initPuzzle(){
-  const cfg=DIFFS[difficulty];
-  const cols=cfg.cols,rows=cfg.rows;
-  total=cols*rows;placed=0;maxZ=100;pieces=[];trayPieces=[];activePiece=null;
-  const cw=canvas.width,ch=canvas.height;
-  const imgAR=puzzleImg.naturalWidth/puzzleImg.naturalHeight;
-  const isPortrait = ch > cw;
-  let bw,bh;
-  if(isPortrait){
-    // Portrait mobile: fill width, image near top
-    bw = cw * 0.96;
-    bh = bw / imgAR;
-    // If still too tall, constrain height
-    const maxH = ch * 0.52;
-    if(bh > maxH){ bh = maxH; bw = bh * imgAR; }
-  } else {
-    // Landscape desktop: original calculation
-    bw = cw * 0.8; bh = bw / imgAR;
-    if(bh > ch*0.78){ bh = ch*0.78; bw = bh*imgAR; }
-  }
-  const bx=(cw-bw)/2, by=isPortrait ? 10 : Math.max(8,(ch-bh)/2-140);
-  const pw=bw/cols,ph=bh/rows,TAB=Math.min(pw,ph)*0.22;
-  const hTab=Array.from({length:rows-1},()=>Array.from({length:cols},()=>Math.random()>.5?1:-1));
-  const vTab=Array.from({length:rows},()=>Array.from({length:cols-1},()=>Math.random()>.5?1:-1));
-  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
-    pieces.push({id:r*cols+c,r,c,cols,rows,cx:bx+c*pw,cy:by+r*ph,x:0,y:0,w:pw,h:ph,tab:TAB,
-      sides:{top:r>0?-hTab[r-1][c]:0,bottom:r<rows-1?hTab[r][c]:0,left:c>0?-vTab[r][c-1]:0,right:c<cols-1?vTab[r][c]:0},
-      placed:false,inTray:true,z:r*cols+c});
-  }
-  trayPieces=[...pieces];
-  trayPieces.sort(()=>Math.random()-0.5);
-  // Pre-render ghost
-  ghostCanvas=document.createElement('canvas');
-  ghostCanvas.width=cw;ghostCanvas.height=ch;
-  const gCtx=ghostCanvas.getContext('2d');
-  gCtx.fillStyle='#ebcfb2';gCtx.fillRect(0,0,cw,ch);
-  gCtx.globalAlpha=0.38;gCtx.drawImage(puzzleImg,bx,by,bw,bh);gCtx.globalAlpha=1;
-  gCtx.strokeStyle='rgba(80,180,80,0.6)';gCtx.lineWidth=1.5;gCtx.strokeRect(bx-5,by-5,bw+10,bh+10);
-  gCtx.strokeStyle='rgba(201,168,76,0.9)';gCtx.lineWidth=4;gCtx.strokeRect(bx-3,by-3,bw+6,bh+6);
-  gCtx.strokeStyle='rgba(255,215,0,0.4)';gCtx.lineWidth=1;gCtx.strokeRect(bx-1,by-1,bw+2,bh+2);
-  buildTray();updateHud();startTimer();running=true;
-  document.getElementById('pieceTray').style.display='block';
-  requestAnimationFrame(renderLoop);
-}
-
-// ── TRAY ─────────────────────────────────────────
-function buildTray(){
-  const inner=document.getElementById('trayInner');
-  inner.innerHTML='';
-  trayPieces.filter(p=>!p.placed&&p.inTray).forEach(p=>{
-    const div=document.createElement('div');
-    div.className='tray-piece';div.dataset.id=p.id;
-    const c=document.createElement('canvas');
-    c.width=SMALL;c.height=SMALL;
-    const cx2=c.getContext('2d');
-    const srcX=(p.c/p.cols)*puzzleImg.naturalWidth;
-    const srcY=(p.r/p.rows)*puzzleImg.naturalHeight;
-    const srcW=puzzleImg.naturalWidth/p.cols;
-    const srcH=puzzleImg.naturalHeight/p.rows;
-    cx2.drawImage(puzzleImg,srcX,srcY,srcW,srcH,0,0,SMALL,SMALL);
-    const T=SMALL*0.18,s=p.sides;
-    cx2.beginPath();cx2.moveTo(0,0);
-    if(s.top===0){cx2.lineTo(SMALL,0);}else{cx2.lineTo(SMALL*.37,0);cx2.bezierCurveTo(SMALL*.37,s.top*T*.6,SMALL*.18,s.top*T,SMALL*.5,s.top*T);cx2.bezierCurveTo(SMALL*.82,s.top*T,SMALL*.63,s.top*T*.6,SMALL*.63,0);cx2.lineTo(SMALL,0);}
-    if(s.right===0){cx2.lineTo(SMALL,SMALL);}else{cx2.lineTo(SMALL,SMALL*.37);cx2.bezierCurveTo(SMALL-s.right*T*.6,SMALL*.37,SMALL-s.right*T,SMALL*.18,SMALL-s.right*T,SMALL*.5);cx2.bezierCurveTo(SMALL-s.right*T,SMALL*.82,SMALL-s.right*T*.6,SMALL*.63,SMALL,SMALL*.63);cx2.lineTo(SMALL,SMALL);}
-    if(s.bottom===0){cx2.lineTo(0,SMALL);}else{cx2.lineTo(SMALL*.63,SMALL);cx2.bezierCurveTo(SMALL*.63,SMALL-s.bottom*T*.6,SMALL*.82,SMALL-s.bottom*T,SMALL*.5,SMALL-s.bottom*T);cx2.bezierCurveTo(SMALL*.18,SMALL-s.bottom*T,SMALL*.37,SMALL-s.bottom*T*.6,SMALL*.37,SMALL);cx2.lineTo(0,SMALL);}
-    if(s.left===0){cx2.lineTo(0,0);}else{cx2.lineTo(0,SMALL*.63);cx2.bezierCurveTo(s.left*T*.6,SMALL*.63,s.left*T,SMALL*.82,s.left*T,SMALL*.5);cx2.bezierCurveTo(s.left*T,SMALL*.18,s.left*T*.6,SMALL*.37,0,SMALL*.37);cx2.lineTo(0,0);}
-    cx2.closePath();
-    cx2.strokeStyle='rgba(255,255,255,0.8)';cx2.lineWidth=2;cx2.stroke();
-    cx2.strokeStyle='rgba(201,168,76,0.6)';cx2.lineWidth=1;cx2.stroke();
-    div.appendChild(c);
-    div.addEventListener('mouseenter',e=>showPiecePreview(e,p));
-    div.addEventListener('mouseleave',hidePiecePreview);
-    div.addEventListener('mousedown',e=>{hidePiecePreview();liftFromTray(e,p,div);});
-    div.addEventListener('touchstart',e=>{
-      e.stopPropagation(); // Stop canvas from seeing this touch!!
-      liftFromTray(e,p,div);
-    },{passive:false});
-    inner.appendChild(div);p.trayEl=div;
-  });
-}
-
-// ── PIECE PREVIEW ────────────────────────────────
-function showPiecePreview(e,p){
-  if(!puzzleImg)return;
-  previewCanvas.width=p.w+p.tab*2;previewCanvas.height=p.h+p.tab*2;
-  previewCanvas.style.width=(p.w+p.tab*2)+'px';previewCanvas.style.height=(p.h+p.tab*2)+'px';
-  const off=p.tab,x=off,y=off,w=p.w,h=p.h,t=p.tab,s=p.sides;
-  pCtx.clearRect(0,0,previewCanvas.width,previewCanvas.height);
-  pCtx.beginPath();pCtx.moveTo(x,y);
-  if(s.top===0){pCtx.lineTo(x+w,y);}else{pCtx.lineTo(x+w*.37,y);pCtx.bezierCurveTo(x+w*.37,y+s.top*t*.6,x+w*.18,y+s.top*t,x+w*.5,y+s.top*t);pCtx.bezierCurveTo(x+w*.82,y+s.top*t,x+w*.63,y+s.top*t*.6,x+w*.63,y);pCtx.lineTo(x+w,y);}
-  if(s.right===0){pCtx.lineTo(x+w,y+h);}else{pCtx.lineTo(x+w,y+h*.37);pCtx.bezierCurveTo(x+w-s.right*t*.6,y+h*.37,x+w-s.right*t,y+h*.18,x+w-s.right*t,y+h*.5);pCtx.bezierCurveTo(x+w-s.right*t,y+h*.82,x+w-s.right*t*.6,y+h*.63,x+w,y+h*.63);pCtx.lineTo(x+w,y+h);}
-  if(s.bottom===0){pCtx.lineTo(x,y+h);}else{pCtx.lineTo(x+w*.63,y+h);pCtx.bezierCurveTo(x+w*.63,y+h-s.bottom*t*.6,x+w*.82,y+h-s.bottom*t,x+w*.5,y+h-s.bottom*t);pCtx.bezierCurveTo(x+w*.18,y+h-s.bottom*t,x+w*.37,y+h-s.bottom*t*.6,x+w*.37,y+h);pCtx.lineTo(x,y+h);}
-  if(s.left===0){pCtx.lineTo(x,y);}else{pCtx.lineTo(x,y+h*.63);pCtx.bezierCurveTo(x+s.left*t*.6,y+h*.63,x+s.left*t,y+h*.82,x+s.left*t,y+h*.5);pCtx.bezierCurveTo(x+s.left*t,y+h*.18,x+s.left*t*.6,y+h*.37,x,y+h*.37);pCtx.lineTo(x,y);}
-  pCtx.closePath();
-  pCtx.save();pCtx.clip();
-  const boardW=p.cols*p.w,boardH=p.rows*p.h;
-  const destX=-(p.c*p.w-off),destY=-(p.r*p.h-off);
-  pCtx.drawImage(puzzleImg,0,0,puzzleImg.naturalWidth,puzzleImg.naturalHeight,destX,destY,boardW,boardH);
-  pCtx.restore();
-  pCtx.strokeStyle='rgba(255,215,0,0.9)';pCtx.lineWidth=2;pCtx.stroke();
-  const rect=e.currentTarget.getBoundingClientRect();
-  const pw=previewCanvas.width,ph=previewCanvas.height;
-  let left=rect.left+rect.width/2-pw/2;
-  let top=rect.top-ph-12;
-  left=Math.max(8,Math.min(left,window.innerWidth-pw-8));
-  top=Math.max(8,top);
-  previewCanvas.style.left=left+'px';previewCanvas.style.top=top+'px';
-  previewCanvas.style.display='block';
-}
-function hidePiecePreview(){previewCanvas.style.display='none';}
-
-// ── LIFT FROM TRAY ───────────────────────────────
-function liftFromTray(e,p,div){
-  e.preventDefault();
-  if(p.placed||!p.inTray)return;
-  const src=e.touches?e.touches[0]:e;
-  const r=canvas.getBoundingClientRect();
-  p.inTray=false;p.x=(src.clientX-r.left)-p.w/2;p.y=(src.clientY-r.top)-p.h/2;p.z=++maxZ;
-  div.style.opacity='0.3';div.style.pointerEvents='none';
-  dragging=p;dragOffX=p.w/2;dragOffY=p.h/2;activePiece=p;
-}
-function returnToTray(p){
-  p.inTray=true;p.x=0;p.y=0;
-  if(p.trayEl){p.trayEl.style.opacity='1';p.trayEl.style.pointerEvents='auto';}
-  dragging=null;activePiece=null;
-}
-
-// ── RENDER ────────────────────────────────────────
-function renderLoop(){
-  if(!running)return;
-  const cw=canvas.width,ch=canvas.height;
-  ctx.clearRect(0,0,cw,ch);
-  if(ghostCanvas){ctx.drawImage(ghostCanvas,0,0);}
-  else{ctx.fillStyle='#ebcfb2';ctx.fillRect(0,0,cw,ch);}
-  pieces.filter(p=>p.placed).forEach(drawPiece);
-  [...pieces].filter(p=>!p.placed&&!p.inTray).sort((a,b)=>a.z-b.z).forEach(drawPiece);
-  requestAnimationFrame(renderLoop);
-}
-
-function drawPiece(p){
-  ctx.save();buildPath(p);ctx.clip();
-  const bX=p.cx-p.c*p.w,bY=p.cy-p.r*p.h,bW=p.cols*p.w,bH=p.rows*p.h;
-  const oX=p.x-p.cx,oY=p.y-p.cy;
-  ctx.drawImage(puzzleImg,0,0,puzzleImg.naturalWidth,puzzleImg.naturalHeight,bX+oX,bY+oY,bW,bH);
-  ctx.restore();
-  if(p===dragging){buildPath(p);ctx.shadowColor='rgba(0,0,0,0.7)';ctx.shadowBlur=16;ctx.shadowOffsetY=6;ctx.strokeStyle='rgba(255,215,0,0.8)';ctx.lineWidth=2.5;ctx.stroke();ctx.shadowColor='transparent';}
-  else if(!p.placed){buildPath(p);ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=1.2;ctx.stroke();}
-}
-
-function buildPath(p){
-  const{x,y,w,h,tab:t,sides:s}=p;
-  ctx.beginPath();ctx.moveTo(x,y);
-  if(s.top===0){ctx.lineTo(x+w,y);}else{ctx.lineTo(x+w*.37,y);ctx.bezierCurveTo(x+w*.37,y+s.top*t*.6,x+w*.18,y+s.top*t,x+w*.5,y+s.top*t);ctx.bezierCurveTo(x+w*.82,y+s.top*t,x+w*.63,y+s.top*t*.6,x+w*.63,y);ctx.lineTo(x+w,y);}
-  if(s.right===0){ctx.lineTo(x+w,y+h);}else{ctx.lineTo(x+w,y+h*.37);ctx.bezierCurveTo(x+w-s.right*t*.6,y+h*.37,x+w-s.right*t,y+h*.18,x+w-s.right*t,y+h*.5);ctx.bezierCurveTo(x+w-s.right*t,y+h*.82,x+w-s.right*t*.6,y+h*.63,x+w,y+h*.63);ctx.lineTo(x+w,y+h);}
-  if(s.bottom===0){ctx.lineTo(x,y+h);}else{ctx.lineTo(x+w*.63,y+h);ctx.bezierCurveTo(x+w*.63,y+h-s.bottom*t*.6,x+w*.82,y+h-s.bottom*t,x+w*.5,y+h-s.bottom*t);ctx.bezierCurveTo(x+w*.18,y+h-s.bottom*t,x+w*.37,y+h-s.bottom*t*.6,x+w*.37,y+h);ctx.lineTo(x,y+h);}
-  if(s.left===0){ctx.lineTo(x,y);}else{ctx.lineTo(x,y+h*.63);ctx.bezierCurveTo(x+s.left*t*.6,y+h*.63,x+s.left*t,y+h*.82,x+s.left*t,y+h*.5);ctx.bezierCurveTo(x+s.left*t,y+h*.18,x+s.left*t*.6,y+h*.37,x,y+h*.37);ctx.lineTo(x,y);}
-  ctx.closePath();
-}
-
-// ── SNAP ─────────────────────────────────────────
-function trySnap(p){
-  const thr=Math.min(p.w,p.h)*0.38;
-  if(Math.abs(p.x-p.cx)<thr&&Math.abs(p.y-p.cy)<thr){
-    p.x=p.cx;p.y=p.cy;p.placed=true;p.inTray=false;placed++;
-    if(p.trayEl)p.trayEl.remove();
-    trayPieces=trayPieces.filter(tp=>tp.id!==p.id);
-    updateHud();snapFx(p.cx+p.w/2,p.cy+p.h/2);
-    if(placed>=total)setTimeout(winGame,500);
-    return true;
-  }return false;
-}
-
-// ── INPUT ────────────────────────────────────────
-function getXY(e){const r=canvas.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return{x:s.clientX-r.left,y:s.clientY-r.top};}
-function hitTest(x,y){
-  const sorted=[...pieces].sort((a,b)=>b.z-a.z);
-  for(const p of sorted){
-    if(p.placed||p.inTray)continue;
-    const T=p.tab;
-    if(x>=p.x-T&&x<=p.x+p.w+T&&y>=p.y-T&&y<=p.y+p.h+T){
-      ctx.save();buildPath(p);const hit=ctx.isPointInPath(x,y);ctx.restore();
-      if(hit||(x>=p.x&&x<=p.x+p.w&&y>=p.y&&y<=p.y+p.h))return p;
-    }
-  }return null;
-}
-
-function onGlobalMove(e){
-  if(!dragging) return;
-  const src=e.touches?e.touches[0]:e;
-  const tray=document.getElementById('pieceTray');
-  const tr=tray?tray.getBoundingClientRect():null;
-  // If touch is over tray - let tray scroll, don't preventDefault!
-  if(tr && src.clientY >= tr.top-10) return;
-  // Only preventDefault when dragging a piece on the canvas
-  if(e.cancelable) e.preventDefault();
-  const r=canvas.getBoundingClientRect();
-  dragging.x=(src.clientX-r.left)-dragOffX;
-  dragging.y=(src.clientY-r.top)-dragOffY;
-}
-function onGlobalUp(e){
-  if(!dragging)return;
-  const p=dragging;
-  const snapped=trySnap(p);
-  if(!snapped){
-    const src=e.changedTouches?e.changedTouches[0]:e;
-    const tray=document.getElementById('pieceTray');
-    const tr=tray?tray.getBoundingClientRect():null;
-    if(tr&&src.clientY>tr.top-20)returnToTray(p);
-  }
-  dragging=null;activePiece=null;
-}
-
-// Separate active touchmove ONLY for canvas dragging
-canvas.addEventListener('touchmove',e=>{
-  if(!dragging) return;
-  const src=e.touches[0];
-  const tray=document.getElementById('pieceTray');
-  const tr=tray?tray.getBoundingClientRect():null;
-  if(tr&&src.clientY>=tr.top-10) return;
-  if(e.cancelable) e.preventDefault();
-  const r=canvas.getBoundingClientRect();
-  dragging.x=(src.clientX-r.left)-dragOffX;
-  dragging.y=(src.clientY-r.top)-dragOffY;
-},{passive:false});
-
-canvas.addEventListener('mousedown',e=>{
-  if(dragging)return;e.preventDefault();
-  const{x,y}=getXY(e);const p=hitTest(x,y);
-  if(p&&!p.placed&&!p.inTray){dragging=p;dragOffX=x-p.x;dragOffY=y-p.y;maxZ++;p.z=maxZ;}
-});
-canvas.addEventListener('touchstart',e=>{
-  if(dragging)return;
-  // Hard stop - if touch Y is in tray zone, do nothing
-  const tray=document.getElementById('pieceTray');
-  if(tray&&tray.style.display!=='none'){
-    const tr=tray.getBoundingClientRect();
-    if(e.touches[0].clientY>=tr.top)return; // tray handles its own touches
-  }
-  const{x,y}=getXY(e);const p=hitTest(x,y);
-  if(p&&!p.placed&&!p.inTray){
-    e.preventDefault();
-    dragging=p;dragOffX=x-p.x;dragOffY=y-p.y;maxZ++;p.z=maxZ;
-  }
-},{passive:false});
-
-window.addEventListener('mousemove',onGlobalMove);
-window.addEventListener('touchmove',onGlobalMove,{passive:true});
-window.addEventListener('mouseup',onGlobalUp);
-window.addEventListener('touchend',onGlobalUp,{passive:false});
-
-// ── CAROUSEL TOUCH SCROLL ────────────────────────
-(function(){
-  const car=document.getElementById('carousel');
-  const track=document.getElementById('carouselTrack');
-  let isDown=false,startX=0,scrollLeft=0;
-
-  // On mobile: stop animation, make scrollable
-  if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
-    car.style.overflowX='auto';
-    car.style.webkitOverflowScrolling='touch';
-    track.style.animation='none';
-  }
-
-  car.addEventListener('touchstart',e=>{
-    isDown=true;
-    startX=e.touches[0].pageX - car.offsetLeft;
-    scrollLeft=car.scrollLeft;
-  },{passive:true});
-  car.addEventListener('touchmove',e=>{
-    if(!isDown)return;
-    const x=e.touches[0].pageX - car.offsetLeft;
-    car.scrollLeft=scrollLeft-(x-startX);
-  },{passive:true});
-  car.addEventListener('touchend',()=>{isDown=false;});
-})();
-
-// ── SWIPE HOME ───────────────────────────────────
-let swX=0;
-document.getElementById('heroStage').addEventListener('touchstart',e=>{
-  // Don't interfere with carousel
-  const car=document.getElementById('carousel');
-  const cr=car.getBoundingClientRect();
-  if(e.touches[0].clientY>=cr.top) return;
-  swX=e.touches[0].clientX;
-},{passive:true});
-document.getElementById('heroStage').addEventListener('touchend',e=>{
-  if(!swX) return;
-  const dx=e.changedTouches[0].clientX-swX;
-  if(Math.abs(dx)>60){dx<0?nextPuzzle():prevPuzzle();}
-  swX=0;
-},{passive:true});
-
-// ── PEEK ─────────────────────────────────────────
-let peekTO=null;
-function peekImage(){const ov=document.getElementById('peekOverlay');ov.style.display='flex';clearTimeout(peekTO);peekTO=setTimeout(()=>ov.style.display='none',2500);}
-
-// ── HUD ──────────────────────────────────────────
-function updateHud(){document.getElementById('hudPieces').textContent=placed+' / '+total+' placed';document.getElementById('hudBar').style.width=Math.round(placed/total*100)+'%';}
-function startTimer(){stopTimer();elapsed=0;timerInt=setInterval(()=>{elapsed++;const m=Math.floor(elapsed/60),s=elapsed%60;document.getElementById('hudTimer').textContent=m+':'+(s<10?'0':'')+s;},1000);}
-function stopTimer(){clearInterval(timerInt);}
-
-// ── WIN ───────────────────────────────────────────
-function winGame(){
-  stopTimer();running=false;
-  document.getElementById('gameBtnBar').style.display='none';
-  document.getElementById('pieceTray').style.display='none';
-  const m=Math.floor(elapsed/60),s=elapsed%60;
-  document.getElementById('winTime').textContent=m+':'+(s<10?'0':'')+s;
-  document.getElementById('winPieces').textContent=total;
-  document.getElementById('gameScreen').style.display='none';
-  document.getElementById('winScreen').style.display='flex';
-  for(let i=0;i<10;i++)setTimeout(()=>burst(Math.random()*innerWidth,Math.random()*innerHeight*.6),i*120);
-  winSound();
-}
-
-// ── SHARE ────────────────────────────────────────
-function sharePuzzle(){
-  const p=PUZZLES[curIdx];
-  const txt='🧩 I just completed "'+p.title+'" on jigsaw.games!! Try it FREE!! 🎨 https://www.jigsaw.games';
-  if(navigator.share){navigator.share({title:'🧩 '+p.title,text:txt,url:'https://www.jigsaw.games'}).catch(()=>{});}
-  else{navigator.clipboard.writeText(txt).then(()=>{const t=document.createElement('div');t.style.cssText='position:fixed;bottom:120px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(50,200,100,0.95);color:#fff;padding:12px 24px;border-radius:12px;font-size:13px;font-weight:700;font-family:Inter,sans-serif;white-space:nowrap;';t.textContent='✅ Copied!! Paste and share!!';document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}).catch(()=>window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(txt),'_blank'));}
-}
-
-// ── FX ────────────────────────────────────────────
-function snapFx(x,y){
-  const pop=document.createElement('div');pop.className='snap-pop';pop.style.cssText=`left:${x}px;top:${y}px;`;pop.textContent='✦';document.body.appendChild(pop);setTimeout(()=>pop.remove(),1000);
-  const ring=document.createElement('div');ring.className='snap-ring';ring.style.cssText=`left:${x}px;top:${y}px;width:60px;height:60px;`;document.body.appendChild(ring);setTimeout(()=>ring.remove(),600);
-  const fl=document.createElement('div');fl.className='snap-flash';document.body.appendChild(fl);setTimeout(()=>fl.remove(),400);
-  const stars=['✦','★','✨','◆','✸'];
-  for(let i=0;i<8;i++){const s=document.createElement('div');s.className='sparkle';const ang=(i/8)*Math.PI*2,d=40+Math.random()*50,d2=d+30;s.style.cssText=`left:${x}px;top:${y}px;--tx:${Math.cos(ang)*d-50}%;--ty:${Math.sin(ang)*d-50}%;--tx2:${Math.cos(ang)*d2-50}%;--ty2:${Math.sin(ang)*d2-50}%;animation-duration:${.5+Math.random()*.3}s;color:${['#ffd700','#ffaa00','#fff','#c9a84c'][i%4]};`;s.textContent=stars[i%stars.length];document.body.appendChild(s);setTimeout(()=>s.remove(),800);}
-  snapBurst(x,y);snapSound();
-  try{if(navigator.vibrate)navigator.vibrate([20,10,40]);}catch(e){}
-}
-function snapBurst(cx,cy){for(let i=0;i<14;i++){const p=document.createElement('div');const sz=3+Math.random()*5;p.style.cssText=`position:fixed;pointer-events:none;z-index:9995;background:${['#ffd700','#ffaa00','#fff','#c9a84c'][i%4]};width:${sz}px;height:${sz}px;border-radius:50%;left:${cx}px;top:${cy}px;`;document.body.appendChild(p);const ang=Math.random()*Math.PI*2,dist=30+Math.random()*60,tx=Math.cos(ang)*dist,ty=Math.sin(ang)*dist;const dur=300+Math.random()*400,t0=Date.now();const anim=()=>{const pr=Math.min(1,(Date.now()-t0)/dur),e=1-Math.pow(1-pr,3);p.style.transform=`translate(${tx*e}px,${ty*e+25*pr*pr}px)`;p.style.opacity=1-pr;if(pr<1)requestAnimationFrame(anim);else p.remove();};requestAnimationFrame(anim);}}
-function burst(cx,cy){const cols=['#ffd700','#c9a84c','#ff4444','#44ff88','#87ceeb','#ff69b4'];for(let i=0;i<20;i++){const p=document.createElement('div');p.style.cssText=`position:fixed;pointer-events:none;z-index:9994;background:${cols[i%cols.length]};width:${4+Math.random()*7}px;height:${4+Math.random()*7}px;border-radius:${Math.random()>.5?'50%':'2px'};left:${cx}px;top:${cy}px;`;document.body.appendChild(p);const ang=Math.random()*Math.PI*2,dist=50+Math.random()*110,tx=Math.cos(ang)*dist,ty=Math.sin(ang)*dist;const dur=600+Math.random()*600,t0=Date.now();const anim=()=>{const pr=Math.min(1,(Date.now()-t0)/dur),e=1-Math.pow(1-pr,2);p.style.transform=`translate(${tx*e}px,${ty*e+70*pr*pr}px) rotate(${pr*540}deg)`;p.style.opacity=1-pr;if(pr<1)requestAnimationFrame(anim);else p.remove();};requestAnimationFrame(anim);}}
-
-// ── SOUND ─────────────────────────────────────────
-let _ac=null;
-function _audio(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();return _ac;}
-function _tone(f,t,v,d,delay=0){try{const c=_audio(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=t;o.frequency.value=f;g.gain.setValueAtTime(0,c.currentTime+delay);g.gain.linearRampToValueAtTime(v,c.currentTime+delay+.01);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+delay+d);o.start(c.currentTime+delay);o.stop(c.currentTime+delay+d+.05);}catch(e){}}
-function snapSound(){_tone(880,'sine',.3,.06);_tone(1046,'sine',.35,.1,.03);_tone(1318,'sine',.25,.12,.07);_tone(1568,'sine',.15,.14,.12);}
-function winSound(){[523,659,784,1047,1319,1568].forEach((f,i)=>_tone(f,'sine',.4,.2,i*.07));setTimeout(()=>[784,1047,1318,1568,2093].forEach((f,i)=>_tone(f,'sine',.3,.22,i*.06)),700);}
-
-// ── RESIZE ───────────────────────────────────────
-window.addEventListener('resize',()=>{
-  const nudge=document.getElementById('rotateNudge');
-  if(nudge)nudge.style.display=(window.innerHeight>window.innerWidth&&window.innerWidth<768)?'flex':'none';
-  if(!running)return;
-  setTimeout(()=>{canvas.width=canvas.offsetWidth||innerWidth;canvas.height=canvas.offsetHeight||(innerHeight-52);ghostCanvas=null;initPuzzle();},150);
-});
-window.addEventListener('orientationchange',()=>{
-  setTimeout(()=>{
-    const nudge=document.getElementById('rotateNudge');
-    if(nudge)nudge.style.display=(window.innerHeight>window.innerWidth&&window.innerWidth<768)?'flex':'none';
-    if(running){canvas.width=canvas.offsetWidth||innerWidth;canvas.height=canvas.offsetHeight||(innerHeight-52);ghostCanvas=null;initPuzzle();}
-    if(PUZZLES.length)buildCarousel();
-  },500);
-});
-</script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -726,5 +633,31 @@ window.addEventListener('load',async()=>{
   buildDots();updateHero();buildCarousel();
 });
 </script>
+
+<!-- PORTRAIT WARNING -->
+<div id="portraitWarning">
+  <div class="pw-icon">📱</div>
+  <div class="pw-title">Rotate for Best Experience</div>
+  <div class="pw-sub">jigsaw.games plays best in landscape mode — please rotate your phone sideways!</div>
+  <button class="pw-btn" onclick="dismissPortraitWarning()">Play Anyway →</button>
+</div>
+
+<!-- MOBILE GAME -->
+<div id="mobileGame">
+  <div id="mobileHud">
+    <div class="mob-title" id="mobTitle"></div>
+    <div class="mob-timer" id="mobTimer">0:00</div>
+    <button class="mob-btn" onclick="quitMobile()">✕ Exit</button>
+  </div>
+  <div id="mobileBoard">
+    <img id="mobileBoardImg" src="" alt="">
+    <div id="mobileBoardFrame"></div>
+  </div>
+  <div id="mobileTray"></div>
+  <div id="mobileBtns">
+    <button class="mob-action-btn" onclick="peekMobile()">👁 Peek</button>
+    <button class="mob-action-btn" onclick="quitMobile()">🎨 Gallery</button>
+  </div>
+</div>
 </body>
 </html>
