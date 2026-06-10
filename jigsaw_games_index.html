@@ -15,7 +15,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);touch-action:man
 #heroBg,#heroBgNext{position:fixed;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;filter:brightness(0.55);}
 #heroBgNext{opacity:0;transition:opacity 0.8s ease;}
 #heroBg{transition:none;}
-#bottomGrad{position:fixed;bottom:0;left:0;right:0;height:65%;background:linear-gradient(0deg,rgba(0,0,0,0.82) 0%,rgba(0,0,0,0.45) 40%,transparent 100%);pointer-events:none;z-index:5;}
+#bottomGrad{position:fixed;bottom:0;left:0;right:0;height:65%;background:linear-gradient(0deg,rgba(0,0,0,0.67) 0%,rgba(0,0,0,0.3) 40%,transparent 100%);pointer-events:none;z-index:5;}
 
 #heroStage{position:fixed;inset:0;display:flex;flex-direction:column;z-index:10;}
 #topNav{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0;position:relative;z-index:10;}
@@ -32,7 +32,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);touch-action:man
 @keyframes infoFade{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
 .art-num{font-family:'Cinzel',serif;font-size:10px;color:rgba(255,215,0,0.5);letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;}
 .art-title{font-family:'Cinzel Decorative',serif;font-size:clamp(22px,6vw,42px);font-weight:900;color:#fff;line-height:1.2;margin-bottom:8px;text-shadow:0 2px 20px rgba(0,0,0,0.8);}
-.art-desc{font-size:14px;color:rgba(255,255,255,0.82);font-family:'Lora',Georgia,serif;font-style:italic;line-height:1.5;letter-spacing:0.2px;text-shadow:0 1px 4px rgba(0,0,0,0.9);max-width:300px;text-align:center;margin-top:2px;}
+.art-desc{font-size:12px;color:rgba(255,255,255,0.65);font-family:'Cinzel',serif;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;text-align:center;}
 
 #diffRow{display:flex;gap:8px;margin-bottom:20px;}
 .diff-pill{padding:7px 16px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.4);backdrop-filter:blur(6px);color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;}
@@ -76,9 +76,9 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);touch-action:man
 #gameCanvas{display:block;touch-action:none;flex:1;width:100%;}
 
 /* ── PIECE TRAY ── */
-#pieceTray{position:fixed;bottom:62px;left:0;right:0;height:148px;z-index:52;background:rgba(235,207,178,0.75);border-top:2px solid rgba(201,168,76,0.3);overflow-x:scroll;-webkit-overflow-scrolling:touch;touch-action:pan-x;overflow-y:visible;display:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+#pieceTray{position:fixed;bottom:62px;left:0;right:0;height:148px;z-index:52;background:rgba(235,207,178,0.75);border-top:2px solid rgba(201,168,76,0.3);overflow-x:scroll;-webkit-overflow-scrolling:touch;touch-action:pan-x;overflow-y:visible;display:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-x!important;}
 #pieceTray::-webkit-scrollbar{display:none;}
-#trayInner{display:flex;align-items:center;gap:10px;padding:8px 12px;height:100%;width:max-content;touch-action:pan-x;user-select:none;}
+#trayInner{display:flex;align-items:center;gap:10px;padding:8px 12px;height:100%;width:max-content;touch-action:pan-x!important;user-select:none;}
 .tray-piece{flex-shrink:0;width:120px;height:120px;overflow:hidden;border-radius:6px;border:2px solid rgba(201,168,76,0.4);cursor:grab;transition:transform 0.12s,box-shadow 0.12s;position:relative;background:#c8a96e;box-shadow:0 3px 10px rgba(0,0,0,0.3);}
 .tray-piece canvas{display:block;width:120px!important;height:120px!important;}
 .tray-piece:hover,.tray-piece.lifted{box-shadow:0 0 0 2px var(--gold2),0 4px 12px rgba(255,215,0,0.3);z-index:53;border-color:var(--gold2);}
@@ -705,9 +705,13 @@ function hitTest(x,y){
 }
 // Global move/up handlers - work for both tray lifts and canvas drags
 function onGlobalMove(e){
-  if(!dragging)return;
-  e.preventDefault();
+  if(!dragging) return;
+  // Only block scroll if we're dragging a piece on canvas
+  const tray=document.getElementById('pieceTray');
+  const tr=tray ? tray.getBoundingClientRect() : null;
   const src=e.touches?e.touches[0]:e;
+  if(tr && src.clientY >= tr.top - 10) return; // let tray scroll
+  e.preventDefault();
   const r=canvas.getBoundingClientRect();
   dragging.x=(src.clientX-r.left)-dragOffX;
   dragging.y=(src.clientY-r.top)-dragOffY;
@@ -741,16 +745,19 @@ canvas.addEventListener('mousedown',e=>{
   if(p&&!p.placed&&!p.inTray){dragging=p;dragOffX=x-p.x;dragOffY=y-p.y;maxZ++;p.z=maxZ;}
 });
 canvas.addEventListener('touchstart',e=>{
-  if(dragging)return;
-  // Don't intercept touches on the tray area!
+  if(dragging) return;
   const tray=document.getElementById('pieceTray');
-  const tr=tray.getBoundingClientRect();
+  const tr=tray ? tray.getBoundingClientRect() : null;
   const ty=e.touches[0].clientY;
-  if(ty >= tr.top) return; // let tray handle its own touches
-  e.preventDefault();
+  // Let tray area handle its own scrolling!!
+  if(tr && ty >= tr.top - 10) return;
   const{x,y}=getXY(e);
   const p=hitTest(x,y);
-  if(p&&!p.placed&&!p.inTray){dragging=p;dragOffX=x-p.x;dragOffY=y-p.y;maxZ++;p.z=maxZ;}
+  // Only preventDefault if we actually found a piece to drag
+  if(p && !p.placed && !p.inTray){
+    e.preventDefault();
+    dragging=p;dragOffX=x-p.x;dragOffY=y-p.y;maxZ++;p.z=maxZ;
+  }
 },{passive:false});
 
 window.addEventListener('mousemove',onGlobalMove);
