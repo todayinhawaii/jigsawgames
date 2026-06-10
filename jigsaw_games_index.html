@@ -69,12 +69,18 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 #gameCanvas{display:block;touch-action:none;flex:1;width:100%;}
 
 /* ── PIECE TRAY ── */
-#pieceTray{position:fixed;bottom:62px;left:0;right:0;height:148px;z-index:52;background:rgba(235,207,178,0.75);border-top:2px solid rgba(201,168,76,0.3);overflow-x:auto;overflow-y:visible;display:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+#pieceTray{position:fixed;bottom:62px;left:0;right:0;height:148px;z-index:52;background:rgba(235,207,178,0.75);border-top:2px solid rgba(201,168,76,0.3);overflow-x:scroll;touch-action:pan-x;overflow-y:visible;display:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 #pieceTray::-webkit-scrollbar{display:none;}
-#trayInner{display:flex;align-items:center;gap:10px;padding:8px 12px;height:100%;width:max-content;}
+#trayInner{display:flex;align-items:center;gap:10px;padding:8px 12px;height:100%;width:max-content;touch-action:pan-x;}
 .tray-piece{flex-shrink:0;width:120px;height:120px;overflow:hidden;border-radius:6px;border:2px solid rgba(201,168,76,0.4);cursor:grab;transition:transform 0.12s,box-shadow 0.12s;position:relative;background:#c8a96e;box-shadow:0 3px 10px rgba(0,0,0,0.3);}
 .tray-piece canvas{display:block;width:120px!important;height:120px!important;}
-.tray-piece:hover,.tray-piece.lifted{transform:scale(1.2) translateY(-10px);box-shadow:0 0 0 2px var(--gold2),0 8px 20px rgba(255,215,0,0.4);z-index:53;border-color:var(--gold2);}
+.tray-piece:hover,.tray-piece.lifted{box-shadow:0 0 0 2px var(--gold2),0 4px 12px rgba(255,215,0,0.3);z-index:53;border-color:var(--gold2);}
+#piecePreview{
+  position:fixed;z-index:200;pointer-events:none;
+  display:none;
+  border-radius:4px;
+  filter:drop-shadow(0 8px 24px rgba(0,0,0,0.6)) drop-shadow(0 0 8px rgba(255,215,0,0.4));
+}
 .tray-piece canvas{
   width:100%;height:100%;display:block;
 }
@@ -199,6 +205,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
   </div>
 </div>
 
+<canvas id="piecePreview"></canvas>
 <div id="peekOverlay">
   <div id="peekLabel">👁 TAKE A PEEK — Memorise it!!</div>
   <img id="peekImg" src="" alt="">
@@ -436,6 +443,63 @@ function initPuzzle(){
 }
 
 // ── BUILD TRAY ────────────────────────────────────
+// ── FLOATING PIECE PREVIEW ON HOVER ─────────────
+const previewCanvas = document.getElementById('piecePreview');
+const pCtx = previewCanvas.getContext('2d');
+
+function showPiecePreview(e, p){
+  if(!puzzleImg) return;
+  const size = Math.min(p.w, p.h); // use actual piece size
+  previewCanvas.width = p.w + p.tab*2;
+  previewCanvas.height = p.h + p.tab*2;
+  previewCanvas.style.width = (p.w + p.tab*2) + 'px';
+  previewCanvas.style.height = (p.h + p.tab*2) + 'px';
+
+  const off = p.tab; // offset so tabs have room
+  pCtx.clearRect(0,0,previewCanvas.width,previewCanvas.height);
+
+  // Build path at full size with offset for tabs
+  const x=off,y=off,w=p.w,h=p.h,t=p.tab,s=p.sides;
+  pCtx.beginPath(); pCtx.moveTo(x,y);
+  if(s.top===0){pCtx.lineTo(x+w,y);}
+  else{pCtx.lineTo(x+w*.37,y);pCtx.bezierCurveTo(x+w*.37,y+s.top*t*.6,x+w*.18,y+s.top*t,x+w*.5,y+s.top*t);pCtx.bezierCurveTo(x+w*.82,y+s.top*t,x+w*.63,y+s.top*t*.6,x+w*.63,y);pCtx.lineTo(x+w,y);}
+  if(s.right===0){pCtx.lineTo(x+w,y+h);}
+  else{pCtx.lineTo(x+w,y+h*.37);pCtx.bezierCurveTo(x+w-s.right*t*.6,y+h*.37,x+w-s.right*t,y+h*.18,x+w-s.right*t,y+h*.5);pCtx.bezierCurveTo(x+w-s.right*t,y+h*.82,x+w-s.right*t*.6,y+h*.63,x+w,y+h*.63);pCtx.lineTo(x+w,y+h);}
+  if(s.bottom===0){pCtx.lineTo(x,y+h);}
+  else{pCtx.lineTo(x+w*.63,y+h);pCtx.bezierCurveTo(x+w*.63,y+h-s.bottom*t*.6,x+w*.82,y+h-s.bottom*t,x+w*.5,y+h-s.bottom*t);pCtx.bezierCurveTo(x+w*.18,y+h-s.bottom*t,x+w*.37,y+h-s.bottom*t*.6,x+w*.37,y+h);pCtx.lineTo(x,y+h);}
+  if(s.left===0){pCtx.lineTo(x,y);}
+  else{pCtx.lineTo(x,y+h*.63);pCtx.bezierCurveTo(x+s.left*t*.6,y+h*.63,x+s.left*t,y+h*.82,x+s.left*t,y+h*.5);pCtx.bezierCurveTo(x+s.left*t,y+h*.18,x+s.left*t*.6,y+h*.37,x,y+h*.37);pCtx.lineTo(x,y);}
+  pCtx.closePath();
+
+  // Fill with image
+  pCtx.save(); pCtx.clip();
+  const bX = p.cx - p.c*p.w - off;
+  const bY = p.cy - p.r*p.h - off;
+  pCtx.drawImage(puzzleImg, 0,0,puzzleImg.naturalWidth,puzzleImg.naturalHeight,
+    bX,bY,p.cols*p.w+off*2,p.rows*p.h+off*2);
+  pCtx.restore();
+
+  // Gold outline
+  pCtx.strokeStyle='rgba(255,215,0,0.9)'; pCtx.lineWidth=2; pCtx.stroke();
+
+  // Position above the hovered element
+  const src = e.touches ? e.touches[0] : e;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pw = previewCanvas.width, ph = previewCanvas.height;
+  let left = rect.left + rect.width/2 - pw/2;
+  let top = rect.top - ph - 12;
+  // Keep on screen
+  left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
+  top = Math.max(8, top);
+  previewCanvas.style.left = left + 'px';
+  previewCanvas.style.top = top + 'px';
+  previewCanvas.style.display = 'block';
+}
+
+function hidePiecePreview(){
+  previewCanvas.style.display = 'none';
+}
+
 function buildTray(){
   const inner = document.getElementById('trayInner');
   inner.innerHTML='';
@@ -481,8 +545,15 @@ function buildTray(){
 
         div.appendChild(c);
 
+    // Hover preview events
+    div.addEventListener('mouseenter', e=>showPiecePreview(e,p));
+    div.addEventListener('mouseleave', hidePiecePreview);
+    div.addEventListener('touchstart', e=>{
+      showPiecePreview(e,p);
+      setTimeout(hidePiecePreview, 2000);
+    },{passive:true});
     // Touch/mouse events for tray pieces
-    div.addEventListener('mousedown', e=>liftFromTray(e,p,div));
+    div.addEventListener('mousedown', e=>{ hidePiecePreview(); liftFromTray(e,p,div); });
     div.addEventListener('touchstart', e=>liftFromTray(e,p,div),{passive:false});
 
     inner.appendChild(div);
