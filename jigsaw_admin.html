@@ -333,7 +333,7 @@ async function addPuzzle(){
     showAddMsg('💾 Saving puzzle data...','info');
     const{error:dbError} = await sbClient
       .from('jigsaw_puzzles')
-      .upsert({num, title, desc, filename, updated_at: new Date().toISOString()});
+      .upsert({num, title, desc, filename});
 
     if(dbError) throw new Error('Save failed: '+dbError.message);
 
