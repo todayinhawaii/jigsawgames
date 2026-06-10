@@ -9,7 +9,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
 :root{--gold:#c9a84c;--gold2:#ffd700;--gold3:#e8c86a;--dark:#080808;--dark2:#111114;--dark3:#1a1a1f;--text:#f0ede8;--muted:rgba(240,237,232,0.5);}
-html,body{height:100%;overflow:hidden;background:#e7cf7d;}
+html,body{height:100%;overflow:hidden;background:#ebcfb2;}
 body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 
 #heroBg,#heroBgNext{position:fixed;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;filter:brightness(0.55);}
@@ -59,7 +59,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 .car-card-label{position:absolute;bottom:0;left:0;right:0;padding:20px 8px 7px;background:linear-gradient(0deg,rgba(0,0,0,0.9),transparent);font-size:10px;font-weight:700;color:#fff;text-align:center;line-height:1.3;}
 .car-card-num{position:absolute;top:5px;left:7px;font-size:9px;color:var(--gold);font-family:'Cinzel',serif;font-weight:700;}
 
-#gameScreen{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;background:#e7cf7d;}
+#gameScreen{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;background:#ebcfb2;}
 #gameHud{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;flex-shrink:0;background:rgba(0,0,0,0.9);border-bottom:1px solid rgba(201,168,76,0.12);}
 .hud-title{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);font-weight:700;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .hud-pieces{font-size:10px;color:var(--muted);margin-top:2px;}
@@ -88,10 +88,10 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 .tray-piece{
   flex-shrink:0;
   width:105px;height:105px;
-  border-radius:8px;overflow:hidden;
-  border:1.5px solid rgba(201,168,76,0.2);
+  border-radius:8px;overflow:visible;
+  border:none;
   cursor:grab;transition:transform 0.08s ease,box-shadow 0.08s ease;
-  position:relative;background:#d4b86a;
+  position:relative;background:transparent;
 }
 .tray-piece:hover,.tray-piece.lifted{
   border-color:var(--gold2);
@@ -379,6 +379,8 @@ const SMALL = 105; // tray piece size px
 let trayPieces = []; // pieces still in tray
 let activePiece = null; // piece being dragged from tray
 
+let ghostCanvas = null; // offscreen canvas for ghost image - drawn once!!
+
 function initPuzzle(){
   const cfg=DIFFS[difficulty];
   const cols=cfg.cols,rows=cfg.rows;
@@ -415,6 +417,24 @@ function initPuzzle(){
   // Shuffle tray order
   trayPieces.sort(()=>Math.random()-0.5);
 
+  // Pre-render ghost image ONCE to offscreen canvas - no flicker!!
+  ghostCanvas = document.createElement('canvas');
+  ghostCanvas.width = cw;
+  ghostCanvas.height = ch;
+  const gCtx = ghostCanvas.getContext('2d');
+  gCtx.fillStyle = '#ebcfb2';
+  gCtx.fillRect(0,0,cw,ch);
+  gCtx.globalAlpha = 0.38;
+  gCtx.drawImage(puzzleImg, bx, by, bw, bh);
+  gCtx.globalAlpha = 1;
+  // Draw golden frame on ghost
+  gCtx.strokeStyle='rgba(80,180,80,0.6)';gCtx.lineWidth=1.5;
+  gCtx.strokeRect(bx-5,by-5,bw+10,bh+10);
+  gCtx.strokeStyle='rgba(201,168,76,0.9)';gCtx.lineWidth=4;
+  gCtx.strokeRect(bx-3,by-3,bw+6,bh+6);
+  gCtx.strokeStyle='rgba(255,215,0,0.4)';gCtx.lineWidth=1;
+  gCtx.strokeRect(bx-1,by-1,bw+2,bh+2);
+
   buildTray();
   updateHud();
   startTimer();
@@ -432,19 +452,38 @@ function buildTray(){
     div.className='tray-piece';
     div.dataset.id=p.id;
 
-    // Draw mini piece thumbnail
+    // Draw mini piece thumbnail with REAL jigsaw shape!!
     const c=document.createElement('canvas');
     c.width=SMALL;c.height=SMALL;
     const cx2=c.getContext('2d');
 
-    // Draw image clipped to piece shape at small scale
-    const scale=SMALL/Math.max(p.w,p.h);
+    // Scale piece to fit thumbnail with padding for tabs
+    const pad=SMALL*0.15;
+    const scale=Math.min((SMALL-pad*2)/p.w,(SMALL-pad*2)/p.h);
     const sw=p.w*scale,sh=p.h*scale;
     const ox=(SMALL-sw)/2,oy=(SMALL-sh)/2;
+    const T=p.tab*scale;
 
-    cx2.save();
-    // Simple rect clip for thumbnail
-    cx2.beginPath();cx2.rect(ox,oy,sw,sh);cx2.clip();
+    // Draw real jigsaw shape path scaled to thumbnail
+    cx2.beginPath();
+    cx2.moveTo(ox,oy);
+    // TOP
+    const s=p.sides;
+    if(s.top===0){cx2.lineTo(ox+sw,oy);}
+    else{cx2.lineTo(ox+sw*.37,oy);cx2.bezierCurveTo(ox+sw*.37,oy+s.top*T*.6,ox+sw*.18,oy+s.top*T,ox+sw*.5,oy+s.top*T);cx2.bezierCurveTo(ox+sw*.82,oy+s.top*T,ox+sw*.63,oy+s.top*T*.6,ox+sw*.63,oy);cx2.lineTo(ox+sw,oy);}
+    // RIGHT
+    if(s.right===0){cx2.lineTo(ox+sw,oy+sh);}
+    else{cx2.lineTo(ox+sw,oy+sh*.37);cx2.bezierCurveTo(ox+sw-s.right*T*.6,oy+sh*.37,ox+sw-s.right*T,oy+sh*.18,ox+sw-s.right*T,oy+sh*.5);cx2.bezierCurveTo(ox+sw-s.right*T,oy+sh*.82,ox+sw-s.right*T*.6,oy+sh*.63,ox+sw,oy+sh*.63);cx2.lineTo(ox+sw,oy+sh);}
+    // BOTTOM
+    if(s.bottom===0){cx2.lineTo(ox,oy+sh);}
+    else{cx2.lineTo(ox+sw*.63,oy+sh);cx2.bezierCurveTo(ox+sw*.63,oy+sh-s.bottom*T*.6,ox+sw*.82,oy+sh-s.bottom*T,ox+sw*.5,oy+sh-s.bottom*T);cx2.bezierCurveTo(ox+sw*.18,oy+sh-s.bottom*T,ox+sw*.37,oy+sh-s.bottom*T*.6,ox+sw*.37,oy+sh);cx2.lineTo(ox,oy+sh);}
+    // LEFT
+    if(s.left===0){cx2.lineTo(ox,oy);}
+    else{cx2.lineTo(ox,oy+sh*.63);cx2.bezierCurveTo(ox+s.left*T*.6,oy+sh*.63,ox+s.left*T,oy+sh*.82,ox+s.left*T,oy+sh*.5);cx2.bezierCurveTo(ox+s.left*T,oy+sh*.18,ox+s.left*T*.6,oy+sh*.37,ox,oy+sh*.37);cx2.lineTo(ox,oy);}
+    cx2.closePath();
+
+    // Fill with image
+    cx2.save();cx2.clip();
     const srcX=(p.c/p.cols)*puzzleImg.naturalWidth;
     const srcY=(p.r/p.rows)*puzzleImg.naturalHeight;
     const srcW=puzzleImg.naturalWidth/p.cols;
@@ -452,10 +491,10 @@ function buildTray(){
     cx2.drawImage(puzzleImg,srcX,srcY,srcW,srcH,ox,oy,sw,sh);
     cx2.restore();
 
-    // Gold border
-    cx2.strokeStyle='rgba(201,168,76,0.4)';
-    cx2.lineWidth=1;
-    cx2.strokeRect(ox,oy,sw,sh);
+    // Gold outline on jigsaw shape
+    cx2.strokeStyle='rgba(201,168,76,0.8)';
+    cx2.lineWidth=1.5;
+    cx2.stroke();
 
     div.appendChild(c);
 
@@ -516,7 +555,7 @@ function buildPath(p){
 function renderLoop(){
   if(!running)return;
   const cw=canvas.width,ch=canvas.height;
-  ctx.clearRect(0,0,cw,ch);ctx.fillStyle='#e7cf7d';ctx.fillRect(0,0,cw,ch);
+  ctx.clearRect(0,0,cw,ch);
   if(pieces.length){
     const p0=pieces[0];
     const bx=p0.cx,by=p0.cy,bw=p0.cols*p0.w,bh=p0.rows*p0.h;
