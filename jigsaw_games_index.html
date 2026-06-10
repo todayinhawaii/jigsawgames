@@ -24,7 +24,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 .nav-btn{padding:8px 16px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);color:rgba(255,255,255,0.8);font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:'Inter',sans-serif;}
 .nav-btn.gold{background:rgba(201,168,76,0.2);border-color:var(--gold);color:var(--gold2);}
 
-#heroContent{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative;z-index:10;padding:0 24px 0;margin-bottom:168px;}
+#heroContent{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative;z-index:10;padding:0 24px 0;margin-bottom:185px;}
 #puzzleDots{display:flex;gap:8px;margin-bottom:24px;}
 .pdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);transition:all 0.3s;cursor:pointer;}
 .pdot.active{background:var(--gold2);width:24px;border-radius:4px;box-shadow:0 0 8px rgba(255,215,0,0.5);}
@@ -49,12 +49,12 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 #prevArrow:hover,#nextArrow:hover{background:rgba(201,168,76,0.2);}
 .arrow-icon{font-size:22px;color:rgba(255,255,255,0.6);}
 
-#carousel{position:fixed;bottom:0;left:0;right:0;z-index:15;padding:10px 0 22px;background:linear-gradient(0deg,rgba(0,0,0,0.9) 0%,transparent 100%);overflow:hidden;}
+#carousel{position:fixed;bottom:0;left:0;right:0;z-index:15;padding:14px 0 26px;background:linear-gradient(0deg,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.3) 80%,transparent 100%);overflow:hidden;}
 .carousel-track{display:flex;gap:12px;padding:0 16px;animation:carouselScroll 40s linear infinite;width:max-content;}
 .carousel-track:hover{animation-play-state:paused;}
 @keyframes carouselScroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
-.car-card{flex-shrink:0;width:192px;height:108px;border-radius:10px;overflow:hidden;border:2px solid rgba(201,168,76,0.15);cursor:pointer;position:relative;transition:all 0.25s;box-shadow:0 4px 16px rgba(0,0,0,0.5);}
-.car-card:hover,.car-card.active{border-color:var(--gold2);transform:scale(1.06) translateY(-4px);box-shadow:0 0 0 1px var(--gold),0 8px 24px rgba(255,215,0,0.3);}
+.car-card{flex-shrink:0;width:230px;height:130px;border-radius:10px;overflow:hidden;border:2px solid rgba(201,168,76,0.15);cursor:pointer;position:relative;transition:all 0.2s ease;box-shadow:0 4px 16px rgba(0,0,0,0.5);}
+.car-card:hover,.car-card.active{border-color:var(--gold2);transform:scale(1.5) translateY(-6px);box-shadow:0 0 0 2px var(--gold),0 12px 32px rgba(255,215,0,0.4);z-index:20;}
 .car-card img{width:100%;height:100%;object-fit:cover;display:block;}
 .car-card-label{position:absolute;bottom:0;left:0;right:0;padding:20px 8px 7px;background:linear-gradient(0deg,rgba(0,0,0,0.9),transparent);font-size:10px;font-weight:700;color:#fff;text-align:center;line-height:1.3;}
 .car-card-num{position:absolute;top:5px;left:7px;font-size:9px;color:var(--gold);font-family:'Cinzel',serif;font-weight:700;}
@@ -72,7 +72,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 #pieceTray{
   position:fixed;bottom:70px;left:0;right:0;
   height:128px;z-index:52;
-  background:rgba(180,140,40,0.85);
+  background:rgba(235,207,178,0.55);
   border-top:1px solid rgba(201,168,76,0.15);
   overflow-x:auto;overflow-y:hidden;
   display:none;
@@ -88,9 +88,9 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 .tray-piece{
   flex-shrink:0;
   width:105px;height:105px;
-  border-radius:8px;overflow:visible;
+  border-radius:0;overflow:visible;
   border:none;
-  cursor:grab;transition:transform 0.08s ease,box-shadow 0.08s ease;
+  cursor:grab;transition:transform 0.08s ease;
   position:relative;background:transparent;
 }
 .tray-piece:hover,.tray-piece.lifted{
@@ -328,7 +328,10 @@ function buildCarousel(){
       card.innerHTML = `<img src="${p.src}" loading="lazy" alt="${p.title}">
         <div class="car-card-num">${i+1}</div>
         <div class="car-card-label">${p.title}</div>`;
-      card.addEventListener('click',()=>{ goTo(i); setTimeout(()=>startGame(),400); });
+      card.addEventListener('click',()=>{
+        goTo(i);
+        setTimeout(()=>showPreviewScreen(),300);
+      });
       track.appendChild(card);
     });
   });
@@ -348,6 +351,20 @@ function setDiff(el){
 }
 
 // ── GAME ─────────────────────────────────────────
+// Show preview of selected puzzle before scrambling
+function showPreviewScreen(){
+  if(!PUZZLES.length) return;
+  const p = PUZZLES[curIdx];
+  // Show hero stage with play button prominently
+  document.getElementById('gameScreen').style.display='none';
+  // Scroll hero content into view — it's already showing!
+  // Just pulse the play button to draw attention
+  const btn = document.getElementById('playBtn');
+  btn.style.transform='scale(1.15)';
+  btn.style.transition='transform 0.3s';
+  setTimeout(()=>{btn.style.transform='scale(1)';},400);
+}
+
 function startGame(){
   if(!PUZZLES.length) return;
   document.getElementById('gameScreen').style.display='flex';
