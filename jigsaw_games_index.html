@@ -8,8 +8,8 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
 :root{--gold:#c9a84c;--gold2:#ffd700;--dark:#080808;--text:#f0ede8;--muted:rgba(240,237,232,0.5);}
-html{position:fixed;width:100%;height:100%;}
-body{height:100%;background:var(--dark);font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);}
+body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 
 #heroBg,#heroBgNext{position:fixed;inset:0;background-size:cover;background-position:center;filter:brightness(0.55);}
 #heroBgNext{opacity:0;transition:opacity 0.8s ease;}
@@ -84,7 +84,7 @@ body{height:100%;background:var(--dark);font-family:'Inter',system-ui,sans-serif
 .mob-timer{font-size:18px;font-weight:900;color:var(--gold2);font-family:'Cinzel',serif;}
 .mob-exit{padding:5px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:11px;cursor:pointer;}
 #mobBoard{position:relative;flex-shrink:0;overflow:hidden;background:#ebcfb2;}
-#mobBoardImg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:0.38;pointer-events:none;}
+#mobBoardImg{position:absolute;opacity:0.38;pointer-events:none;}
 #mobFrame{position:absolute;inset:-3px;border:3px solid rgba(201,168,76,0.9);box-shadow:0 0 0 1px rgba(80,180,80,0.5);pointer-events:none;z-index:5;}
 .mob-piece{position:absolute;cursor:grab;touch-action:none;border:1.5px solid rgba(255,255,255,0.7);box-shadow:0 2px 8px rgba(0,0,0,0.4);z-index:10;background-repeat:no-repeat;}
 .mob-piece.placed{border:none!important;box-shadow:none!important;z-index:1!important;cursor:default;}
@@ -571,20 +571,23 @@ function initMobile(p){
 
 function selectMobPiece(p){
   if(p.placed)return;
-  // Deselect old
+  // Just deselect visually - leave old piece on board where it is!!
   if(mobSelected&&mobSelected!==p){
     mobSelected.thumb.classList.remove('selected');
-    mobSelected.el.style.display='none';
+    mobSelected.el.style.zIndex='10'; // send to back
   }
   mobSelected=p;
   p.thumb.classList.add('selected');
 
-  // Show piece on board centered
-  const board=document.getElementById('mobBoard');
-  const startX=Math.round((board.offsetWidth-mobPW)/2);
-  const startY=Math.round((board.offsetHeight-mobPH)/2);
-  p.el.style.left=startX+'px';p.el.style.top=startY+'px';
-  p.el.style.display='block';p.el.style.zIndex='100';
+  // If piece not yet on board, place it centered
+  if(p.el.style.display==='none'){
+    const board=document.getElementById('mobBoard');
+    const startX=Math.round((board.offsetWidth-mobPW)/2);
+    const startY=Math.round((board.offsetHeight-mobPH)/2);
+    p.el.style.left=startX+'px';p.el.style.top=startY+'px';
+    p.el.style.display='block';
+  }
+  p.el.style.zIndex='100';
   addMobDrag(p);
 }
 
