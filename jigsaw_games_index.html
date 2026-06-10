@@ -856,6 +856,38 @@ function updateCarouselActive(){
   });
 }
 
+// ── LOAD PUZZLES FROM SUPABASE ───────────────────
+const STORAGE_URL = 'https://xbzeakoypdyslnnriaef.supabase.co/storage/v1/object/public/puzzles/';
+let sbClient = null;
+
+async function loadPuzzlesFromDB(){
+  try{
+    const res = await fetch('/api/config');
+    const cfg = await res.json();
+    sbClient = window.supabase.createClient(cfg.supabase_url, cfg.supabase_anon_key);
+    const{data, error} = await sbClient
+      .from('jigsaw_puzzles')
+      .select('*')
+      .order('num');
+    if(error){ console.error('Supabase error:', error); throw error; }
+    if(data && data.length > 0){
+      PUZZLES = data.map(p=>({
+        src: STORAGE_URL + p.filename,
+        title: p.title,
+        desc: p.desc,
+        num: p.num
+      }));
+      console.log('Loaded '+PUZZLES.length+' puzzles! First:', PUZZLES[0].src);
+    } else {
+      console.log('No puzzles in DB yet!');
+      PUZZLES = [];
+    }
+  }catch(e){
+    console.error('DB load error:', e);
+    PUZZLES = [];
+  }
+}
+
 // ── INIT ─────────────────────────────────────────
 window.addEventListener('load', async ()=>{
   // Wait briefly for Supabase CDN to initialise
