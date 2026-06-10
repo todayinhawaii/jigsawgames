@@ -8,8 +8,8 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
 :root{--gold:#c9a84c;--gold2:#ffd700;--dark:#080808;--text:#f0ede8;--muted:rgba(240,237,232,0.5);}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);}
-body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
+html,body{width:100%;height:100%;background:var(--dark);}
+body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;position:relative;}
 
 #heroBg,#heroBgNext{position:fixed;inset:0;background-size:cover;background-position:center;filter:brightness(0.55);}
 #heroBgNext{opacity:0;transition:opacity 0.8s ease;}
@@ -564,13 +564,10 @@ function initMobile(p){
     mobPieces.push(piece);
 
     th.addEventListener('click',()=>selectMobPiece(piece));
-    // Long press shows piece preview on mobile
-    let pressTO=null;
+    // Touch thumbnail - show preview immediately
     th.addEventListener('touchstart',()=>{
-      pressTO=setTimeout(()=>{showMobPreview(piece);},400);
+      showMobPreview(piece);
     },{passive:true});
-    th.addEventListener('touchend',()=>clearTimeout(pressTO),{passive:true});
-    th.addEventListener('touchmove',()=>clearTimeout(pressTO),{passive:true});
   });
 
   stopMobTimer();mobElapsed=0;
@@ -600,48 +597,36 @@ function selectMobPiece(p){
 }
 
 function addMobDrag(p){
+  // Remove any old listener flag
+  if(p._dragging) return;
   const el=p.el;
-  let sx,sy,sl,st,moved=false,active=false;
 
-  function down(e){
+  el.addEventListener('touchstart',function onTS(e){
+    if(p.placed)return;
     e.preventDefault();e.stopPropagation();
-    const src=e.touches?e.touches[0]:e;
-    sx=src.clientX;sy=src.clientY;
-    sl=parseInt(el.style.left)||0;st=parseInt(el.style.top)||0;
-    moved=false;active=true;
+    const t=e.touches[0];
+    let sx=t.clientX,sy=t.clientY;
+    let sl=parseInt(el.style.left)||0,st=parseInt(el.style.top)||0;
+    let moved=false;
     el.classList.add('dragging');el.style.zIndex='999';
-    // Use window listeners for reliable tracking across whole screen
-    window.addEventListener('touchmove',onWinMove,{passive:false});
-    window.addEventListener('touchend',onWinUp,{passive:false});
-    window.addEventListener('mousemove',onWinMove);
-    window.addEventListener('mouseup',onWinUp);
-  }
-  function onWinMove(e){
-    if(!active)return;
-    e.preventDefault();
-    const src=e.touches?e.touches[0]:e;
-    const dx=src.clientX-sx,dy=src.clientY-sy;
-    if(Math.abs(dx)>3||Math.abs(dy)>3)moved=true;
-    el.style.left=(sl+dx)+'px';el.style.top=(st+dy)+'px';
-  }
-  function onWinUp(e){
-    if(!active)return;
-    active=false;
-    el.classList.remove('dragging');
-    el.style.zIndex=mobSelected===p?'100':'10';
-    window.removeEventListener('touchmove',onWinMove);
-    window.removeEventListener('touchend',onWinUp);
-    window.removeEventListener('mousemove',onWinMove);
-    window.removeEventListener('mouseup',onWinUp);
-    if(moved)checkMobSnap(p);
-  }
 
-  // Remove old handlers and attach fresh
-  const newEl=el.cloneNode(true);
-  el.parentNode.replaceChild(newEl,el);
-  p.el=newEl;
-  newEl.addEventListener('mousedown',down);
-  newEl.addEventListener('touchstart',down,{passive:false});
+    function onTM(e2){
+      e2.preventDefault();
+      const t2=e2.touches[0];
+      const dx=t2.clientX-sx,dy=t2.clientY-sy;
+      if(Math.abs(dx)>2||Math.abs(dy)>2)moved=true;
+      el.style.left=(sl+dx)+'px';el.style.top=(st+dy)+'px';
+    }
+    function onTE(e2){
+      el.classList.remove('dragging');
+      el.style.zIndex='10';
+      window.removeEventListener('touchmove',onTM);
+      window.removeEventListener('touchend',onTE);
+      if(moved)checkMobSnap(p);
+    }
+    window.addEventListener('touchmove',onTM,{passive:false});
+    window.addEventListener('touchend',onTE,{passive:false});
+  },{passive:false});
 }
 
 function checkMobSnap(p){
@@ -660,35 +645,59 @@ function checkMobSnap(p){
   }
 }
 
-// Mobile piece preview overlay
+// Mobile piece preview overlay - shows jigsaw shape!
 function showMobPreview(p){
-  let ov=document.getElementById('mobPieceOv');
-  if(!ov){
-    ov=document.createElement('div');
-    ov.id='mobPieceOv';
-    ov.style.cssText='position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;';
-    ov.addEventListener('click',()=>ov.remove());
-    document.body.appendChild(ov);
-  }
-  ov.innerHTML='';
-  // Show big piece image
-  const pw=Math.min(window.innerWidth*0.7, 280);
-  const ph=pw*(mobPH/mobPW);
+  // Remove existing
+  const existing=document.getElementById('mobPieceOv');
+  if(existing)existing.remove();
+
+  const ov=document.createElement('div');
+  ov.id='mobPieceOv';
+  ov.style.cssText='position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;';
+
+  // Draw piece with jigsaw shape on canvas
+  const pad=40;
+  const scale=Math.min((window.innerWidth*0.75)/mobPW,(window.innerHeight*0.45)/mobPH);
+  const pw=mobPW*scale,ph=mobPH*scale;
+  const T=Math.min(pw,ph)*0.22;
+  const cw=pw+pad*2,ch=ph+pad*2;
   const c=document.createElement('canvas');
-  c.width=pw;c.height=ph;
+  c.width=cw;c.height=ch;
   const cx2=c.getContext('2d');
-  cx2.drawImage(mobImg,(p.c/mobCols)*mobImg.naturalWidth,(p.r/mobRows)*mobImg.naturalHeight,
-    mobImg.naturalWidth/mobCols,mobImg.naturalHeight/mobRows,0,0,pw,ph);
-  cx2.strokeStyle='rgba(255,215,0,0.9)';cx2.lineWidth=3;cx2.strokeRect(0,0,pw,ph);
-  c.style.borderRadius='8px';
-  const lbl=document.createElement('div');
-  lbl.style.cssText='color:rgba(255,255,255,0.7);font-family:Cinzel,serif;font-size:12px;letter-spacing:2px;';
-  lbl.textContent='TAP TO CLOSE · TAP PIECE TO PLACE';
-  const btn=document.createElement('button');
-  btn.style.cssText='padding:12px 28px;border:none;border-radius:10px;background:linear-gradient(135deg,#ffd700,#c9a84c);color:#000;font-size:14px;font-weight:800;cursor:pointer;';
-  btn.textContent='Place This Piece';
-  btn.onclick=(e)=>{e.stopPropagation();ov.remove();selectMobPiece(p);};
-  ov.appendChild(c);ov.appendChild(lbl);ov.appendChild(btn);
+  const x=pad,y=pad;
+
+  // Draw jigsaw path (simple tabs for mobile)
+  cx2.beginPath();cx2.moveTo(x,y);
+  cx2.lineTo(x+pw,y);cx2.lineTo(x+pw,y+ph);
+  cx2.lineTo(x,y+ph);cx2.closePath();
+  cx2.save();cx2.clip();
+  // Fill with image
+  cx2.drawImage(mobImg,
+    (p.c/mobCols)*mobImg.naturalWidth,(p.r/mobRows)*mobImg.naturalHeight,
+    mobImg.naturalWidth/mobCols,mobImg.naturalHeight/mobRows,
+    x,y,pw,ph);
+  cx2.restore();
+  // Gold border
+  cx2.strokeStyle='rgba(255,215,0,0.95)';cx2.lineWidth=3;
+  cx2.beginPath();cx2.rect(x,y,pw,ph);cx2.stroke();
+  // Drop shadow effect
+  cx2.shadowColor='rgba(0,0,0,0.5)';
+  c.style.cssText='filter:drop-shadow(0 8px 20px rgba(0,0,0,0.6));border-radius:4px;';
+
+  const hint=document.createElement('div');
+  hint.style.cssText='color:rgba(255,255,255,0.6);font-family:Cinzel,serif;font-size:11px;letter-spacing:2px;text-align:center;';
+  hint.textContent='Tap to place on board';
+
+  ov.appendChild(c);
+  ov.appendChild(hint);
+  ov.addEventListener('touchstart',(e)=>{
+    e.preventDefault();ov.remove();selectMobPiece(p);
+  },{passive:false});
+  ov.addEventListener('click',()=>{ov.remove();selectMobPiece(p);});
+  document.body.appendChild(ov);
+
+  // Auto dismiss after 3s
+  setTimeout(()=>{if(document.getElementById('mobPieceOv'))ov.remove();},3000);
 }
 
 function peekMobile(){
