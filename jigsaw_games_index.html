@@ -24,7 +24,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 .nav-btn{padding:8px 16px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);color:rgba(255,255,255,0.8);font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:'Inter',sans-serif;}
 .nav-btn.gold{background:rgba(201,168,76,0.2);border-color:var(--gold);color:var(--gold2);}
 
-#heroContent{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative;z-index:10;padding:0 24px 0;margin-bottom:185px;}
+#heroContent{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative;z-index:10;padding:0 24px 0;margin-bottom:160px;}
 #puzzleDots{display:flex;gap:8px;margin-bottom:24px;}
 .pdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);transition:all 0.3s;cursor:pointer;}
 .pdot.active{background:var(--gold2);width:24px;border-radius:4px;box-shadow:0 0 8px rgba(255,215,0,0.5);}
@@ -49,13 +49,13 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 #prevArrow:hover,#nextArrow:hover{background:rgba(201,168,76,0.2);}
 .arrow-icon{font-size:22px;color:rgba(255,255,255,0.6);}
 
-#carousel{position:fixed;bottom:0;left:0;right:0;z-index:15;padding:20px 0 28px;background:linear-gradient(0deg,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.3) 80%,transparent 100%);overflow-x:hidden;overflow-y:visible;}
-.carousel-track{display:flex;gap:16px;padding:0 20px;animation:carouselScroll 40s linear infinite;width:max-content;}
+#carousel{position:fixed;bottom:0;left:0;right:0;z-index:15;padding:24px 0 28px;background:linear-gradient(0deg,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.5) 60%,transparent 100%);overflow:hidden;}
+.carousel-track{display:flex;gap:20px;padding:0 20px;animation:carouselScroll 45s linear infinite;width:max-content;}
 .carousel-track:hover{animation-play-state:paused;}
 @keyframes carouselScroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
-.car-card{flex-shrink:0;width:168px;height:95px;border-radius:10px;overflow:visible;border:2px solid rgba(201,168,76,0.15);cursor:pointer;position:relative;transition:all 0.2s ease;box-shadow:0 4px 16px rgba(0,0,0,0.5);}
-.car-card:hover,.car-card.active{border-color:var(--gold2);transform:scale(1.35) translateY(-5px);box-shadow:0 0 0 2px var(--gold),0 12px 32px rgba(255,215,0,0.4);z-index:20;}
-.car-card img{width:100%;height:100%;object-fit:cover;display:block;border-radius:9px;}
+.car-card{flex-shrink:0;width:156px;height:88px;border-radius:8px;overflow:hidden;border:2px solid rgba(201,168,76,0.2);cursor:pointer;position:relative;transition:border-color 0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.5);}
+.car-card:hover,.car-card.active{border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold),0 6px 20px rgba(255,215,0,0.35);}
+.car-card img{width:100%;height:100%;object-fit:cover;display:block;}
 .car-card-label{position:absolute;bottom:0;left:0;right:0;padding:20px 8px 7px;background:linear-gradient(0deg,rgba(0,0,0,0.9),transparent);font-size:10px;font-weight:700;color:#fff;text-align:center;line-height:1.3;}
 .car-card-num{position:absolute;top:5px;left:7px;font-size:9px;color:var(--gold);font-family:'Cinzel',serif;font-weight:700;}
 
@@ -69,40 +69,16 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 #gameCanvas{display:block;touch-action:none;flex:1;width:100%;}
 
 /* ── PIECE TRAY ── */
-#pieceTray{
-  position:fixed;bottom:70px;left:0;right:0;
-  height:124px;z-index:52;
-  background:rgba(235,207,178,0.55);
-  border-top:1px solid rgba(201,168,76,0.15);
-  overflow-x:auto;overflow-y:hidden;
-  display:none;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-}
+#pieceTray{position:fixed;bottom:70px;left:0;right:0;height:148px;z-index:52;background:rgba(235,207,178,0.6);border-top:1px solid rgba(201,168,76,0.2);overflow-x:auto;overflow-y:visible;display:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 #pieceTray::-webkit-scrollbar{display:none;}
 #trayInner{
   display:flex;align-items:center;gap:6px;
   padding:8px 10px;height:100%;
   width:max-content;
 }
-.tray-piece{
-  flex-shrink:0;
-  width:100px;height:100px;
-  border-radius:0;overflow:visible;
-  border:none;
-  cursor:grab;transition:transform 0.08s ease;
-  position:relative;background:transparent;
-}
-.tray-piece canvas{
-  display:block;
-}
-.tray-piece:hover,.tray-piece.lifted{
-  border-color:var(--gold2);
-  transform:scale(1.2) translateY(-10px);
-  box-shadow:0 0 16px rgba(255,215,0,0.5);
-  z-index:53;
-  transition:transform 0.1s ease,box-shadow 0.1s ease;
-}
+.tray-piece{flex-shrink:0;width:120px;height:120px;border-radius:0;overflow:visible;border:none;cursor:grab;transition:transform 0.1s ease;position:relative;background:transparent;}
+.tray-piece canvas{display:block;}
+.tray-piece:hover,.tray-piece.lifted{border-color:var(--gold2);transform:scale(1.2) translateY(-10px);box-shadow:0 6px 16px rgba(255,215,0,0.3);z-index:53;transition:transform 0.1s ease;}
 .tray-piece canvas{
   width:100%;height:100%;display:block;
 }
@@ -395,7 +371,7 @@ function quitGame(){ stopTimer();running=false;document.getElementById('gameScre
 // When dragged out it grows to full size
 // When returned it shrinks back
 
-const SMALL = 100; // tray piece size px
+const SMALL = 120; // tray piece size px
 let trayPieces = []; // pieces still in tray
 let activePiece = null; // piece being dragged from tray
 
@@ -478,7 +454,7 @@ function buildTray(){
     const cx2=c.getContext('2d');
 
     // BIG padding so tabs fully fit inside canvas (tabs are ~22% of piece size)
-    const pad=SMALL*0.28;
+    const pad=SMALL*0.22;
     const scale=Math.min((SMALL-pad*2)/p.w,(SMALL-pad*2)/p.h);
     const sw=p.w*scale,sh=p.h*scale;
     const ox=(SMALL-sw)/2,oy=(SMALL-sh)/2;
