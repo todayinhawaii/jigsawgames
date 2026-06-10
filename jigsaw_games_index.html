@@ -494,6 +494,7 @@ function startMobile(){
   document.getElementById('mobileGame').style.display='flex';
   document.getElementById('mobTitle').textContent=p.title;
   document.getElementById('winArt').src=p.src;
+  document.getElementById('mobBoardImg').src=p.src;
   mobImg=new Image();
   mobImg.onload=()=>initMobile(p);
   mobImg.src=p.src;
@@ -563,6 +564,13 @@ function initMobile(p){
     mobPieces.push(piece);
 
     th.addEventListener('click',()=>selectMobPiece(piece));
+    // Long press shows piece preview on mobile
+    let pressTO=null;
+    th.addEventListener('touchstart',()=>{
+      pressTO=setTimeout(()=>{showMobPreview(piece);},400);
+    },{passive:true});
+    th.addEventListener('touchend',()=>clearTimeout(pressTO),{passive:true});
+    th.addEventListener('touchmove',()=>clearTimeout(pressTO),{passive:true});
   });
 
   stopMobTimer();mobElapsed=0;
@@ -593,32 +601,47 @@ function selectMobPiece(p){
 
 function addMobDrag(p){
   const el=p.el;
-  let sx,sy,sl,st,moved=false;
+  let sx,sy,sl,st,moved=false,active=false;
 
   function down(e){
-    e.stopPropagation();
+    e.preventDefault();e.stopPropagation();
     const src=e.touches?e.touches[0]:e;
     sx=src.clientX;sy=src.clientY;
     sl=parseInt(el.style.left)||0;st=parseInt(el.style.top)||0;
-    moved=false;
-    el.classList.add('dragging');
+    moved=false;active=true;
+    el.classList.add('dragging');el.style.zIndex='999';
+    // Use window listeners for reliable tracking across whole screen
+    window.addEventListener('touchmove',onWinMove,{passive:false});
+    window.addEventListener('touchend',onWinUp,{passive:false});
+    window.addEventListener('mousemove',onWinMove);
+    window.addEventListener('mouseup',onWinUp);
   }
-  function move(e){
-    e.preventDefault();e.stopPropagation();
+  function onWinMove(e){
+    if(!active)return;
+    e.preventDefault();
     const src=e.touches?e.touches[0]:e;
     const dx=src.clientX-sx,dy=src.clientY-sy;
     if(Math.abs(dx)>3||Math.abs(dy)>3)moved=true;
     el.style.left=(sl+dx)+'px';el.style.top=(st+dy)+'px';
   }
-  function up(e){
-    e.stopPropagation();
+  function onWinUp(e){
+    if(!active)return;
+    active=false;
     el.classList.remove('dragging');
+    el.style.zIndex=mobSelected===p?'100':'10';
+    window.removeEventListener('touchmove',onWinMove);
+    window.removeEventListener('touchend',onWinUp);
+    window.removeEventListener('mousemove',onWinMove);
+    window.removeEventListener('mouseup',onWinUp);
     if(moved)checkMobSnap(p);
   }
 
-  el.onmousedown=down;el.ontouchstart=down;
-  el.onmousemove=move;el.ontouchmove=move;
-  el.onmouseup=up;el.ontouchend=up;
+  // Remove old handlers and attach fresh
+  const newEl=el.cloneNode(true);
+  el.parentNode.replaceChild(newEl,el);
+  p.el=newEl;
+  newEl.addEventListener('mousedown',down);
+  newEl.addEventListener('touchstart',down,{passive:false});
 }
 
 function checkMobSnap(p){
@@ -635,6 +658,37 @@ function checkMobSnap(p){
     try{if(navigator.vibrate)navigator.vibrate([20,10,30]);}catch(e){}
     if(mobPlaced>=mobTotal)setTimeout(winMobile,500);
   }
+}
+
+// Mobile piece preview overlay
+function showMobPreview(p){
+  let ov=document.getElementById('mobPieceOv');
+  if(!ov){
+    ov=document.createElement('div');
+    ov.id='mobPieceOv';
+    ov.style.cssText='position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;';
+    ov.addEventListener('click',()=>ov.remove());
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML='';
+  // Show big piece image
+  const pw=Math.min(window.innerWidth*0.7, 280);
+  const ph=pw*(mobPH/mobPW);
+  const c=document.createElement('canvas');
+  c.width=pw;c.height=ph;
+  const cx2=c.getContext('2d');
+  cx2.drawImage(mobImg,(p.c/mobCols)*mobImg.naturalWidth,(p.r/mobRows)*mobImg.naturalHeight,
+    mobImg.naturalWidth/mobCols,mobImg.naturalHeight/mobRows,0,0,pw,ph);
+  cx2.strokeStyle='rgba(255,215,0,0.9)';cx2.lineWidth=3;cx2.strokeRect(0,0,pw,ph);
+  c.style.borderRadius='8px';
+  const lbl=document.createElement('div');
+  lbl.style.cssText='color:rgba(255,255,255,0.7);font-family:Cinzel,serif;font-size:12px;letter-spacing:2px;';
+  lbl.textContent='TAP TO CLOSE · TAP PIECE TO PLACE';
+  const btn=document.createElement('button');
+  btn.style.cssText='padding:12px 28px;border:none;border-radius:10px;background:linear-gradient(135deg,#ffd700,#c9a84c);color:#000;font-size:14px;font-weight:800;cursor:pointer;';
+  btn.textContent='Place This Piece';
+  btn.onclick=(e)=>{e.stopPropagation();ov.remove();selectMobPiece(p);};
+  ov.appendChild(c);ov.appendChild(lbl);ov.appendChild(btn);
 }
 
 function peekMobile(){
