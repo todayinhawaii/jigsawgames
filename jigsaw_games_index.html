@@ -860,14 +860,8 @@ window.addEventListener('resize',()=>{if(!running)return;canvas.width=canvas.off
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // Init after everything is loaded
-function checkOrientation(){
-  const isPort = window.innerHeight > window.innerWidth;
-  const nudge = document.getElementById('rotateNudge');
-  if(nudge) nudge.style.display = (isPort && window.innerWidth < 768) ? 'flex' : 'none';
-}
-
 window.addEventListener('load', async ()=>{
-  checkOrientation();
+  {const _n=document.getElementById('rotateNudge');if(_n)_n.style.display=(window.innerHeight>window.innerWidth&&window.innerWidth<768)?'flex':'none';}
   await loadPuzzlesFromDB();
   if(PUZZLES.length === 0){
     document.getElementById('artTitle').textContent = 'Beautiful Puzzles Coming Soon!';
