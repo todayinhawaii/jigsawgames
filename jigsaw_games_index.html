@@ -297,17 +297,18 @@ function hideRotateOverlay(){
 }
 function forcePlay(){
   hideRotateOverlay();
-  startDesktop();
+  // Small delay to let overlay hide and layout settle
+  setTimeout(startDesktop, 100);
 }
 function startGame(){
   if(!PUZZLES.length) return;
-  const isMobile = window.innerWidth < 1024 && 'ontouchstart' in window;
+  // Only show rotate overlay on TOUCH devices in portrait
   const isPortrait = window.innerHeight > window.innerWidth;
-  if(isMobile && isPortrait){
+  const isTouch = 'ontouchstart' in window;
+  if(isTouch && isPortrait){
     showRotateOverlay();
     return;
   }
-  hideRotateOverlay();
   startDesktop();
 }
 
@@ -803,39 +804,41 @@ document.getElementById('heroStage').addEventListener('touchend',e=>{const dx=e.
 // ── RESIZE ───────────────────────────────────
 window.addEventListener('resize',()=>{
   const isPortrait = window.innerHeight > window.innerWidth;
-  const isMobile = window.innerWidth < 1024 && 'ontouchstart' in window;
-  if(isMobile && isPortrait && running){
+  const isTouch = 'ontouchstart' in window;
+  if(isTouch && isPortrait && running){
     showRotateOverlay();
-  } else if(!isPortrait){
+  } else if(!isPortrait && running){
     hideRotateOverlay();
-    if(running){
-      setTimeout(()=>{
-        canvas.width=canvas.offsetWidth||innerWidth;
-        canvas.height=canvas.offsetHeight||(innerHeight-52);
-        ghostCanvas=null;initDesktop();
-      },150);
-    }
+    setTimeout(()=>{
+      canvas.width=canvas.offsetWidth||innerWidth;
+      canvas.height=canvas.offsetHeight||(innerHeight-52);
+      ghostCanvas=null;initDesktop();
+    },150);
   }
 });
 window.addEventListener('orientationchange',()=>{
   setTimeout(()=>{
     const isPortrait = window.innerHeight > window.innerWidth;
-    const isMobile = window.innerWidth < 1024 && 'ontouchstart' in window;
-    if(isMobile && isPortrait && running){
-      // Rotated to portrait - show overlay, pause game
-      showRotateOverlay();
-    } else if(!isPortrait){
-      // Rotated to landscape - hide overlay, resume/restart
+    const isTouch = 'ontouchstart' in window;
+    if(isTouch && isPortrait){
+      // Portrait phone - show rotate message
+      if(running) showRotateOverlay();
+    } else {
+      // Landscape - start/resume game
       hideRotateOverlay();
       if(running){
         canvas.width=canvas.offsetWidth||innerWidth;
         canvas.height=canvas.offsetHeight||(innerHeight-52);
         ghostCanvas=null;
         initDesktop();
+      } else if(document.getElementById('rotateOverlay').style.display==='flex'){
+        // Was showing overlay - now landscape - start game!
+        hideRotateOverlay();
+        startDesktop();
       }
     }
     if(PUZZLES.length) buildCarousel();
-  },500);
+  },600);
 });
 </script>
 
