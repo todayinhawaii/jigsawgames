@@ -15,7 +15,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 #heroBg,#heroBgNext{position:fixed;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;filter:brightness(0.55);}
 #heroBgNext{opacity:0;transition:opacity 0.8s ease;}
 #heroBg{transition:none;}
-#bottomGrad{position:fixed;bottom:0;left:0;right:0;height:65%;background:linear-gradient(0deg,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.6) 40%,transparent 100%);pointer-events:none;z-index:5;}
+#bottomGrad{position:fixed;bottom:0;left:0;right:0;height:65%;background:linear-gradient(0deg,rgba(0,0,0,0.82) 0%,rgba(0,0,0,0.45) 40%,transparent 100%);pointer-events:none;z-index:5;}
 
 #heroStage{position:fixed;inset:0;display:flex;flex-direction:column;z-index:10;}
 #topNav{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0;position:relative;z-index:10;}
@@ -471,12 +471,15 @@ function showPiecePreview(e, p){
   else{pCtx.lineTo(x,y+h*.63);pCtx.bezierCurveTo(x+s.left*t*.6,y+h*.63,x+s.left*t,y+h*.82,x+s.left*t,y+h*.5);pCtx.bezierCurveTo(x+s.left*t,y+h*.18,x+s.left*t*.6,y+h*.37,x,y+h*.37);pCtx.lineTo(x,y);}
   pCtx.closePath();
 
-  // Fill with image
+  // Fill with correct image portion for THIS piece
   pCtx.save(); pCtx.clip();
-  const bX = p.cx - p.c*p.w - off;
-  const bY = p.cy - p.r*p.h - off;
+  const boardW = p.cols * p.w;
+  const boardH = p.rows * p.h;
+  // Offset so piece (r,c) appears at position (off,off) in preview
+  const destX = -(p.c * p.w - off);
+  const destY = -(p.r * p.h - off);
   pCtx.drawImage(puzzleImg, 0,0,puzzleImg.naturalWidth,puzzleImg.naturalHeight,
-    bX,bY,p.cols*p.w+off*2,p.rows*p.h+off*2);
+    destX, destY, boardW, boardH);
   pCtx.restore();
 
   // Gold outline
