@@ -64,9 +64,9 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 .hud-bar-fill{height:100%;background:linear-gradient(90deg,#ffd700,#c9a84c);border-radius:2px;transition:width 0.4s;}
 .hud-timer{font-size:22px;font-weight:900;color:var(--gold2);font-family:'Cinzel',serif;}
 #gameCanvas{display:block;touch-action:none;flex:1;width:100%;margin-bottom:90px;}
-#pieceTray{position:fixed;bottom:62px;left:0;right:0;height:130px;z-index:52;background:rgba(235,207,178,0.75);border-top:2px solid rgba(201,168,76,0.3);overflow-x:auto;overflow-y:visible;display:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-x;}
+#pieceTray{position:fixed;bottom:62px;left:0;right:0;height:130px;z-index:52;background:rgba(235,207,178,0.75);border-top:2px solid rgba(201,168,76,0.3);overflow-x:scroll;overflow-y:hidden;display:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-x;overscroll-behavior-x:contain;}
 #pieceTray::-webkit-scrollbar{display:none;}
-#trayInner{display:flex;align-items:center;gap:10px;padding:8px 12px;height:100%;width:max-content;}
+#trayInner{display:flex;align-items:center;gap:10px;padding:8px 12px;height:100%;width:max-content;touch-action:pan-x;}
 .tray-piece{flex-shrink:0;width:120px;height:120px;overflow:hidden;border-radius:6px;border:2px solid rgba(201,168,76,0.4);cursor:grab;transition:transform 0.12s;box-shadow:0 3px 10px rgba(0,0,0,0.3);background:#c8a96e;}
 .tray-piece:hover{transform:scale(1.15) translateY(-8px);border-color:var(--gold2);}
 .tray-piece canvas{display:block;width:120px!important;height:120px!important;}
@@ -261,8 +261,7 @@ function buildCarousel(){
 // ── START GAME ────────────────────────────────
 function startGame(){
   if(!PUZZLES.length)return;
-  if(IS_MOB())startMobile();
-  else startDesktop();
+  startDesktop();
 }
 
 // ════════════════════════════════════════════
@@ -338,7 +337,11 @@ function buildDesktopTray(){
     div.addEventListener('mouseenter',e=>showPreview(e,p));
     div.addEventListener('mouseleave',hidePreview);
     div.addEventListener('mousedown',e=>{hidePreview();liftFromTray(e,p,div);});
-    div.addEventListener('touchstart',e=>liftFromTray(e,p,div),{passive:false});
+    // Mobile: touchstart on tray piece - show preview then lift
+    div.addEventListener('touchstart',e=>{
+      // Show preview briefly then lift
+      showMobPiecePreview(e,p,div);
+    },{passive:false});
     inner.appendChild(div);p.trayEl=div;
   });
 }
@@ -363,6 +366,18 @@ function showPreview(e,p){
   previewCanvas.style.display='block';
 }
 function hidePreview(){previewCanvas.style.display='none';}
+
+// Mobile: show piece preview on touch, then lift after brief delay
+function showMobPiecePreview(e,p,div){
+  e.preventDefault();
+  // Show the desktop preview canvas immediately
+  showPreview({currentTarget:div},p);
+  // After short delay, hide preview and lift piece
+  setTimeout(()=>{
+    hidePreview();
+    liftFromTray(e,p,div);
+  },300);
+}
 
 function liftFromTray(e,p,div){
   e.preventDefault();if(p.placed||!p.inTray)return;
@@ -430,9 +445,10 @@ function onMove(e){
   const src=e.touches?e.touches[0]:e;
   const tray=document.getElementById('pieceTray');
   const tr=tray?tray.getBoundingClientRect():null;
-  if(tr&&src.clientY>=tr.top-10){dragging=null;return;}
+  if(tr&&src.clientY>=tr.top){dragging=null;return;}
   const r=canvas.getBoundingClientRect();
-  dragging.x=(src.clientX-r.left)-dragOffX;dragging.y=(src.clientY-r.top)-dragOffY;
+  dragging.x=(src.clientX-r.left)-dragOffX;
+  dragging.y=(src.clientY-r.top)-dragOffY;
 }
 function onUp(e){
   if(!dragging)return;const p=dragging;
@@ -454,9 +470,13 @@ canvas.addEventListener('touchstart',e=>{
   if(dragging)return;
   const tray=document.getElementById('pieceTray');
   const tr=tray?tray.getBoundingClientRect():null;
-  if(tr&&e.touches[0].clientY>=tr.top-10)return;
+  // If touch starts in tray area - let tray handle it natively!
+  if(tr&&e.touches[0].clientY>=tr.top)return;
   const{x,y}=getXY(e);const p=hitTest(x,y);
-  if(p&&!p.placed&&!p.inTray){e.preventDefault();dragging=p;dragOffX=x-p.x;dragOffY=y-p.y;maxZ++;p.z=maxZ;}
+  if(p&&!p.placed&&!p.inTray){
+    e.preventDefault();
+    dragging=p;dragOffX=x-p.x;dragOffY=y-p.y;maxZ++;p.z=maxZ;
+  }
 },{passive:false});
 window.addEventListener('mousemove',onMove);
 window.addEventListener('touchmove',onMove,{passive:true});
@@ -505,13 +525,7 @@ function initMobile(p){
   mobCols=cfg.cols;mobRows=cfg.rows;
   mobTotal=mobCols*mobRows;mobPlaced=0;mobPieces=[];mobSelected=null;
 
-  // Size board to fill available height
-  const vw=window.innerWidth,vh=window.innerHeight;
-  const hudH=document.getElementById('mobHud').offsetHeight||42;
-  const btnH=document.getElementById('mobBtns').offsetHeight||50;
-  const trayH=96;
-  const boardH=vh-hudH-btnH-trayH;
-  const boardW=vw;
+
   const ar=mobImg.naturalWidth/mobImg.naturalHeight;
 
   // Fit image to board maintaining aspect ratio
