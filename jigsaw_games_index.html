@@ -69,11 +69,11 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);}
 #gameCanvas{display:block;touch-action:none;flex:1;width:100%;}
 
 /* ── PIECE TRAY ── */
-#pieceTray{position:fixed;bottom:62px;left:0;right:0;height:154px;z-index:52;background:rgba(235,207,178,0.75);border-top:2px solid rgba(201,168,76,0.3);overflow-x:auto;overflow-y:visible;display:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+#pieceTray{position:fixed;bottom:62px;left:0;right:0;height:186px;z-index:52;background:rgba(235,207,178,0.75);border-top:2px solid rgba(201,168,76,0.3);overflow-x:auto;overflow-y:visible;display:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 #pieceTray::-webkit-scrollbar{display:none;}
 #trayInner{display:flex;align-items:center;gap:10px;padding:8px 12px;height:100%;width:max-content;}
-.tray-piece{flex-shrink:0;width:130px;height:130px;overflow:visible;border:none;cursor:grab;transition:transform 0.12s ease;position:relative;background:transparent;}
-.tray-piece canvas{display:block;}
+.tray-piece{flex-shrink:0;width:160px;height:160px;overflow:visible;border:none;cursor:grab;transition:transform 0.12s;position:relative;background:transparent;}
+.tray-piece canvas{display:block;width:160px!important;height:160px!important;}
 .tray-piece:hover,.tray-piece.lifted{transform:scale(1.18) translateY(-10px);z-index:53;}
 .tray-piece canvas{
   width:100%;height:100%;display:block;
@@ -367,7 +367,7 @@ function quitGame(){ stopTimer();running=false;document.getElementById('gameScre
 // When dragged out it grows to full size
 // When returned it shrinks back
 
-const SMALL = 130; // tray piece size px
+const SMALL = 160; // tray piece size px
 let trayPieces = []; // pieces still in tray
 let activePiece = null; // piece being dragged from tray
 
@@ -384,7 +384,7 @@ function initPuzzle(){
   // Board takes 80% of canvas, centered
   let bw=cw*0.8,bh=bw/imgAR;
   if(bh>ch*0.78){bh=ch*0.78;bw=bh*imgAR;}
-  const bx=(cw-bw)/2,by=Math.max(8,(ch-bh)/2-130);
+  const bx=(cw-bw)/2,by=Math.max(8,(ch-bh)/2-150);
   const pw=bw/cols,ph=bh/rows,TAB=Math.min(pw,ph)*0.22;
 
   const hTab=Array.from({length:rows-1},()=>Array.from({length:cols},()=>Math.random()>.5?1:-1));
@@ -475,11 +475,11 @@ function buildTray(){
       cx2.closePath();
     }
 
-    // Draw shadow behind piece so shape pops off background
+    // White halo behind piece so it stands out against tray
     cx2.save();
-    cx2.shadowColor='rgba(0,0,0,0.45)';
-    cx2.shadowBlur=6; cx2.shadowOffsetX=2; cx2.shadowOffsetY=3;
-    cx2.fillStyle='rgba(0,0,0,0.01)';
+    cx2.shadowColor='rgba(0,0,0,0.5)';
+    cx2.shadowBlur=8; cx2.shadowOffsetX=2; cx2.shadowOffsetY=3;
+    cx2.fillStyle='rgba(255,255,255,0.6)';
     jigsawPath(); cx2.fill();
     cx2.restore();
 
