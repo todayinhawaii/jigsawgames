@@ -6,6 +6,7 @@
 <title>🧩 Jigsaw Games — Beautiful Puzzles</title>
 <meta name="description" content="Beautifully illustrated jigsaw puzzles. Original artwork, drag and drop pieces, satisfying snap. Play free on any device.">
 <link rel="icon" href="/icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&display=block" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
@@ -857,8 +858,20 @@ function updateCarouselActive(){
 }
 
 // ── INIT ─────────────────────────────────────────
-window.addEventListener('load',()=>{
-  const src=getSrc(PUZZLES[0]);
+window.addEventListener('load', async ()=>{
+  // Load puzzles from database first
+  await loadPuzzlesFromDB();
+
+  if(PUZZLES.length === 0){
+    // No puzzles yet - show coming soon message
+    document.getElementById('artTitle').textContent = 'Coming Soon!';
+    document.getElementById('artDesc').textContent = 'Beautiful original art puzzles on their way!!';
+    document.getElementById('artNum').textContent = 'jigsaw.games';
+    document.getElementById('playBtn').style.display = 'none';
+    return;
+  }
+
+  const src = getSrc(PUZZLES[0]);
   document.getElementById('heroBg').style.backgroundImage=`url(${src})`;
   buildDots();
   updateHero(false);
