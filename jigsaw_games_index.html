@@ -445,8 +445,16 @@ function buildCarousel(){
 }
 
 // ── START GAME ────────────────────────────────
-function startGame(){
+async function startGame(){
+  // Show paywall immediately - first thing!!
+  showPaywall();
+  const member = await checkMembership();
+  if(!member) return; // stay on paywall
+  closePaywall();
   if(!PUZZLES.length) return;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  const isTouch = 'ontouchstart' in window;
+  if(isTouch && isPortrait){ showRotateOverlay(); return; }
   startDesktop();
 }
 
