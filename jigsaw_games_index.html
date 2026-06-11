@@ -65,7 +65,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
   transform:scale(1.08) translateY(-4px);
   z-index:20;
 }
-#carousel{position:fixed;bottom:0;left:0;right:0;z-index:15;padding:14px 0 20px;background:linear-gradient(0deg,rgba(0,0,0,0.92) 0%,transparent 100%);overflow-x:hidden;overflow-y:visible;}
+#carousel{position:fixed;bottom:0;left:0;right:0;z-index:15;padding:14px 0 20px;background:linear-gradient(0deg,rgba(0,0,0,0.72) 0%,transparent 100%);overflow-x:hidden;overflow-y:visible;}
 #carousel::-webkit-scrollbar{display:none;}
 .carousel-track{display:flex;gap:20px;padding:0 20px;animation:scroll 45s linear infinite;width:max-content;}
 @media(max-width:767px){
@@ -185,7 +185,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
     height:140px;
     bottom:0!important;
     z-index:100!important;
-    background:rgba(15,8,3,0.94)!important;
+    background:rgba(15,8,3,0.72)!important;
     border-top:2px solid rgba(201,168,76,0.35)!important;
   }
   #pieceTray.visible{transform:translateY(0);}
@@ -237,6 +237,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 <!-- DESKTOP GAME -->
 <div id="gameScreen">
   <div id="gameHud">
+    <a href="/" style="position:fixed;top:10px;right:14px;z-index:201;padding:6px 14px;border-radius:20px;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);font-size:11px;font-family:Inter,sans-serif;text-decoration:none;display:none;" id="mobBackBtn">🧩 Games</a>
     <div><div class="hud-title" id="hudTitle"></div><div class="hud-pieces" id="hudPieces">0 / 0 placed</div><div class="hud-bar"><div class="hud-bar-fill" id="hudBar" style="width:0%"></div></div></div>
     <div class="hud-timer" id="hudTimer">0:00</div>
   </div>
@@ -365,6 +366,8 @@ function startDesktop(){
   // Show rotate button on mobile
   const rotBtn=document.getElementById('mobRotateBtn');
   if(rotBtn&&'ontouchstart' in window)rotBtn.style.display='flex';
+  const backBtn=document.getElementById('mobBackBtn');
+  if(backBtn&&'ontouchstart' in window)backBtn.style.display='block';
   canvas.width=canvas.offsetWidth||window.innerWidth;
   canvas.height=canvas.offsetHeight||(window.innerHeight-52);
   const p=PUZZLES[curIdx];
@@ -603,7 +606,7 @@ function unlockOrientation(){
 
 function startTimer(){stopTimer();elapsed=0;timerInt=setInterval(()=>{elapsed++;const m=Math.floor(elapsed/60),s=elapsed%60;document.getElementById('hudTimer').textContent=m+':'+(s<10?'0':'')+s;},1000);}
 function stopTimer(){clearInterval(timerInt);}
-function quitDesktop(){stopTimer();running=false;document.getElementById('gameScreen').style.display='none';document.getElementById('gameBtnBar').style.display='none';document.getElementById('pieceTray').style.display='none';const rb=document.getElementById('mobRotateBtn');if(rb)rb.style.display='none';}
+function quitDesktop(){stopTimer();running=false;document.getElementById('gameScreen').style.display='none';document.getElementById('gameBtnBar').style.display='none';document.getElementById('pieceTray').style.display='none';const rb=document.getElementById('mobRotateBtn');if(rb)rb.style.display='none';const bb=document.getElementById('mobBackBtn');if(bb)bb.style.display='none';}
 function winGame(){
   stopTimer();running=false;
   document.getElementById('gameBtnBar').style.display='none';document.getElementById('pieceTray').style.display='none';
@@ -905,31 +908,48 @@ document.addEventListener('touchstart',e=>{
 document.addEventListener('touchend',e=>{
   if(!running)return;
   const tray=document.getElementById('pieceTray');
-  if(!tray)return;
+  if(!tray||!tray.classList.contains('visible'))return;
   const tr=tray.getBoundingClientRect();
   const src=e.changedTouches[0];
-  // If touch ended outside tray, start hide timer
-  if(src.clientY<tr.top-20)hideMobTray();
+  // Single tap OUTSIDE tray = immediately hide
+  if(src.clientY<tr.top-10){
+    clearTimeout(trayTimeout);
+    tray.classList.remove('visible');
+  }
 },{passive:true});
 
 // ══ MOBILE ROTATION TOGGLE ══
+let isLandscapeLocked=false;
 function goFullLandscape(){
   try{
-    // Request fullscreen first
-    const el=document.documentElement;
-    if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
-    else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-
-    // Then lock to landscape
-    if(screen.orientation&&screen.orientation.lock){
-      screen.orientation.lock('landscape').catch(()=>{
-        // Fallback - just show message
-        alert('Please rotate your phone to landscape for the best experience!');
-      });
+    if(!isLandscapeLocked){
+      // Go landscape fullscreen
+      const el=document.documentElement;
+      if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+      else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      if(screen.orientation&&screen.orientation.lock){
+        screen.orientation.lock('landscape').then(()=>{
+          isLandscapeLocked=true;
+          setTimeout(resizeAfterRotation,400);
+        }).catch(()=>setTimeout(resizeAfterRotation,600));
+      } else { setTimeout(resizeAfterRotation,600); }
+    } else {
+      // Go back to portrait
+      isLandscapeLocked=false;
+      if(screen.orientation&&screen.orientation.unlock) screen.orientation.unlock();
+      if(document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+      else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+      setTimeout(resizeAfterRotation,400);
     }
-  }catch(e){
-    console.log('Orientation:',e);
-  }
+  }catch(e){ setTimeout(resizeAfterRotation,500); }
+}
+
+function resizeAfterRotation(){
+  if(!running)return;
+  canvas.width=canvas.offsetWidth||window.innerWidth;
+  canvas.height=canvas.offsetHeight||window.innerHeight;
+  ghostCanvas=null;
+  initDesktop();
 }
 
 window.addEventListener('resize',()=>{
