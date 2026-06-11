@@ -1146,6 +1146,14 @@ window.addEventListener('load',async()=>{
   document.getElementById('heroBg').style.backgroundImage=`url(${PUZZLES[0].src})`;
   document.getElementById('navSub').textContent=PUZZLES.length+' Original Art Puzzles';
   buildDots();updateHero();buildCarousel();
+  // Wire play buttons directly
+  ['playBtn'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('click',()=>{
+      showPaywall();
+      startGame();
+    });
+  });
 });
 
 </script>
