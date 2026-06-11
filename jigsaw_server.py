@@ -58,6 +58,10 @@ def success():
 def login():
     return send_from_directory('.', 'jigsaw_login.html')
 
+@app.route('/reset')
+def reset():
+    return send_from_directory('.', 'jigsaw_reset.html')
+
 # ── CONFIG ────────────────────────────────────────
 @app.route('/api/config')
 def config():
