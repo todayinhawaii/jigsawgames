@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reset Password — jigsaw.games</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&display=block" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--black:#080808;--gold:#c9a84c;--gold2:#ffd700;--white:#f0ede8;--muted:rgba(240,237,232,0.5);--border:rgba(255,255,255,0.07);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(201,168,76,0.05),transparent);pointer-events:none;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Cinzel Decorative',serif;font-size:20px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;}
+.nav-back{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;}
+.nav-back:hover{color:var(--gold);}
+.wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+.card{width:100%;max-width:400px;background:#0d0d0f;border:1px solid rgba(201,168,76,0.3);border-radius:24px;padding:40px 32px;box-shadow:0 0 60px rgba(201,168,76,0.08);text-align:center;}
+.card-icon{font-size:48px;margin-bottom:12px;}
+.card-title{font-family:'Cinzel Decorative',serif;font-size:24px;font-weight:900;background:linear-gradient(135deg,#ffd700,#c9a84c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;}
+.card-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:24px;font-style:italic;font-family:'Cinzel',serif;}
+.form-group{margin-bottom:16px;text-align:left;}
+.form-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:5px;display:block;}
+.form-input{width:100%;padding:13px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--white);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:rgba(201,168,76,0.5);}
+.form-input::placeholder{color:rgba(240,237,232,0.2);}
+.btn{width:100%;padding:15px;border:none;border-radius:12px;font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:#080808;cursor:pointer;background:linear-gradient(135deg,#ffd700,#c9a84c);box-shadow:0 4px 0 #7a5c14;transition:transform 0.1s;letter-spacing:1px;}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #7a5c14;}
+.btn:disabled{opacity:0.6;cursor:not-allowed;}
+.msg{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;display:none;text-align:center;line-height:1.6;}
+.msg.success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#86efac;}
+.msg.error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;}
+.msg.info{background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:var(--gold);}
+.back-link{margin-top:16px;font-size:12px;color:var(--muted);}
+.back-link a{color:var(--gold);text-decoration:none;}
+footer{text-align:center;padding:20px;font-size:11px;color:rgba(240,237,232,0.2);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo">🧩 jigsaw.games</a>
+  <a href="/login" class="nav-back">← Sign In</a>
+</nav>
+<div class="wrap">
+  <div class="card">
+    <div class="card-icon">🔑</div>
+    <div class="card-title">Reset Password</div>
+    <div class="card-sub">Enter your email and we'll send you a reset link!!</div>
+    <div id="msgBox" class="msg"></div>
+    <div id="resetForm">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="email" type="email" placeholder="your@email.com">
+      </div>
+      <button class="btn" id="resetBtn" onclick="sendReset()">Send Reset Link →</button>
+    </div>
+    <div class="back-link"><a href="/login">← Back to Sign In</a></div>
+  </div>
+</div>
+<footer>© 2026 jigsaw.games — Made with 🌺 in Hawaii</footer>
+<script>
+let sbClient;
+async function init(){
+  sbClient = window.supabase.createClient(
+    'https://xbzeakoypdyslnnriaef.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiemVha295cGR5c2xubnJpYWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NDI5MzIsImV4cCI6MjA5NjIxODkzMn0.-pS2FE-Q-_EetM5ONbJycZWFm336wJ-z4MTOGCdA1LE'
+  );
+}
+init();
+
+async function sendReset(){
+  const email=document.getElementById('email').value.trim().toLowerCase();
+  if(!email||!email.includes('@')){
+    showMsg('Please enter a valid email address!','error');return;
+  }
+  const btn=document.getElementById('resetBtn');
+  btn.disabled=true;btn.textContent='Sending...';
+  try{
+    const{error}=await sbClient.auth.resetPasswordForEmail(email,{
+      redirectTo:'https://www.jigsaw.games/update-password'
+    });
+    if(error){showMsg(error.message,'error');btn.disabled=false;btn.textContent='Send Reset Link →';return;}
+    document.getElementById('resetForm').innerHTML=`
+      <div style="padding:20px 0;">
+        <div style="font-size:48px;margin-bottom:12px;">📧</div>
+        <div style="font-family:'Cinzel',serif;font-size:18px;color:var(--gold);margin-bottom:10px;">Check Your Email!!</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.8;">We sent a reset link to<br>
+        <strong style="color:var(--white);">${email}</strong><br>
+        Click the link to set a new password!!</p>
+      </div>`;
+  }catch(e){showMsg('Connection error — please try again!','error');btn.disabled=false;btn.textContent='Send Reset Link →';}
+}
+
+function showMsg(msg,type='error'){
+  const el=document.getElementById('msgBox');
+  el.innerHTML=msg;el.className='msg '+type;el.style.display='block';
+}
+</script>
+</body>
+</html>
