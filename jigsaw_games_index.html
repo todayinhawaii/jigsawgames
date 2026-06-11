@@ -44,13 +44,36 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 #nextArrow{right:0;border-radius:12px 0 0 12px;}
 .arrow-icon{font-size:22px;color:rgba(255,255,255,0.6);}
 
+/* LANDSCAPE BUTTON */
+#landscapeBtn{
+  position:fixed;bottom:168px;right:16px;z-index:20;
+  width:42px;height:42px;border-radius:10px;
+  background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.2);
+  display:none;align-items:center;justify-content:center;
+  cursor:pointer;transition:all 0.2s;
+}
+#landscapeBtn:hover{background:rgba(201,168,76,0.3);border-color:var(--gold);}
+#landscapeBtn svg{width:22px;height:22px;fill:rgba(255,255,255,0.8);}
+@media(max-width:767px){#landscapeBtn{display:flex;}}
+
+/* Carousel card hover enlarge - smooth, no crop */
+.car-card:hover,.car-card.active{
+  border-color:var(--gold2);
+  box-shadow:0 0 0 2px var(--gold),0 6px 20px rgba(255,215,0,0.35);
+  transform:scale(1.08) translateY(-4px);
+  z-index:20;
+}
 #carousel{position:fixed;bottom:0;left:0;right:0;z-index:15;padding:16px 0 24px;background:linear-gradient(0deg,rgba(0,0,0,0.92) 0%,transparent 100%);overflow:hidden;}
-@media(max-width:767px){#carousel{overflow-x:auto;-webkit-overflow-scrolling:touch;}}
+#carousel::-webkit-scrollbar{display:none;}
 .carousel-track{display:flex;gap:20px;padding:0 20px;animation:scroll 45s linear infinite;width:max-content;}
-@media(max-width:767px){.carousel-track{animation:none;}}
+@media(max-width:767px){
+  #carousel{overflow-x:scroll;-webkit-overflow-scrolling:touch;}
+  .carousel-track{animation:none;touch-action:pan-x;}
+}
 @keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .car-card{flex-shrink:0;width:210px;height:118px;border-radius:10px;overflow:hidden;border:2px solid rgba(201,168,76,0.2);cursor:pointer;position:relative;transition:border-color 0.2s,box-shadow 0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.5);}
-.car-card:hover,.car-card.active{border-color:var(--gold2);box-shadow:0 0 0 2px var(--gold);}
+
 .car-card img{width:100%;height:100%;object-fit:cover;display:block;}
 .car-card-label{position:absolute;bottom:0;left:0;right:0;padding:20px 8px 7px;background:linear-gradient(0deg,rgba(0,0,0,0.9),transparent);font-size:10px;font-weight:700;color:#fff;text-align:center;}
 .car-card-num{position:absolute;top:5px;left:7px;font-size:9px;color:var(--gold);font-family:'Cinzel',serif;font-weight:700;}
@@ -118,38 +141,9 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 .snap-flash{position:fixed;inset:0;pointer-events:none;z-index:9996;background:rgba(255,215,0,0.07);animation:flashX 0.4s ease forwards;}
 @keyframes flashX{0%{opacity:1;}100%{opacity:0;}}
 
-/* ROTATE OVERLAY */
-#rotateOverlay{
-  position:fixed;inset:0;z-index:999;
-  background:radial-gradient(ellipse at center,#1a1a2e,#080808);
-  display:none;flex-direction:column;
-  align-items:center;justify-content:center;
-  gap:20px;text-align:center;padding:32px;
-}
-.ro-icon{font-size:72px;animation:roSpin 2.5s ease-in-out infinite;}
-@keyframes roSpin{
-  0%,40%{transform:rotate(0deg);}
-  60%,100%{transform:rotate(90deg);}
-}
-.ro-title{font-family:'Cinzel Decorative',serif;font-size:clamp(20px,5vw,28px);
-  background:linear-gradient(135deg,#ffd700,#c9a84c);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.ro-sub{font-size:14px;color:rgba(255,255,255,0.65);line-height:1.7;max-width:300px;font-family:'Cinzel',serif;}
-.ro-btn{padding:14px 32px;border:none;border-radius:12px;
-  background:linear-gradient(135deg,#ffd700,#c9a84c);
-  color:#080808;font-size:14px;font-weight:800;cursor:pointer;
-  font-family:'Cinzel',serif;letter-spacing:1px;
-  box-shadow:0 6px 0 #7a5c14;}
-.ro-btn:active{transform:translateY(4px);box-shadow:0 2px 0 #7a5c14;}
 </style>
 </head>
 <body>
-<div id="rotateOverlay">
-  <div class="ro-icon">📱</div>
-  <div class="ro-title">Rotate Your Phone</div>
-  <div class="ro-sub">jigsaw.games is best experienced in landscape mode — please turn your phone sideways to play!!</div>
-  <button class="ro-btn" onclick="forcePlay()">Play Anyway →</button>
-</div>
 <div id="heroBg"></div>
 <div id="heroBgNext"></div>
 <div id="bottomGrad"></div>
@@ -181,6 +175,11 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 </div>
 <div id="prevArrow" onclick="prevPuzzle()"><span class="arrow-icon">‹</span></div>
 <div id="nextArrow" onclick="nextPuzzle()"><span class="arrow-icon">›</span></div>
+<div id="landscapeBtn" onclick="goLandscape()" title="Switch to landscape">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M16.48 2.52c3.27 1.55 5.61 4.72 5.97 8.48h1.5C23.44 4.84 18.29 0 12 0l-.66.03 3.81 3.81 1.33-1.32zm-6.25-.77c-.59-.59-1.54-.59-2.12 0L1.75 8.11c-.59.59-.59 1.54 0 2.12l12.02 12.02c.59.59 1.54.59 2.12 0l6.36-6.36c.59-.59.59-1.54 0-2.12L10.23 1.75zm4.6 19.44L2.81 9.17l6.36-6.36 12.02 12.02-6.36 6.36zm-7.31.29C4.25 19.94 1.91 16.76 1.55 13H.05C.56 19.16 5.71 24 12 24l.66-.03-3.81-3.81-1.33 1.32z"/>
+  </svg>
+</div>
 <div id="carousel"><div class="carousel-track" id="carouselTrack"></div></div>
 
 <!-- DESKTOP GAME -->
@@ -289,26 +288,8 @@ function buildCarousel(){
 }
 
 // ── START GAME ────────────────────────────────
-function showRotateOverlay(){
-  document.getElementById('rotateOverlay').style.display='flex';
-}
-function hideRotateOverlay(){
-  document.getElementById('rotateOverlay').style.display='none';
-}
-function forcePlay(){
-  hideRotateOverlay();
-  // Small delay to let overlay hide and layout settle
-  setTimeout(startDesktop, 100);
-}
 function startGame(){
   if(!PUZZLES.length) return;
-  // Only show rotate overlay on TOUCH devices in portrait
-  const isPortrait = window.innerHeight > window.innerWidth;
-  const isTouch = 'ontouchstart' in window;
-  if(isTouch && isPortrait){
-    showRotateOverlay();
-    return;
-  }
   startDesktop();
 }
 
@@ -524,6 +505,28 @@ window.addEventListener('touchend',onUp,{passive:false});
 let peekTO=null;
 function peekImage(){const ov=document.getElementById('peekOverlay');ov.style.display='flex';clearTimeout(peekTO);peekTO=setTimeout(()=>ov.style.display='none',2500);}
 function updateHud(){document.getElementById('hudPieces').textContent=placed+' / '+total+' placed';document.getElementById('hudBar').style.width=Math.round(placed/total*100)+'%';}
+// YouTube-style landscape button
+async function goLandscape(){
+  try{
+    // Try Screen Orientation API (works on Android Chrome!!)
+    if(screen.orientation && screen.orientation.lock){
+      await screen.orientation.lock('landscape');
+      return;
+    }
+  }catch(e){}
+  // Fallback: request fullscreen which triggers landscape on mobile
+  try{
+    const el = document.documentElement;
+    if(el.requestFullscreen) await el.requestFullscreen();
+    else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  }catch(e){}
+}
+
+// Unlock orientation when leaving game
+function unlockOrientation(){
+  try{if(screen.orientation && screen.orientation.unlock) screen.orientation.unlock();}catch(e){}
+}
+
 function startTimer(){stopTimer();elapsed=0;timerInt=setInterval(()=>{elapsed++;const m=Math.floor(elapsed/60),s=elapsed%60;document.getElementById('hudTimer').textContent=m+':'+(s<10?'0':'')+s;},1000);}
 function stopTimer(){clearInterval(timerInt);}
 function quitDesktop(){stopTimer();running=false;document.getElementById('gameScreen').style.display='none';document.getElementById('gameBtnBar').style.display='none';document.getElementById('pieceTray').style.display='none';}
@@ -803,12 +806,7 @@ document.getElementById('heroStage').addEventListener('touchend',e=>{const dx=e.
 
 // ── RESIZE ───────────────────────────────────
 window.addEventListener('resize',()=>{
-  const isPortrait = window.innerHeight > window.innerWidth;
-  const isTouch = 'ontouchstart' in window;
-  if(isTouch && isPortrait && running){
-    showRotateOverlay();
-  } else if(!isPortrait && running){
-    hideRotateOverlay();
+  if(running){
     setTimeout(()=>{
       canvas.width=canvas.offsetWidth||innerWidth;
       canvas.height=canvas.offsetHeight||(innerHeight-52);
@@ -818,24 +816,11 @@ window.addEventListener('resize',()=>{
 });
 window.addEventListener('orientationchange',()=>{
   setTimeout(()=>{
-    const isPortrait = window.innerHeight > window.innerWidth;
-    const isTouch = 'ontouchstart' in window;
-    if(isTouch && isPortrait){
-      // Portrait phone - show rotate message
-      if(running) showRotateOverlay();
-    } else {
-      // Landscape - start/resume game
-      hideRotateOverlay();
-      if(running){
-        canvas.width=canvas.offsetWidth||innerWidth;
-        canvas.height=canvas.offsetHeight||(innerHeight-52);
-        ghostCanvas=null;
-        initDesktop();
-      } else if(document.getElementById('rotateOverlay').style.display==='flex'){
-        // Was showing overlay - now landscape - start game!
-        hideRotateOverlay();
-        startDesktop();
-      }
+    if(running){
+      canvas.width=canvas.offsetWidth||innerWidth;
+      canvas.height=canvas.offsetHeight||(innerHeight-52);
+      ghostCanvas=null;
+      initDesktop();
     }
     if(PUZZLES.length) buildCarousel();
   },600);
