@@ -143,10 +143,41 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 @keyframes flashX{0%{opacity:1;}100%{opacity:0;}}
 
 
-#ytPlayBtn{position:fixed;bottom:180px;right:24px;z-index:16;width:64px;height:64px;border-radius:14px;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);border:2.5px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 20px rgba(0,0,0,0.5);}
-#ytPlayBtn:hover{background:rgba(200,0,0,0.9);border-color:rgba(255,255,255,0.6);transform:scale(1.1);box-shadow:0 6px 28px rgba(200,0,0,0.5);}
-#ytPlayBtn:active{transform:scale(0.95);}
-.yt-tri{width:0;height:0;border-style:solid;border-width:12px 0 12px 22px;border-color:transparent transparent transparent #fff;margin-left:4px;}
+/* Rotate button on play page */
+#mobRotateBtn{
+  position:fixed;bottom:20px;right:16px;z-index:100;
+  width:52px;height:52px;border-radius:12px;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
+  border:2px solid rgba(255,255,255,0.3);
+  display:none;align-items:center;justify-content:center;
+  cursor:pointer;transition:all 0.2s;
+  box-shadow:0 4px 16px rgba(0,0,0,0.5);
+  font-size:22px;
+}
+#mobRotateBtn:hover{background:rgba(200,0,0,0.9);transform:scale(1.1);}
+@media(max-width:1023px) and (pointer:coarse){
+  #mobRotateBtn{display:flex;}
+}
+
+/* MOBILE GAME - full screen, no header */
+@media(max-width:1023px) and (pointer:coarse){
+  #gameHud{display:none!important;}
+  #gameBtnBar{display:none!important;}
+  #gameCanvas{margin-bottom:0!important;}
+  #pieceTray{
+    transform:translateY(100%);
+    transition:transform 0.3s ease;
+    height:150px;
+    bottom:0!important;
+    background:rgba(20,10,5,0.92)!important;
+    border-top:2px solid rgba(201,168,76,0.4)!important;
+  }
+  #pieceTray.visible{
+    transform:translateY(0);
+  }
+}
+
+.yt-tri{width:0;height:0;border-style:solid;border-width:10px 0 10px 18px;border-color:transparent transparent transparent #fff;margin-left:3px;}
 </style>
 </head>
 <body>
@@ -179,7 +210,6 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
     <button id="playBtn" onclick="startGame()">✦ PLAY THIS PUZZLE ✦<span class="play-sub">Tap to begin</span></button>
   </div>
 </div>
-<div id="ytPlayBtn" onclick="startGame()" title="Play Puzzle"><div class="yt-tri"></div></div>
 <div id="prevArrow" onclick="prevPuzzle()"><span class="arrow-icon">‹</span></div>
 <div id="nextArrow" onclick="nextPuzzle()"><span class="arrow-icon">›</span></div>
 <div id="landscapeBtn" onclick="goLandscape()" title="Switch to landscape">
@@ -217,6 +247,9 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
   <div id="mobBtns">
     <button class="mob-action" onclick="peekMobile()">👁 PEEK</button>
     <button class="mob-action" onclick="quitMobile()">🎨 GALLERY</button>
+    <!-- Mobile rotate button - bottom right of art -->
+  <div id="mobRotateBtn" onclick="toggleMobOrientation()" title="Rotate">
+    <div class="yt-tri"></div>
   </div>
 </div>
 
@@ -315,6 +348,9 @@ const SMALL=120;
 function startDesktop(){
   document.getElementById('gameScreen').style.display='flex';
   document.getElementById('gameBtnBar').style.display='flex';
+  // Show rotate button on mobile
+  const rotBtn=document.getElementById('mobRotateBtn');
+  if(rotBtn&&'ontouchstart' in window)rotBtn.style.display='flex';
   canvas.width=canvas.offsetWidth||window.innerWidth;
   canvas.height=canvas.offsetHeight||(window.innerHeight-52);
   const p=PUZZLES[curIdx];
@@ -536,7 +572,7 @@ function unlockOrientation(){
 
 function startTimer(){stopTimer();elapsed=0;timerInt=setInterval(()=>{elapsed++;const m=Math.floor(elapsed/60),s=elapsed%60;document.getElementById('hudTimer').textContent=m+':'+(s<10?'0':'')+s;},1000);}
 function stopTimer(){clearInterval(timerInt);}
-function quitDesktop(){stopTimer();running=false;document.getElementById('gameScreen').style.display='none';document.getElementById('gameBtnBar').style.display='none';document.getElementById('pieceTray').style.display='none';}
+function quitDesktop(){stopTimer();running=false;document.getElementById('gameScreen').style.display='none';document.getElementById('gameBtnBar').style.display='none';document.getElementById('pieceTray').style.display='none';const rb=document.getElementById('mobRotateBtn');if(rb)rb.style.display='none';}
 function winGame(){
   stopTimer();running=false;
   document.getElementById('gameBtnBar').style.display='none';document.getElementById('pieceTray').style.display='none';
@@ -812,6 +848,52 @@ document.getElementById('heroStage').addEventListener('touchstart',e=>{swX=e.tou
 document.getElementById('heroStage').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-swX;if(Math.abs(dx)>50){dx<0?nextPuzzle():prevPuzzle();}},{passive:true});
 
 // ── RESIZE ───────────────────────────────────
+// ══ MOBILE AUTO-SHOW TRAY ══
+let trayTimeout=null;
+function showMobTray(){
+  const tray=document.getElementById('pieceTray');
+  if(tray){tray.classList.add('visible');clearTimeout(trayTimeout);}
+}
+function hideMobTray(){
+  trayTimeout=setTimeout(()=>{
+    const tray=document.getElementById('pieceTray');
+    if(tray)tray.classList.remove('visible');
+  },1500);
+}
+
+// Show tray when touching bottom 25% of screen
+document.addEventListener('touchstart',e=>{
+  if(!running)return;
+  const y=e.touches[0].clientY;
+  const threshold=window.innerHeight*0.75;
+  if(y>threshold){
+    showMobTray();
+  }
+},{passive:true});
+
+document.addEventListener('touchend',e=>{
+  if(!running)return;
+  const tray=document.getElementById('pieceTray');
+  if(!tray)return;
+  const tr=tray.getBoundingClientRect();
+  const src=e.changedTouches[0];
+  // If touch ended outside tray, start hide timer
+  if(src.clientY<tr.top-20)hideMobTray();
+},{passive:true});
+
+// ══ MOBILE ROTATION TOGGLE ══
+function toggleMobOrientation(){
+  try{
+    const isPortrait=window.innerHeight>window.innerWidth;
+    if(screen.orientation&&screen.orientation.lock){
+      screen.orientation.lock(isPortrait?'landscape':'portrait').catch(()=>{});
+    }
+  }catch(e){}
+  // Visual feedback
+  const btn=document.getElementById('mobRotateBtn');
+  if(btn){btn.style.background='rgba(200,0,0,0.9)';setTimeout(()=>btn.style.background='',500);}
+}
+
 window.addEventListener('resize',()=>{
   if(running){
     setTimeout(()=>{
