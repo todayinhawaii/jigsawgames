@@ -1146,7 +1146,12 @@ async function checkMembership(){
   }
 }
 
-function showPaywall(){ document.getElementById('paywallOverlay').style.display='flex'; }
+function showPaywall(){
+  const ov=document.getElementById('paywallOverlay');
+  if(ov){ov.style.display='flex';ov.classList.add('visible');}
+  const btn=document.getElementById('playBtn');
+  if(btn)btn.style.animationPlayState='paused';
+}
 function closePaywall(){
   const ov=document.getElementById('paywallOverlay');
   if(ov) ov.classList.remove('visible');
