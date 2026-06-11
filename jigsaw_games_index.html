@@ -304,7 +304,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
     <div><div class="nav-logo">🧩 jigsaw.games</div><div class="nav-sub" id="navSub">Original Art Puzzles</div></div>
     <div style="display:flex;gap:8px;">
       <button class="nav-btn" onclick="location.href='https://www.fab.games'">fab.games</button>
-      <button class="nav-btn gold" onclick="startGame()">▶ Play Now</button>
+      <button class="nav-btn gold" onclick="showPaywall();startGame();">▶ Play Now</button>
     </div>
   </div>
   <div id="heroContent">
@@ -320,7 +320,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
       <div class="diff-pill" data-d="48" onclick="setDiff(this)">Hard · 48</div>
       <div class="diff-pill" data-d="70" onclick="setDiff(this)">Expert · 70</div>
     </div>
-    <button id="playBtn" onclick="startGame()">✦ PLAY THIS PUZZLE ✦<span class="play-sub">Tap to begin</span></button>
+    <button id="playBtn" onclick="showPaywall();startGame();">✦ PLAY THIS PUZZLE ✦<span class="play-sub">Tap to begin</span></button>
   </div>
 </div>
 <div id="prevArrow" onclick="prevPuzzle()"><span class="arrow-icon">‹</span></div>
@@ -446,16 +446,18 @@ function buildCarousel(){
 
 // ── START GAME ────────────────────────────────
 async function startGame(){
-  // Show paywall immediately - first thing!!
   showPaywall();
-  const member = await checkMembership();
-  if(!member) return; // stay on paywall
-  closePaywall();
-  if(!PUZZLES.length) return;
-  const isPortrait = window.innerHeight > window.innerWidth;
-  const isTouch = 'ontouchstart' in window;
-  if(isTouch && isPortrait){ showRotateOverlay(); return; }
-  startDesktop();
+  try{
+    const member = await checkMembership();
+    if(member){
+      closePaywall();
+      if(!PUZZLES.length) return;
+      const isPortrait = window.innerHeight > window.innerWidth;
+      const isTouch = 'ontouchstart' in window;
+      if(isTouch && isPortrait){ showRotateOverlay(); return; }
+      startDesktop();
+    }
+  }catch(e){ /* stay on paywall */ }
 }
 
 // ════════════════════════════════════════════
