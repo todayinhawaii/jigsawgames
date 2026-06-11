@@ -446,7 +446,11 @@ function setDiff(el){document.querySelectorAll('.diff-pill').forEach(b=>b.classL
 function buildCarousel(){
   const t=document.getElementById('carouselTrack');t.innerHTML='';
   t.style.gap='40px';t.style.padding='0 28px';
-  [0,1].forEach(()=>PUZZLES.forEach((p,i)=>{
+  // Only duplicate for infinite scroll if 5+ puzzles
+  const copies = PUZZLES.length >= 5 ? [0,1] : [0];
+  if(PUZZLES.length < 5) t.style.animation='none';
+  else t.style.animation='';
+  copies.forEach(()=>PUZZLES.forEach((p,i)=>{
     const c=document.createElement('div');c.className='car-card'+(i===curIdx?' active':'');
     c.innerHTML=`<img src="${p.src}" loading="lazy"><div class="car-card-num">${i+1}</div><div class="car-card-label">${p.title}</div>`;
     c.onclick=()=>{goTo(i);const b=document.getElementById('playBtn');b.style.transform='scale(1.12)';setTimeout(()=>b.style.transform='',400);};
