@@ -1187,23 +1187,17 @@ window.addEventListener('load',async()=>{
     <button class="pw-close" onclick="closePaywall()">✕</button>
     <span class="pw-lock">🔐</span>
     <div class="pw-title">Unlock All Puzzles</div>
-    <div class="pw-sub">Join jigsaw.games and enjoy beautiful original artwork puzzles crafted with love</div>
-
-    <div class="pw-features">
-      <div class="pw-feat"><span class="pw-feat-icon">🎨</span>All original art puzzles — unlimited</div>
-      <div class="pw-feat"><span class="pw-feat-icon">🧩</span>4 difficulty levels — Easy to Expert</div>
-      <div class="pw-feat"><span class="pw-feat-icon">✨</span>New puzzles added regularly</div>
-      <div class="pw-feat"><span class="pw-feat-icon">📱</span>Play on any device — anywhere</div>
-      <div class="pw-feat"><span class="pw-feat-icon">🚫</span>No ads — ever</div>
+    <div class="pw-sub">Original artwork puzzles crafted with love — first month always free!!</div>
+    <div class="pw-free-badge">✦ First Month Completely Free · Cancel Anytime ✦</div>
+    <!-- TWO OPTION BUTTONS -->
+    <div style="display:flex;gap:12px;margin-bottom:14px;">
+      <button onclick="window.location='/join'" style="flex:1;padding:16px 8px;border:none;border-radius:12px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:12px;font-weight:800;cursor:pointer;font-family:Inter,sans-serif;letter-spacing:0.5px;">
+        🎁 Free Month<br><span style="font-size:10px;opacity:0.85;">No credit card</span>
+      </button>
+      <button onclick="window.location='/join'" style="flex:1;padding:16px 8px;border:none;border-radius:12px;background:linear-gradient(135deg,#c9a84c,#ffd700);color:#000;font-size:12px;font-weight:800;cursor:pointer;font-family:Inter,sans-serif;letter-spacing:0.5px;">
+        💳 Subscribe<br><span style="font-size:10px;opacity:0.7;">.99/month</span>
+      </button>
     </div>
-
-    <div class="pw-free-badge">
-      ✦ First Month Completely Free · Cancel Anytime ✦
-    </div>
-
-    <button class="pw-cta" onclick="window.location='/join'">
-      🎁 Start My Free Month
-    </button>
     <div class="pw-signin">Already a member? <a href="/login">Sign in →</a></div>
   </div>
 </div>
