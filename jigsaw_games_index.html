@@ -67,7 +67,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 }
 #carousel{position:fixed;bottom:0;left:0;right:0;z-index:15;padding:14px 0 20px;background:linear-gradient(0deg,rgba(0,0,0,0.72) 0%,transparent 100%);overflow-x:hidden;overflow-y:visible;}
 #carousel::-webkit-scrollbar{display:none;}
-.carousel-track{display:flex;gap:20px;padding:0 20px;animation:scroll 45s linear infinite;width:max-content;}
+.carousel-track{display:flex;gap:28px;padding:0 24px;animation:scroll 45s linear infinite;width:max-content;}
 @media(max-width:767px){
   #carousel{overflow-x:scroll;-webkit-overflow-scrolling:touch;}
   .carousel-track{animation:none;touch-action:pan-x;}
@@ -601,9 +601,12 @@ function returnToTray(p){
 function renderLoop(){
   if(!running)return;
   const cw=canvas.width,ch=canvas.height;
-  ctx.clearRect(0,0,cw,ch);
-  if(ghostCanvas)ctx.drawImage(ghostCanvas,0,0);
-  else{ctx.fillStyle='#ebcfb2';ctx.fillRect(0,0,cw,ch);}
+  // No clearRect - ghostCanvas has full background, prevents flicker!!
+  if(ghostCanvas){
+    ctx.drawImage(ghostCanvas,0,0);
+  } else {
+    ctx.fillStyle='#ebcfb2';ctx.fillRect(0,0,cw,ch);
+  }
   pieces.filter(p=>p.placed).forEach(dp);
   [...pieces].filter(p=>!p.placed&&!p.inTray).sort((a,b)=>a.z-b.z).forEach(dp);
   requestAnimationFrame(renderLoop);
@@ -1068,14 +1071,15 @@ function resizeAfterRotation(){
   initDesktop();
 }
 
+let resizeTO=null;
 window.addEventListener('resize',()=>{
-  if(running){
-    setTimeout(()=>{
-      canvas.width=canvas.offsetWidth||innerWidth;
-      canvas.height=canvas.offsetHeight||(innerHeight-52);
-      ghostCanvas=null;initDesktop();
-    },150);
-  }
+  if(!running)return;
+  clearTimeout(resizeTO);
+  resizeTO=setTimeout(()=>{
+    canvas.width=canvas.offsetWidth||innerWidth;
+    canvas.height=canvas.offsetHeight||(innerHeight-52);
+    ghostCanvas=null;initDesktop();
+  },300);
 });
 window.addEventListener('orientationchange',()=>{
   setTimeout(()=>{
