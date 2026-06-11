@@ -35,7 +35,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 #diffRow{display:flex;gap:8px;margin-bottom:16px;}
 .diff-pill{padding:7px 16px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.4);color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;cursor:pointer;}
 .diff-pill.active{background:rgba(201,168,76,0.2);border-color:var(--gold);color:var(--gold2);}
-#playBtn{margin-bottom:16px;padding:18px 56px;border:none;border-radius:16px;font-family:'Cinzel Decorative',serif;font-size:clamp(16px,4.5vw,20px);font-weight:900;color:#080808;cursor:pointer;background:linear-gradient(135deg,#ffd700,#c9a84c,#ffd700);background-size:200%;box-shadow:0 8px 0 #7a5c14,0 12px 40px rgba(201,168,76,0.5);animation:shine 3s ease infinite;letter-spacing:2px;}
+#playBtn{margin-bottom:16px;padding:18px 56px;border:none;border-radius:16px;font-family:'Cinzel Decorative',serif;font-size:clamp(16px,4.5vw,20px);font-weight:900;color:#080808;cursor:pointer;background:linear-gradient(135deg,#ffd700,#c9a84c);box-shadow:0 8px 0 #7a5c14,0 12px 40px rgba(201,168,76,0.5);letter-spacing:2px;}
 .play-sub{font-size:10px;color:rgba(0,0,0,0.5);font-family:'Inter',sans-serif;display:block;margin-top:3px;}
 @keyframes shine{0%,100%{background-position:0%}50%{background-position:100%}}
 #playBtn:active{transform:translateY(4px);box-shadow:0 2px 0 #7a5c14;}
@@ -219,8 +219,10 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
   display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:0;padding:20px;
   opacity:0;pointer-events:none;
-  transition:opacity 0.2s ease;
+  transition:opacity 0.15s ease;
   will-change:opacity;
+  transform:translateZ(0);
+  -webkit-transform:translateZ(0);
 }
 #paywallOverlay.visible{
   opacity:1;pointer-events:all;
@@ -452,19 +454,19 @@ function buildCarousel(){
 }
 
 // ── START GAME ────────────────────────────────
-async function startGame(){
+function startGame(){
+  // Always show paywall - no async, no flash, no Chrome issues!!
   showPaywall();
-  try{
-    const member = await checkMembership();
-    if(member){
-      closePaywall();
-      if(!PUZZLES.length) return;
-      const isPortrait = window.innerHeight > window.innerWidth;
-      const isTouch = 'ontouchstart' in window;
-      if(isTouch && isPortrait){ showRotateOverlay(); return; }
-      startDesktop();
-    }
-  }catch(e){ /* stay on paywall */ }
+}
+
+async function startGameAsMember(){
+  // Called after login confirms membership
+  closePaywall();
+  if(!PUZZLES.length) return;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  const isTouch = 'ontouchstart' in window;
+  if(isTouch && isPortrait){ showRotateOverlay(); return; }
+  startDesktop();
 }
 
 // ════════════════════════════════════════════
@@ -1148,6 +1150,8 @@ function showPaywall(){ document.getElementById('paywallOverlay').style.display=
 function closePaywall(){
   const ov=document.getElementById('paywallOverlay');
   if(ov) ov.classList.remove('visible');
+  const btn=document.getElementById('playBtn');
+  if(btn) btn.style.animationPlayState='running';
 }
 </script>
 
