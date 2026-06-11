@@ -179,11 +179,25 @@ async function joinAndPay(){
       });
     }catch(e){ /* continue even if this fails */ }
 
-    // Step 3: Go straight to Stripe!!
+    // Step 3: Create Stripe checkout WITH 30 day trial via server!!
     showMsg('Account created!! Redirecting to payment...','info');
-    setTimeout(()=>{
+    try{
+      const res=await fetch('/api/create-checkout',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email,name,price_id:'price_1TgXljRszIkvwb2pYi75vBvK'})
+      });
+      const data=await res.json();
+      if(data.ok && data.url){
+        window.location.href=data.url;
+      } else {
+        // Fallback to direct link if server fails
+        window.location.href='https://buy.stripe.com/7sY5kF2RMdk9bk8f7JbMQ00?prefilled_email='+encodeURIComponent(email);
+      }
+    }catch(e){
+      // Fallback to direct link
       window.location.href='https://buy.stripe.com/7sY5kF2RMdk9bk8f7JbMQ00?prefilled_email='+encodeURIComponent(email);
-    },1000);
+    }
 
   }catch(e){
     showMsg('Connection error — please try again!');
