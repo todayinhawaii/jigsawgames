@@ -59,12 +59,14 @@ def register():
 def create_checkout():
     try:
         data = request.json
-        print(f'DEBUG: STRIPE_PRICE={STRIPE_PRICE}', flush=True)
+        # Use env var or hardcoded fallback - cannot be empty!!
+    price_id = STRIPE_PRICE or 'price_1TgXljRszIkvwb2pYi75vBvK'
+    print(f'CHECKOUT: using price_id={price_id}', flush=True)
     session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             mode='subscription',
             customer_email=data.get('email'),
-            line_items=[{'price': STRIPE_PRICE, 'quantity': 1}],
+            line_items=[{'price': price_id, 'quantity': 1}],
             subscription_data={'trial_period_days': 30},
             success_url=BASE_URL + '/success?session_id={CHECKOUT_SESSION_ID}',
             cancel_url=BASE_URL + '/join',
