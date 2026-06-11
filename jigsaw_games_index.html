@@ -453,14 +453,48 @@ function buildCarousel(){
   copies.forEach(()=>PUZZLES.forEach((p,i)=>{
     const c=document.createElement('div');c.className='car-card'+(i===curIdx?' active':'');
     c.innerHTML=`<img src="${p.src}" loading="lazy"><div class="car-card-num">${i+1}</div><div class="car-card-label">${p.title}</div>`;
-    c.onclick=()=>{goTo(i);const b=document.getElementById('playBtn');b.style.transform='scale(1.12)';setTimeout(()=>b.style.transform='',400);};
+    c.onclick=()=>{
+        goTo(i);
+        stopSlideshow(); // pause when they choose an art!!
+        const b=document.getElementById('playBtn');
+        b.style.transform='scale(1.12)';
+        setTimeout(()=>b.style.transform='',400);
+      };
     t.appendChild(c);
   }));
 }
 
 // ── START GAME ────────────────────────────────
-function startGame(){
-  // Always show paywall - no async, no flash, no Chrome issues!!
+async function startGame(){
+  // Check membership first - members go straight to game!!
+  try{
+    let t=0;
+    while(!window.supabase&&t++<10) await new Promise(r=>setTimeout(r,100));
+    if(window.supabase){
+      const sb2=window.supabase.createClient(
+        'https://xbzeakoypdyslnnriaef.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiemVha295cGR5c2xubnJpYWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NDI5MzIsImV4cCI6MjA5NjIxODkzMn0.-pS2FE-Q-_EetM5ONbJycZWFm336wJ-z4MTOGCdA1LE'
+      );
+      const{data:{session}}=await sb2.auth.getSession();
+      if(session){
+        // Logged in - check active membership
+        const{data:m}=await sb2.from('members')
+          .select('subscription_status,plan,trial_end')
+          .eq('id',session.user.id).single();
+        const active=m&&(m.subscription_status==='active'||m.plan==='free_trial'||(m.trial_end&&new Date(m.trial_end)>new Date()));
+        if(active){
+          // Member - go straight to game!!
+          if(!PUZZLES.length)return;
+          const isPortrait=window.innerHeight>window.innerWidth;
+          const isTouch='ontouchstart' in window;
+          if(isTouch&&isPortrait){showRotateOverlay();return;}
+          startDesktop();
+          return;
+        }
+      }
+    }
+  }catch(e){}
+  // Not a member - show paywall
   showPaywall();
 }
 
