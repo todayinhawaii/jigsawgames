@@ -21,6 +21,11 @@ def supabase_client(service=False):
     key = SUPABASE_SVC if service else SUPABASE_KEY
     return create_client(SUPABASE_URL, key)
 
+# ── CONFIG API ───────────────────────────────────────
+@app.route('/api/config')
+def config():
+    return jsonify({'supabase_url':SUPABASE_URL,'supabase_anon_key':SUPABASE_KEY})
+
 # ── REGISTER (Free Trial) ─────────────────────────
 @app.route('/api/register', methods=['POST'])
 def register():
