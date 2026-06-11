@@ -143,22 +143,28 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 @keyframes flashX{0%{opacity:1;}100%{opacity:0;}}
 
 
-/* Rotate button - YouTube style, only on game page touch devices */
+/* Rotate button - spinning phone icon, game page only */
 #mobRotateBtn{
-  position:fixed;bottom:160px;right:16px;z-index:200;
-  width:56px;height:56px;border-radius:14px;
-  background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);
-  border:2.5px solid rgba(255,255,255,0.25);
+  position:fixed;bottom:160px;right:14px;z-index:200;
+  width:54px;height:54px;border-radius:14px;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);
+  border:2px solid rgba(255,255,255,0.2);
   display:none;align-items:center;justify-content:center;
-  cursor:pointer;transition:all 0.2s;
-  box-shadow:0 4px 20px rgba(0,0,0,0.6);
+  cursor:pointer;transition:background 0.2s,transform 0.1s;
+  box-shadow:0 4px 16px rgba(0,0,0,0.6);
+  font-size:26px;
 }
-#mobRotateBtn:hover,#mobRotateBtn:active{
-  background:rgba(200,0,0,0.9);
-  border-color:rgba(255,255,255,0.6);
-  transform:scale(1.1);
-  box-shadow:0 6px 28px rgba(200,0,0,0.5);
+#mobRotateBtn::before{
+  content:'📱';
+  animation:mobBtnSpin 2.5s ease-in-out infinite;
+  display:block;
+  line-height:1;
 }
+@keyframes mobBtnSpin{
+  0%,40%{transform:rotate(0deg);}
+  60%,100%{transform:rotate(90deg);}
+}
+#mobRotateBtn:active{transform:scale(0.9);background:rgba(0,0,0,0.9);}
 
 /* MOBILE GAME - full screen, no header, edge to edge */
 @media(max-width:1023px) and (pointer:coarse){
@@ -236,7 +242,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
   </div>
   <canvas id="gameCanvas"></canvas>
   <!-- Rotate button - bottom right of puzzle art, mobile only -->
-  <div id="mobRotateBtn" onclick="toggleMobOrientation()" title="Rotate Screen"><div class="yt-tri"></div></div>
+  <div id="mobRotateBtn" onclick="goFullLandscape()" title="Rotate to landscape"></div>
   <div id="pieceTray"><div id="trayInner"></div></div>
   <div id="gameBtnBar">
     <button class="hud-btn-pulse" onclick="peekImage()">👁 TAKE A PEEK</button>
@@ -907,16 +913,23 @@ document.addEventListener('touchend',e=>{
 },{passive:true});
 
 // ══ MOBILE ROTATION TOGGLE ══
-function toggleMobOrientation(){
+function goFullLandscape(){
   try{
-    const isPortrait=window.innerHeight>window.innerWidth;
+    // Request fullscreen first
+    const el=document.documentElement;
+    if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+    else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+
+    // Then lock to landscape
     if(screen.orientation&&screen.orientation.lock){
-      screen.orientation.lock(isPortrait?'landscape':'portrait').catch(()=>{});
+      screen.orientation.lock('landscape').catch(()=>{
+        // Fallback - just show message
+        alert('Please rotate your phone to landscape for the best experience!');
+      });
     }
-  }catch(e){}
-  // Visual feedback
-  const btn=document.getElementById('mobRotateBtn');
-  if(btn){btn.style.background='rgba(200,0,0,0.9)';setTimeout(()=>btn.style.background='',500);}
+  }catch(e){
+    console.log('Orientation:',e);
+  }
 }
 
 window.addEventListener('resize',()=>{
