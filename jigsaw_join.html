@@ -240,7 +240,7 @@ async function startSubscription(){
   if(!email||!email.includes('@')){showMsg('paidMsg','Please enter a valid email!');return;}
   showMsg('paidMsg','Redirecting to secure checkout...','info');
   try{
-    const res=await fetch('/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,name})});
+    const res=await fetch('/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,name,price_id:'price_1TgXljRszIkvwb2pYi75vBvK'})});
     const data=await res.json();
     if(data.ok){window.location.href=data.url;}
     else{showMsg('paidMsg',data.error||'Something went wrong!');}
