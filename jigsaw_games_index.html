@@ -1074,15 +1074,21 @@ function resizeAfterRotation(){
   initDesktop();
 }
 
-let resizeTO=null;
+let resizeTO=null, lastCW=0, lastCH=0;
 window.addEventListener('resize',()=>{
   if(!running)return;
   clearTimeout(resizeTO);
   resizeTO=setTimeout(()=>{
-    canvas.width=canvas.offsetWidth||innerWidth;
-    canvas.height=canvas.offsetHeight||(innerHeight-52);
+    const nw=canvas.offsetWidth||innerWidth;
+    const nh=canvas.offsetHeight||(innerHeight-52);
+    // Only reinit if size changed by more than 30px
+    // Ignores mobile address bar show/hide (only ~50-80px but we want to catch real rotations)
+    const bigChange=Math.abs(nw-lastCW)>30||Math.abs(nh-lastCH)>30;
+    if(!bigChange)return;
+    lastCW=nw;lastCH=nh;
+    canvas.width=nw;canvas.height=nh;
     ghostCanvas=null;initDesktop();
-  },300);
+  },400);
 });
 window.addEventListener('orientationchange',()=>{
   setTimeout(()=>{
