@@ -59,9 +59,9 @@ def register():
 def create_checkout():
     try:
         data = request.json
-        # Use env var or hardcoded fallback - cannot be empty!!
-    price_id = STRIPE_PRICE or 'price_1TgXljRszIkvwb2pYi75vBvK'
-    print(f'CHECKOUT: using price_id={price_id}', flush=True)
+        # Price from client OR env var OR hardcoded - TRIPLE fallback!!
+    price_id = data.get('price_id') or STRIPE_PRICE or 'price_1TgXljRszIkvwb2pYi75vBvK'
+    print(f'CHECKOUT: price_id={price_id}', flush=True)
     session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             mode='subscription',
