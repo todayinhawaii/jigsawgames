@@ -143,9 +143,27 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 @keyframes flashX{0%{opacity:1;}100%{opacity:0;}}
 
 
+/* Change Puzzle pulsating button */
+#mobChangePuzzle{
+  position:fixed;bottom:222px;right:10px;z-index:200;
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,#0f2a0f,#0a1a0a);
+  border:2px solid rgba(100,220,100,0.6);
+  display:none;align-items:center;justify-content:center;
+  cursor:pointer;flex-direction:column;gap:2px;
+  animation:chgPulse 2s ease-in-out infinite;
+}
+@keyframes chgPulse{
+  0%,100%{box-shadow:0 0 6px rgba(100,220,100,0.3);}
+  50%{box-shadow:0 0 16px rgba(100,220,100,0.6),0 0 0 4px rgba(100,220,100,0.1);}
+}
+#mobChangePuzzle:active{transform:scale(0.92);}
+.chg-icon{font-size:20px;line-height:1;}
+.chg-txt{font-size:7px;color:#7db87d;font-family:Inter,sans-serif;font-weight:800;text-align:center;line-height:1.3;}
+
 /* Rotate button - spinning phone icon, game page only */
 #mobRotateBtn{
-  position:fixed;bottom:160px;right:14px;z-index:200;
+  position:fixed;bottom:160px;right:10px;z-index:200;opacity:0.88;
   width:54px;height:54px;border-radius:14px;
   background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);
   border:2px solid rgba(255,255,255,0.2);
@@ -368,6 +386,8 @@ function startDesktop(){
   if(rotBtn&&'ontouchstart' in window)rotBtn.style.display='flex';
   const backBtn=document.getElementById('mobBackBtn');
   if(backBtn&&'ontouchstart' in window)backBtn.style.display='block';
+  const chgBtn=document.getElementById('mobChangePuzzle');
+  if(chgBtn&&'ontouchstart' in window)chgBtn.style.display='flex';
   canvas.width=canvas.offsetWidth||window.innerWidth;
   canvas.height=canvas.offsetHeight||(window.innerHeight-52);
   const p=PUZZLES[curIdx];
@@ -608,7 +628,7 @@ function unlockOrientation(){
 
 function startTimer(){stopTimer();elapsed=0;timerInt=setInterval(()=>{elapsed++;const m=Math.floor(elapsed/60),s=elapsed%60;document.getElementById('hudTimer').textContent=m+':'+(s<10?'0':'')+s;},1000);}
 function stopTimer(){clearInterval(timerInt);}
-function quitDesktop(){stopTimer();running=false;document.getElementById('gameScreen').style.display='none';document.getElementById('gameBtnBar').style.display='none';document.getElementById('pieceTray').style.display='none';const rb=document.getElementById('mobRotateBtn');if(rb)rb.style.display='none';const bb=document.getElementById('mobBackBtn');if(bb)bb.style.display='none';}
+function quitDesktop(){stopTimer();running=false;document.getElementById('gameScreen').style.display='none';document.getElementById('gameBtnBar').style.display='none';document.getElementById('pieceTray').style.display='none';const rb=document.getElementById('mobRotateBtn');if(rb)rb.style.display='none';const bb=document.getElementById('mobBackBtn');if(bb)bb.style.display='none';const cb=document.getElementById('mobChangePuzzle');if(cb)cb.style.display='none';}
 function winGame(){
   stopTimer();running=false;
   document.getElementById('gameBtnBar').style.display='none';document.getElementById('pieceTray').style.display='none';
