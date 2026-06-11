@@ -1088,22 +1088,33 @@ let memberChecked=false, isMember=false;
 async function checkMembership(){
   if(memberChecked) return isMember;
   try{
-    if(!sb) return false;
-    const{data:{session}}=await sb.auth.getSession();
-    if(!session){ memberChecked=true; isMember=false; return false; }
-    // Check subscription in members table
-    const{data}=await sb.from('members')
+    // Wait for Supabase to be ready
+    let t=0;
+    while(!sb&&t++<20) await new Promise(r=>setTimeout(r,100));
+    if(!sb){ isMember=false; memberChecked=true; return false; }
+
+    const{data:{session},error:sErr}=await sb.auth.getSession();
+    if(sErr||!session){ memberChecked=true; isMember=false; return false; }
+
+    // Check members table
+    const{data,error}=await sb
+      .from('members')
       .select('plan,trial_end,subscription_status')
       .eq('id',session.user.id)
       .single();
-    if(data){
-      const active = data.plan==='free_trial'||
-                     data.subscription_status==='active'||
-                     (data.trial_end&&new Date(data.trial_end)>new Date());
-      memberChecked=true; isMember=active; return active;
-    }
-  }catch(e){ console.log('Member check:',e.message); }
-  memberChecked=false; return false;
+
+    if(error||!data){ memberChecked=true; isMember=false; return false; }
+
+    const now=new Date();
+    isMember = data.subscription_status==='active' ||
+               data.plan==='free_trial' ||
+               (data.trial_end && new Date(data.trial_end)>now);
+    memberChecked=true;
+    return isMember;
+  }catch(e){
+    console.log('Member check error:',e.message);
+    memberChecked=true; isMember=false; return false;
+  }
 }
 
 function showPaywall(){ document.getElementById('paywallOverlay').style.display='flex'; }
