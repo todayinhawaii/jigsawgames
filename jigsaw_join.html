@@ -73,12 +73,18 @@ footer{text-align:center;padding:20px;font-size:11px;color:rgba(240,237,232,0.2)
       </div>
       <div class="form-group">
         <label class="form-label">Choose a Password</label>
-        <input class="form-input" id="password" type="password" placeholder="Min 8 characters" oninput="checkStrength(this.value)">
+        <div style="position:relative;">
+          <input class="form-input" id="password" type="password" placeholder="Min 8 characters" oninput="checkStrength(this.value)" style="padding-right:44px;">
+          <span onclick="togglePw('password',this)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;opacity:0.5;">👁</span>
+        </div>
         <div class="password-strength"><div class="strength-bar" id="strengthBar"></div></div>
       </div>
       <div class="form-group">
         <label class="form-label">Confirm Password</label>
-        <input class="form-input" id="password2" type="password" placeholder="Repeat your password">
+        <div style="position:relative;">
+          <input class="form-input" id="password2" type="password" placeholder="Repeat your password" style="padding-right:44px;">
+          <span onclick="togglePw('password2',this)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;opacity:0.5;">👁</span>
+        </div>
       </div>
       <button class="cta-btn" id="joinBtn" onclick="joinAndPay()">
         🎁 Start My Free Month →
@@ -115,6 +121,11 @@ function showMsg(msg,type='error'){
 }
 function hideMsg(){document.getElementById('msgBox').style.display='none';}
 
+function togglePw(id,icon){
+  const el=document.getElementById(id);
+  el.type=el.type==='password'?'text':'password';
+  icon.style.opacity=el.type==='text'?'1':'0.5';
+}
 function checkStrength(pw){
   const bar=document.getElementById('strengthBar');
   let s=0;
