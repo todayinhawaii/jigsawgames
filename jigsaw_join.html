@@ -234,17 +234,11 @@ async function startFreeTrial(){
   }
 }
 
-async function startSubscription(){
+function startSubscription(){
   const email=document.getElementById('paidEmail').value.trim();
-  const name=document.getElementById('paidName').value.trim();
   if(!email||!email.includes('@')){showMsg('paidMsg','Please enter a valid email!');return;}
-  showMsg('paidMsg','Redirecting to secure checkout...','info');
-  try{
-    const res=await fetch('/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,name,price_id:'price_1TgXljRszIkvwb2pYi75vBvK'})});
-    const data=await res.json();
-    if(data.ok){window.location.href=data.url;}
-    else{showMsg('paidMsg',data.error||'Something went wrong!');}
-  }catch(e){showMsg('paidMsg','Connection error — please try again!');}
+  // Direct Stripe payment link - no server needed!!
+  window.location.href='https://buy.stripe.com/7sY5kF2RMdk9bk8f7JbMQ00';
 }
 </script>
 </body>
