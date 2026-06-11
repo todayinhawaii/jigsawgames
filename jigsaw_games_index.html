@@ -1078,10 +1078,8 @@ window.addEventListener('orientationchange',()=>{
     if(PUZZLES.length) buildCarousel();
   },600);
 });
-</script>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
+
 // ── MEMBERSHIP CHECK ─────────────────────────
 let memberChecked=false, isMember=false;
 
@@ -1119,6 +1117,12 @@ async function checkMembership(){
 
 function showPaywall(){ document.getElementById('paywallOverlay').style.display='flex'; }
 function closePaywall(){ document.getElementById('paywallOverlay').style.display='none'; }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+
+
 
 window.addEventListener('load',async()=>{
   await loadPuzzles();
@@ -1133,6 +1137,7 @@ window.addEventListener('load',async()=>{
   document.getElementById('navSub').textContent=PUZZLES.length+' Original Art Puzzles';
   buildDots();updateHero();buildCarousel();
 });
+
 </script>
 
 <!-- PAYWALL OVERLAY -->
