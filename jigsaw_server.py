@@ -59,7 +59,8 @@ def register():
 def create_checkout():
     try:
         data = request.json
-        session = stripe.checkout.Session.create(
+        print(f'DEBUG: STRIPE_PRICE={STRIPE_PRICE}', flush=True)
+    session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             mode='subscription',
             customer_email=data.get('email'),
