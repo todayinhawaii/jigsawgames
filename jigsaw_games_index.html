@@ -385,8 +385,10 @@ function initDesktop(){
   total=cols*rows;placed=0;maxZ=100;pieces=[];trayPieces=[];
   const cw=canvas.width,ch=canvas.height;
   const ar=puzzleImg.naturalWidth/puzzleImg.naturalHeight;
-  let bw=cw*0.8,bh=bw/ar;if(bh>ch*0.78){bh=ch*0.78;bw=bh*ar;}
-  const bx=(cw-bw)/2,by=Math.max(8,(ch-bh)/2-140);
+  const isMT='ontouchstart' in window&&cw<1024;
+  let bw=cw*(isMT?1.0:0.80),bh=bw/ar;
+  if(bh>ch*(isMT?1.0:0.78)){bh=ch*(isMT?1.0:0.78);bw=bh*ar;}
+  const bx=(cw-bw)/2,by=isMT?0:Math.max(8,(ch-bh)/2-140);
   const pw=bw/cols,ph=bh/rows,TAB=Math.min(pw,ph)*0.22;
   const hT=Array.from({length:rows-1},()=>Array.from({length:cols},()=>Math.random()>.5?1:-1));
   const vT=Array.from({length:rows},()=>Array.from({length:cols-1},()=>Math.random()>.5?1:-1));
