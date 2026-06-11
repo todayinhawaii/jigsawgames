@@ -143,19 +143,22 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 @keyframes flashX{0%{opacity:1;}100%{opacity:0;}}
 
 
-/* Rotate button - only shows during game on touch devices */
+/* Rotate button - YouTube style, only on game page touch devices */
 #mobRotateBtn{
-  position:fixed;bottom:165px;right:14px;z-index:200;
-  width:46px;height:46px;border-radius:12px;
-  background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);
-  border:2px solid rgba(255,255,255,0.3);
+  position:fixed;bottom:160px;right:16px;z-index:200;
+  width:56px;height:56px;border-radius:14px;
+  background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);
+  border:2.5px solid rgba(255,255,255,0.25);
   display:none;align-items:center;justify-content:center;
   cursor:pointer;transition:all 0.2s;
-  box-shadow:0 4px 16px rgba(0,0,0,0.5);
-  font-size:20px;
-  -webkit-user-select:none;
+  box-shadow:0 4px 20px rgba(0,0,0,0.6);
 }
-#mobRotateBtn:active{background:rgba(200,0,0,0.9);transform:scale(0.92);}
+#mobRotateBtn:hover,#mobRotateBtn:active{
+  background:rgba(200,0,0,0.9);
+  border-color:rgba(255,255,255,0.6);
+  transform:scale(1.1);
+  box-shadow:0 6px 28px rgba(200,0,0,0.5);
+}
 
 /* MOBILE GAME - full screen, no header, edge to edge */
 @media(max-width:1023px) and (pointer:coarse){
@@ -233,7 +236,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
   </div>
   <canvas id="gameCanvas"></canvas>
   <!-- Rotate button - bottom right of puzzle art, mobile only -->
-  <div id="mobRotateBtn" onclick="toggleMobOrientation()">🔄</div>
+  <div id="mobRotateBtn" onclick="toggleMobOrientation()" title="Rotate Screen"><div class="yt-tri"></div></div>
   <div id="pieceTray"><div id="trayInner"></div></div>
   <div id="gameBtnBar">
     <button class="hud-btn-pulse" onclick="peekImage()">👁 TAKE A PEEK</button>
@@ -449,7 +452,18 @@ function hidePreview(){previewCanvas.style.display='none';}
 function liftFromTray(e,p,div){
   e.preventDefault();if(p.placed||!p.inTray)return;
   const src=e.touches?e.touches[0]:e,r=canvas.getBoundingClientRect();
-  p.inTray=false;p.x=(src.clientX-r.left)-p.w/2;p.y=(src.clientY-r.top)-p.h/2;p.z=++maxZ;
+  p.inTray=false;
+  // Place piece under finger - if touch is near bottom, lift piece above tray
+  let py=(src.clientY-r.top)-p.h/2;
+  // Make sure piece appears above tray on mobile
+  const tray=document.getElementById('pieceTray');
+  const tr=tray?tray.getBoundingClientRect():null;
+  if(tr&&(src.clientY-r.top)+p.h/2>tr.top-r.top){
+    py=(tr.top-r.top)-p.h-10; // place above tray
+  }
+  p.x=(src.clientX-r.left)-p.w/2;
+  p.y=py;
+  p.z=++maxZ;
   div.style.opacity='0.3';div.style.pointerEvents='none';
   dragging=p;dragOffX=p.w/2;dragOffY=p.h/2;
 }
@@ -512,16 +526,22 @@ function onMove(e){
   const src=e.touches?e.touches[0]:e;
   const tray=document.getElementById('pieceTray');
   const tr=tray?tray.getBoundingClientRect():null;
-  if(tr&&src.clientY>=tr.top){dragging=null;return;}
+  // Allow dragging INTO tray area - don't cancel drag
   const r=canvas.getBoundingClientRect();
   dragging.x=(src.clientX-r.left)-dragOffX;
   dragging.y=(src.clientY-r.top)-dragOffY;
+  // Fade tray when piece is near it
+  if(tray&&tr){
+    const pieceBottom=src.clientY+dragging.h/2;
+    tray.style.opacity=pieceBottom>tr.top?'0.4':'1';
+  }
 }
 function onUp(e){
   if(!dragging)return;const p=dragging;
+  const tray=document.getElementById('pieceTray');
+  if(tray)tray.style.opacity='1'; // restore tray opacity
   if(!trySnap(p)){
     const src=e.changedTouches?e.changedTouches[0]:e;
-    const tray=document.getElementById('pieceTray');
     const tr=tray?tray.getBoundingClientRect():null;
     if(tr&&src.clientY>tr.top-20)returnToTray(p);
   }
