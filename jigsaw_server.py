@@ -11,7 +11,7 @@ SUPABASE_URL   = os.environ.get('SUPABASE_URL','')
 SUPABASE_KEY   = os.environ.get('SUPABASE_ANON_KEY','')
 SUPABASE_SVC   = os.environ.get('SUPABASE_SERVICE_KEY','')
 STRIPE_KEY     = os.environ.get('STRIPE_SECRET_KEY','')
-STRIPE_PRICE   = os.environ.get('STRIPE_JIGSAW_PRICE_ID','') or os.environ.get('STRIPE_PRICE_ID','')
+STRIPE_PRICE   = os.environ.get('STRIPE_JIGSAW_PRICE_ID','') or os.environ.get('STRIPE_PRICE_ID','') or 'price_1TgXljRszIkvwb2pYi75vBvK'
 STRIPE_WEBHOOK = os.environ.get('STRIPE_WEBHOOK_SECRET','')
 BASE_URL       = os.environ.get('BASE_URL','https://www.jigsaw.games')
 
