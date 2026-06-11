@@ -436,6 +436,7 @@ function setDiff(el){document.querySelectorAll('.diff-pill').forEach(b=>b.classL
 
 function buildCarousel(){
   const t=document.getElementById('carouselTrack');t.innerHTML='';
+  t.style.gap='40px';t.style.padding='0 28px';
   [0,1].forEach(()=>PUZZLES.forEach((p,i)=>{
     const c=document.createElement('div');c.className='car-card'+(i===curIdx?' active':'');
     c.innerHTML=`<img src="${p.src}" loading="lazy"><div class="car-card-num">${i+1}</div><div class="car-card-label">${p.title}</div>`;
@@ -473,6 +474,7 @@ let puzzleImg=null,ghostCanvas=null,trayPieces=[];
 const SMALL=90;
 
 function startDesktop(){
+  running=false; // Stop any existing render loop first
   document.getElementById('gameScreen').style.display='flex';
   document.getElementById('gameBtnBar').style.display='flex';
   // Show rotate button on mobile
@@ -520,7 +522,8 @@ function initDesktop(){
   g.strokeStyle='rgba(201,168,76,0.9)';g.lineWidth=4;g.strokeRect(bx-3,by-3,bw+6,bh+6);
   buildDesktopTray();updateHud();startTimer();running=true;
   document.getElementById('pieceTray').style.display='block';
-  requestAnimationFrame(renderLoop);
+  // Small delay before starting render so canvas is fully ready
+  setTimeout(()=>requestAnimationFrame(renderLoop),50);
 }
 
 function buildDesktopTray(){
