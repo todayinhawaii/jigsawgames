@@ -216,8 +216,14 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 #paywallOverlay{
   position:fixed;inset:0;z-index:500;
   background:rgba(0,0,0,0.93);
-  display:none;flex-direction:column;align-items:center;
+  display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:0;padding:20px;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.2s ease;
+  will-change:opacity;
+}
+#paywallOverlay.visible{
+  opacity:1;pointer-events:all;
 }
 #paywallCard{
   width:100%;max-width:360px;
@@ -1139,7 +1145,10 @@ async function checkMembership(){
 }
 
 function showPaywall(){ document.getElementById('paywallOverlay').style.display='flex'; }
-function closePaywall(){ document.getElementById('paywallOverlay').style.display='none'; }
+function closePaywall(){
+  const ov=document.getElementById('paywallOverlay');
+  if(ov) ov.classList.remove('visible');
+}
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1159,14 +1168,6 @@ window.addEventListener('load',async()=>{
   document.getElementById('heroBg').style.backgroundImage=`url(${PUZZLES[0].src})`;
   document.getElementById('navSub').textContent=PUZZLES.length+' Original Art Puzzles';
   buildDots();updateHero();buildCarousel();
-  // Wire play buttons directly
-  ['playBtn'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.addEventListener('click',()=>{
-      showPaywall();
-      startGame();
-    });
-  });
 });
 
 </script>
