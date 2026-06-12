@@ -369,6 +369,7 @@ body.browsing #puzzleDots{
       <div><div class="nav-logo">🧩 jigsaw.games</div><div class="nav-sub" id="navSub">Original Art Puzzles</div></div>
     </div>
     <div style="display:flex;gap:8px;">
+      <button class="nav-btn" id="accountBtn" onclick="location.href='/account'" style="display:none;">👤 My Account</button>
       <button class="nav-btn" onclick="location.href='https://www.fab.games'">fab.games</button>
       <button class="nav-btn gold" onclick="showPaywall();startGame();">▶ Play Now</button>
     </div>
@@ -1340,6 +1341,21 @@ window.addEventListener('load',async()=>{
     const lb=document.getElementById('landscapeBtn');
     if(lb) lb.style.display='flex';
   }
+  // Show My Account button if logged in
+  try{
+    let t=0;while(!window.supabase&&t++<20)await new Promise(r=>setTimeout(r,100));
+    if(window.supabase){
+      const sb3=window.supabase.createClient(
+        'https://xbzeakoypdyslnnriaef.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiemVha295cGR5c2xubnJpYWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NDI5MzIsImV4cCI6MjA5NjIxODkzMn0.-pS2FE-Q-_EetM5ONbJycZWFm336wJ-z4MTOGCdA1LE'
+      );
+      const{data:{session}}=await sb3.auth.getSession();
+      if(session){
+        const ab=document.getElementById('accountBtn');
+        if(ab) ab.style.display='inline-block';
+      }
+    }
+  }catch(e){}
 });
 
 </script>
