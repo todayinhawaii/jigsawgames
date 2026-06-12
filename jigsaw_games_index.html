@@ -23,7 +23,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 .nav-btn{padding:8px 16px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.6);color:rgba(255,255,255,0.8);font-size:11px;font-weight:600;cursor:pointer;}
 .nav-btn.gold{background:rgba(201,168,76,0.2);border-color:var(--gold);color:var(--gold2);}
 
-#heroContent{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative;z-index:10;padding:0 24px;margin-bottom:175px;}
+#heroContent{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative;z-index:10;padding:0 24px;margin-bottom:175px;margin-top:36px;}
 #puzzleDots{display:flex;gap:8px;margin-bottom:20px;}
 .pdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);transition:all 0.3s;cursor:pointer;}
 .pdot.active{background:var(--gold2);width:24px;border-radius:4px;}
@@ -211,6 +211,31 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
   #trayInner{padding:8px 14px!important;}
 }
 
+
+/* CATEGORY TABS */
+#categoryTabs{
+  position:fixed;top:74px;left:0;right:0;z-index:18;
+  display:flex;gap:8px;padding:0 16px;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+#categoryTabs::-webkit-scrollbar{display:none;}
+.cat-pill{
+  flex-shrink:0;padding:7px 14px;border-radius:18px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(0,0,0,0.45);
+  color:rgba(255,255,255,0.6);
+  font-size:11px;font-weight:700;
+  cursor:pointer;white-space:nowrap;
+  transition:all 0.2s;font-family:'Inter',sans-serif;
+}
+.cat-pill.active{
+  background:rgba(201,168,76,0.25);
+  border-color:var(--gold);
+  color:var(--gold2);
+}
+@media(min-width:768px){
+  #categoryTabs{top:78px;justify-content:center;}
+}
 .yt-tri{width:0;height:0;border-style:solid;border-width:10px 0 10px 18px;border-color:transparent transparent transparent #fff;margin-left:3px;}
 
 /* ── PAYWALL OVERLAY ── */
@@ -316,6 +341,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
       <button class="nav-btn gold" onclick="showPaywall();startGame();">▶ Play Now</button>
     </div>
   </div>
+<div id="categoryTabs"></div>
   <div id="heroContent">
     <div id="puzzleDots"></div>
     <div id="artInfo">
@@ -401,7 +427,9 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 const STORAGE='https://xbzeakoypdyslnnriaef.supabase.co/storage/v1/object/public/puzzles/';
 const DIFFS={12:{cols:3,rows:4},24:{cols:4,rows:6},48:{cols:6,rows:8},70:{cols:7,rows:10}};
 const IS_MOB=()=>window.innerWidth<768;
-let PUZZLES=[],sb=null,curIdx=0,difficulty=12;
+let PUZZLES=[],ALL_PUZZLES=[],sb=null,curIdx=0,difficulty=12,currentCategory='all';
+const CATEGORIES=[("all", "✦ All"), ("village", "🏡 Villages"), ("hawaii", "🌺 Hawaii"), ("winter", "❄️ Winter"), ("fantasy", "🧚 Fantasy"), ("cafe", "☕ Village Life"), ("vintage", "🚂 Vintage"), ("animals", "🐾 Animals"), ("seasonal", "🌹 Seasonal")];
+
 
 // ── SUPABASE ─────────────────────────────────
 async function loadPuzzles(){
@@ -414,10 +442,36 @@ async function loadPuzzles(){
     );
     const{data,error}=await sb.from('jigsaw_puzzles').select('*').order('num');
     if(error)throw error;
-    if(data&&data.length)PUZZLES=data.map(p=>({src:STORAGE+p.filename,title:p.title,desc:p.desc}));
+    if(data&&data.length)ALL_PUZZLES=data.map(p=>({src:STORAGE+p.filename,title:p.title,desc:p.desc,category:p.category||'village'}));
+  PUZZLES=ALL_PUZZLES;
   }catch(e){console.error('DB:',e.message||e);}
 }
 
+
+function buildCategoryTabs(){
+  const used = new Set(ALL_PUZZLES.map(p=>p.category||'village'));
+  const wrap = document.getElementById('categoryTabs');
+  wrap.innerHTML='';
+  CATEGORIES.forEach(([val,label])=>{
+    if(val!=='all' && !used.has(val)) return; // only show categories that have puzzles
+    const p=document.createElement('div');
+    p.className='cat-pill'+(val===currentCategory?' active':'');
+    p.textContent=label;
+    p.onclick=()=>selectCategory(val);
+    wrap.appendChild(p);
+  });
+}
+function selectCategory(cat){
+  currentCategory=cat;
+  PUZZLES = (cat==='all') ? ALL_PUZZLES : ALL_PUZZLES.filter(p=>(p.category||'village')===cat);
+  if(!PUZZLES.length) PUZZLES=ALL_PUZZLES; // fallback if empty
+  curIdx=0;
+  document.querySelectorAll('.cat-pill').forEach(el=>el.classList.remove('active'));
+  buildCategoryTabs();
+  transitionBg(PUZZLES[0].src);
+  updateHero();buildCarousel();
+  stopSlideshow();startSlideshow();
+}
 // ── HOME ──────────────────────────────────────
 function buildDots(){
   const w=document.getElementById('puzzleDots');w.innerHTML='';
@@ -1228,7 +1282,7 @@ window.addEventListener('load',async()=>{
   }
   document.getElementById('heroBg').style.backgroundImage=`url(${PUZZLES[0].src})`;
   document.getElementById('navSub').textContent=PUZZLES.length+' Original Art Puzzles';
-  buildDots();updateHero();buildCarousel();
+  buildCategoryTabs();buildDots();updateHero();buildCarousel();
   startSlideshow();
 });
 
