@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Account — jigsaw.games</title>
+<link rel="icon" type="image/png" href="/jigsaw-logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&display=block" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--black:#080808;--gold:#c9a84c;--gold2:#ffd700;--white:#f0ede8;--muted:rgba(240,237,232,0.5);--border:rgba(255,255,255,0.07);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(201,168,76,0.05),transparent);pointer-events:none;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Cinzel Decorative',serif;font-size:20px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;}
+.nav-back{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;}
+.nav-back:hover{color:var(--gold);}
+.wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+.card{width:100%;max-width:440px;background:#0d0d0f;border:1px solid rgba(201,168,76,0.3);border-radius:24px;padding:36px 32px;box-shadow:0 0 60px rgba(201,168,76,0.08);}
+.card-icon{font-size:48px;text-align:center;margin-bottom:8px;}
+.card-title{font-family:'Cinzel Decorative',serif;font-size:24px;font-weight:900;background:linear-gradient(135deg,#ffd700,#c9a84c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:4px;}
+.card-email{font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px;}
+.status-box{border-radius:14px;padding:18px;margin-bottom:20px;text-align:center;}
+.status-box.active{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);}
+.status-box.cancelled{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);}
+.status-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;}
+.status-box.active .status-label{color:rgba(34,197,94,0.7);}
+.status-box.cancelled .status-label{color:rgba(239,68,68,0.7);}
+.status-value{font-size:18px;font-weight:900;font-family:'Cinzel',serif;}
+.status-box.active .status-value{color:#22c55e;}
+.status-box.cancelled .status-value{color:#fca5a5;}
+.status-sub{font-size:12px;color:var(--muted);margin-top:4px;}
+.btn{display:block;width:100%;padding:15px;border:none;border-radius:12px;font-family:'Cinzel',serif;font-size:14px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;transition:transform 0.1s;margin-bottom:10px;letter-spacing:0.5px;}
+.btn:active{transform:translateY(2px);}
+.btn-gold{background:linear-gradient(135deg,#ffd700,#c9a84c);color:#080808;box-shadow:0 4px 0 #7a5c14;}
+.btn-gold:active{box-shadow:0 1px 0 #7a5c14;}
+.btn-ghost{background:rgba(255,255,255,0.05);color:var(--white);border:1px solid rgba(255,255,255,0.1);}
+.btn-danger{background:rgba(239,68,68,0.08);color:#fca5a5;border:1px solid rgba(239,68,68,0.25);}
+.loading{text-align:center;color:var(--muted);font-size:13px;padding:30px 0;}
+footer{text-align:center;padding:20px;font-size:11px;color:rgba(240,237,232,0.2);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo">🧩 jigsaw.games</a>
+  <a href="/" class="nav-back">← Back to Games</a>
+</nav>
+<div class="wrap">
+  <div class="card">
+    <div class="card-icon">👤</div>
+    <div class="card-title">My Account</div>
+    <div class="card-email" id="userEmail">Loading...</div>
+
+    <div id="content">
+      <div class="loading">Loading your membership details...</div>
+    </div>
+  </div>
+</div>
+<footer>© 2026 jigsaw.games — Made with 🌺 in Hawaii</footer>
+
+<script>
+let sbClient;
+async function init(){
+  sbClient = window.supabase.createClient(
+    'https://xbzeakoypdyslnnriaef.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiemVha295cGR5c2xubnJpYWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NDI5MzIsImV4cCI6MjA5NjIxODkzMn0.-pS2FE-Q-_EetM5ONbJycZWFm336wJ-z4MTOGCdA1LE'
+  );
+  const{data:{session}}=await sbClient.auth.getSession();
+  if(!session){ window.location.href='/login'; return; }
+
+  document.getElementById('userEmail').textContent=session.user.email;
+
+  // Get member info
+  const{data:m}=await sbClient.from('members')
+    .select('*')
+    .eq('email',session.user.email)
+    .single();
+
+  renderStatus(m, session.user.email);
+}
+
+function renderStatus(m, email){
+  const el=document.getElementById('content');
+  const status = m?.subscription_status || m?.status || 'trial';
+  const cancelled = status==='cancelled' || status==='cancel_at_period_end';
+
+  let trialEndStr = '';
+  if(m?.trial_end){
+    const d=new Date(m.trial_end);
+    trialEndStr = d.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  }
+
+  if(cancelled){
+    el.innerHTML=`
+      <div class="status-box cancelled">
+        <div class="status-label">Subscription Cancelled</div>
+        <div class="status-value">😢 We'll miss you</div>
+        <div class="status-sub">${trialEndStr ? `You can keep playing until <strong>${trialEndStr}</strong>` : 'Access ends at your current billing period'}</div>
+      </div>
+      <a href="#" onclick="openPortal();return false;" class="btn btn-gold">🔄 Resume My Subscription</a>
+      <a href="/" class="btn btn-ghost">🎨 Keep Playing</a>
+      <a href="#" onclick="logout();return false;" class="btn btn-ghost">Sign Out</a>
+    `;
+  } else {
+    el.innerHTML=`
+      <div class="status-box active">
+        <div class="status-label">Membership Status</div>
+        <div class="status-value">✅ Active</div>
+        <div class="status-sub">${trialEndStr ? `Free trial until <strong>${trialEndStr}</strong>` : 'Enjoying full access'}</div>
+      </div>
+      <a href="/" class="btn btn-gold">🎨 Play Puzzles</a>
+      <a href="#" onclick="openPortal();return false;" class="btn btn-ghost">💳 Manage Billing & Payment</a>
+      <a href="#" onclick="cancelMembership();return false;" class="btn btn-danger">❌ Cancel Membership</a>
+      <a href="#" onclick="logout();return false;" class="btn btn-ghost">Sign Out</a>
+    `;
+  }
+}
+
+async function openPortal(){
+  const{data:{session}}=await sbClient.auth.getSession();
+  const res=await fetch('/api/create-portal-session',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email:session.user.email})
+  });
+  const data=await res.json();
+  if(data.ok && data.url){ window.location.href=data.url; }
+  else { alert('Unable to open billing portal: '+(data.error||'unknown error')); }
+}
+
+async function cancelMembership(){
+  if(!confirm('Are you sure you want to cancel? You can resume anytime before your access ends.')) return;
+  await openPortal(); // Stripe portal handles the actual cancellation
+}
+
+async function logout(){
+  await sbClient.auth.signOut();
+  window.location.href='/';
+}
+
+init();
+</script>
+</body>
+</html>
