@@ -214,15 +214,22 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 
 /* CATEGORY TABS */
 #categoryTabsWrap{
-  position:fixed;top:68px;left:0;right:0;z-index:18;
+  position:fixed;top:72px;left:0;right:0;z-index:18;
 }
 #categoryHeading{
+  display:inline-block;
+  margin:0 auto 18px;
   text-align:center;font-family:'Cinzel Decorative',serif;
-  font-size:clamp(12px,3vw,15px);font-weight:700;
-  color:rgba(255,215,0,0.65);letter-spacing:2px;
-  text-transform:uppercase;margin-bottom:8px;
-  text-shadow:0 2px 8px rgba(0,0,0,0.6);
+  font-size:clamp(13px,3.3vw,16.5px);font-weight:700;
+  color:var(--gold2);letter-spacing:2px;
+  text-transform:uppercase;
+  background:rgba(20,40,20,0.85);
+  border:1.5px solid var(--gold);
+  border-radius:24px;
+  padding:9px 24px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.4);
 }
+#categoryHeadingWrap{text-align:center;}
 #categoryTabs{
   display:flex;gap:10px;padding:0 16px;overflow-x:auto;
   -webkit-overflow-scrolling:touch;scrollbar-width:none;
@@ -230,17 +237,17 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 #categoryTabs::-webkit-scrollbar{display:none;}
 .cat-pill{
   flex-shrink:0;padding:11px 21px;border-radius:24px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:rgba(0,0,0,0.45);
-  color:rgba(255,255,255,0.6);
+  border:1.5px solid var(--gold);
+  background:rgba(20,40,20,0.85);
+  color:var(--gold2);
   font-size:16px;font-weight:700;
   cursor:pointer;white-space:nowrap;
   transition:all 0.2s;font-family:'Inter',sans-serif;
 }
 .cat-pill.active{
-  background:rgba(201,168,76,0.25);
-  border-color:var(--gold);
-  color:var(--gold2);
+  background:linear-gradient(135deg,#ffd700,#c9a84c);
+  border-color:var(--gold2);
+  color:#0d2410;
 }
 @media(min-width:768px){
   #categoryTabsWrap{top:72px;}
@@ -351,7 +358,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
       <button class="nav-btn gold" onclick="showPaywall();startGame();">▶ Play Now</button>
     </div>
   </div>
-<div id="categoryTabsWrap"><div id="categoryHeading">Explore Our Puzzle Collections</div><div id="categoryTabs"></div></div>
+<div id="categoryTabsWrap"><div id="categoryHeadingWrap"><div id="categoryHeading">Explore Our Puzzle Collections</div></div><div id="categoryTabs"></div></div>
   <div id="heroContent">
     <div id="puzzleDots"></div>
     <div id="artInfo">
