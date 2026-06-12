@@ -166,6 +166,20 @@ body{display:flex;flex-direction:column;align-items:center;padding:30px 16px 60p
         placeholder="e.g. 10" min="1" max="999">
     </div>
 
+    <div class="form-group">
+      <label class="form-label">📂 Category</label>
+      <select class="form-input" id="newCategory">
+        <option value="village">🏡 English Villages</option>
+        <option value="hawaii">🌺 Hawaiian Paradise</option>
+        <option value="winter">❄️ Winter Magic</option>
+        <option value="fantasy">🧚 Fantasy Worlds</option>
+        <option value="cafe">☕ Village Life</option>
+        <option value="vintage">🚂 Vintage & Nostalgia</option>
+        <option value="animals">🐾 Animals & Nature</option>
+        <option value="seasonal">🌹 Seasonal Collection</option>
+      </select>
+    </div>
+
     <button class="btn" id="addBtn" onclick="addPuzzle()">
       ✦ Add This Puzzle to jigsaw.games
     </button>
@@ -281,6 +295,7 @@ function renderPuzzleList(puzzles){
         <div class="puzzle-num">Puzzle ${p.num}</div>
         <div class="puzzle-name">${p.title}</div>
         <div class="puzzle-desc">${p.desc}</div>
+        <div class="puzzle-num" style="margin-top:2px;color:var(--gold);">${p.category||"village"}</div>
       </div>
       <span class="puzzle-status live">✅ Live</span>
     </div>
@@ -333,7 +348,7 @@ async function addPuzzle(){
     showAddMsg('💾 Saving puzzle data...','info');
     const{error:dbError} = await sbClient
       .from('jigsaw_puzzles')
-      .upsert({num, title, desc, filename});
+      .upsert({num, title, desc, filename, category: document.getElementById('newCategory').value});
 
     if(dbError) throw new Error('Save failed: '+dbError.message);
 
