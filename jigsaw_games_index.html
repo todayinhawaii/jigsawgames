@@ -213,18 +213,27 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 
 
 /* CATEGORY TABS */
+#categoryTabsWrap{
+  position:fixed;top:68px;left:0;right:0;z-index:18;
+}
+#categoryHeading{
+  text-align:center;font-family:'Cinzel Decorative',serif;
+  font-size:clamp(12px,3vw,15px);font-weight:700;
+  color:rgba(255,215,0,0.65);letter-spacing:2px;
+  text-transform:uppercase;margin-bottom:8px;
+  text-shadow:0 2px 8px rgba(0,0,0,0.6);
+}
 #categoryTabs{
-  position:fixed;top:74px;left:0;right:0;z-index:18;
-  display:flex;gap:8px;padding:0 16px;overflow-x:auto;
+  display:flex;gap:10px;padding:0 16px;overflow-x:auto;
   -webkit-overflow-scrolling:touch;scrollbar-width:none;
 }
 #categoryTabs::-webkit-scrollbar{display:none;}
 .cat-pill{
-  flex-shrink:0;padding:7px 14px;border-radius:18px;
+  flex-shrink:0;padding:11px 21px;border-radius:24px;
   border:1px solid rgba(255,255,255,0.12);
   background:rgba(0,0,0,0.45);
   color:rgba(255,255,255,0.6);
-  font-size:11px;font-weight:700;
+  font-size:16px;font-weight:700;
   cursor:pointer;white-space:nowrap;
   transition:all 0.2s;font-family:'Inter',sans-serif;
 }
@@ -234,7 +243,8 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
   color:var(--gold2);
 }
 @media(min-width:768px){
-  #categoryTabs{top:78px;justify-content:center;}
+  #categoryTabsWrap{top:72px;}
+  #categoryTabs{justify-content:center;}
 }
 .yt-tri{width:0;height:0;border-style:solid;border-width:10px 0 10px 18px;border-color:transparent transparent transparent #fff;margin-left:3px;}
 
@@ -341,7 +351,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
       <button class="nav-btn gold" onclick="showPaywall();startGame();">▶ Play Now</button>
     </div>
   </div>
-<div id="categoryTabs"></div>
+<div id="categoryTabsWrap"><div id="categoryHeading">Explore Our Puzzle Collections</div><div id="categoryTabs"></div></div>
   <div id="heroContent">
     <div id="puzzleDots"></div>
     <div id="artInfo">
