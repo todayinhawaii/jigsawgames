@@ -833,28 +833,26 @@ function peekImage(){const ov=document.getElementById('peekOverlay');ov.style.di
 function updateHud(){document.getElementById('hudPieces').textContent=placed+' / '+total+' placed';document.getElementById('hudBar').style.width=Math.round(placed/total*100)+'%';}
 // YouTube-style landscape button
 let homeLandscapeLocked=false;
-async function goLandscape(){
+function goLandscape(){
   try{
     if(!homeLandscapeLocked){
-      if(screen.orientation && screen.orientation.lock){
-        await screen.orientation.lock('landscape');
+      const el=document.documentElement;
+      if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+      else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      if(screen.orientation&&screen.orientation.lock){
+        screen.orientation.lock('landscape').then(()=>{
+          homeLandscapeLocked=true;
+        }).catch(()=>{homeLandscapeLocked=true;});
       } else {
-        const el = document.documentElement;
-        if(el.requestFullscreen) await el.requestFullscreen();
-        else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        homeLandscapeLocked=true;
       }
-      homeLandscapeLocked=true;
     } else {
-      if(screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+      if(screen.orientation&&screen.orientation.unlock) screen.orientation.unlock();
       if(document.exitFullscreen) document.exitFullscreen().catch(()=>{});
       else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
-      // Force back to portrait if unlock doesnt do it
-      try{ if(screen.orientation && screen.orientation.lock) await screen.orientation.lock('portrait'); }catch(e){}
       homeLandscapeLocked=false;
     }
-  }catch(e){
-    homeLandscapeLocked=!homeLandscapeLocked;
-  }
+  }catch(e){ homeLandscapeLocked=!homeLandscapeLocked; }
 }
 
 // Unlock orientation when leaving game
