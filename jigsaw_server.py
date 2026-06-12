@@ -62,6 +62,10 @@ def login():
 def reset():
     return send_from_directory('.', 'jigsaw_reset.html')
 
+@app.route('/account')
+def account():
+    return send_from_directory('.', 'jigsaw_account.html')
+
 # ── CONFIG ────────────────────────────────────────
 @app.route('/api/config')
 def config():
@@ -116,6 +120,27 @@ def create_checkout():
         return jsonify({'ok': True, 'url': session.url})
     except Exception as e:
         print(f'STRIPE ERROR: {e}', flush=True)
+        return jsonify({'ok': False, 'error': str(e)})
+
+# ── STRIPE BILLING PORTAL ──────────────────────────
+@app.route('/api/create-portal-session', methods=['POST'])
+def create_portal_session():
+    data = request.get_json()
+    email = data.get('email','').strip().lower()
+    try:
+        members = supabase_request('GET',
+            f"members?email=eq.{urllib.parse.quote(email)}&select=stripe_customer",
+            use_service_key=True)
+        if not members or not members[0].get('stripe_customer'):
+            return jsonify({'ok': False, 'error': 'No subscription found for this account.'})
+        customer_id = members[0]['stripe_customer']
+        session = stripe.billing_portal.Session.create(
+            customer=customer_id,
+            return_url=BASE_URL + '/account',
+        )
+        return jsonify({'ok': True, 'url': session.url})
+    except Exception as e:
+        print(f'PORTAL ERROR: {e}', flush=True)
         return jsonify({'ok': False, 'error': str(e)})
 
 # ── STRIPE WEBHOOK ────────────────────────────────
