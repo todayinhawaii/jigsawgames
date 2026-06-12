@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>🧩 Jigsaw Games — Beautiful Puzzles</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
+<link rel="icon" type="image/png" href="/jigsaw-logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&display=block" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
@@ -364,7 +364,10 @@ body.browsing #puzzleDots{
 <!-- HOME -->
 <div id="heroStage">
   <div id="topNav">
-    <div><div class="nav-logo">🧩 jigsaw.games</div><div class="nav-sub" id="navSub">Original Art Puzzles</div></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="/jigsaw-logo.png" alt="jigsaw.games" style="width:42px;height:42px;border-radius:10px;flex-shrink:0;">
+      <div><div class="nav-logo">🧩 jigsaw.games</div><div class="nav-sub" id="navSub">Original Art Puzzles</div></div>
+    </div>
     <div style="display:flex;gap:8px;">
       <button class="nav-btn" onclick="location.href='https://www.fab.games'">fab.games</button>
       <button class="nav-btn gold" onclick="showPaywall();startGame();">▶ Play Now</button>
