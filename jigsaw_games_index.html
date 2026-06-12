@@ -1148,6 +1148,17 @@ window.prevPuzzle=function(){_origPrev();}
 window.nextPuzzle=function(){_origNext();}
 
 // ── RESIZE ───────────────────────────────────
+
+// ── IMMERSIVE BROWSING MODE ──────────────────
+function enterBrowsing(){document.body.classList.add('browsing');}
+function exitBrowsing(){document.body.classList.remove('browsing');}
+const _carEl=document.getElementById('carousel');
+if(_carEl){
+  _carEl.addEventListener('mouseenter',exitBrowsing);
+  _carEl.addEventListener('touchstart',exitBrowsing,{passive:true});
+}
+document.getElementById('prevArrow').addEventListener('mouseenter',exitBrowsing);
+document.getElementById('nextArrow').addEventListener('mouseenter',exitBrowsing);
 // ══ MOBILE AUTO-SHOW TRAY ══
 let trayTimeout=null;
 function showMobTray(){
