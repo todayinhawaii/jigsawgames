@@ -57,7 +57,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
 }
 #landscapeBtn:hover{background:rgba(201,168,76,0.3);border-color:var(--gold);}
 #landscapeBtn svg{width:22px;height:22px;fill:rgba(255,255,255,0.8);}
-@media(max-width:767px){#landscapeBtn{display:flex;}}
+
 
 /* Carousel card hover enlarge - smooth, no crop */
 .car-card:hover,.car-card.active{
@@ -832,20 +832,29 @@ let peekTO=null;
 function peekImage(){const ov=document.getElementById('peekOverlay');ov.style.display='flex';clearTimeout(peekTO);peekTO=setTimeout(()=>ov.style.display='none',2500);}
 function updateHud(){document.getElementById('hudPieces').textContent=placed+' / '+total+' placed';document.getElementById('hudBar').style.width=Math.round(placed/total*100)+'%';}
 // YouTube-style landscape button
+let homeLandscapeLocked=false;
 async function goLandscape(){
   try{
-    // Try Screen Orientation API (works on Android Chrome!!)
-    if(screen.orientation && screen.orientation.lock){
-      await screen.orientation.lock('landscape');
-      return;
+    if(!homeLandscapeLocked){
+      if(screen.orientation && screen.orientation.lock){
+        await screen.orientation.lock('landscape');
+      } else {
+        const el = document.documentElement;
+        if(el.requestFullscreen) await el.requestFullscreen();
+        else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      }
+      homeLandscapeLocked=true;
+    } else {
+      if(screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+      if(document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+      else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+      // Force back to portrait if unlock doesnt do it
+      try{ if(screen.orientation && screen.orientation.lock) await screen.orientation.lock('portrait'); }catch(e){}
+      homeLandscapeLocked=false;
     }
-  }catch(e){}
-  // Fallback: request fullscreen which triggers landscape on mobile
-  try{
-    const el = document.documentElement;
-    if(el.requestFullscreen) await el.requestFullscreen();
-    else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-  }catch(e){}
+  }catch(e){
+    homeLandscapeLocked=!homeLandscapeLocked;
+  }
 }
 
 // Unlock orientation when leaving game
@@ -1328,6 +1337,11 @@ window.addEventListener('load',async()=>{
   document.getElementById('navSub').textContent=PUZZLES.length+' Original Art Puzzles';
   buildCategoryTabs();buildDots();updateHero();buildCarousel();
   startSlideshow();
+  // Show landscape rotate button on touch devices - stays visible!!
+  if('ontouchstart' in window){
+    const lb=document.getElementById('landscapeBtn');
+    if(lb) lb.style.display='flex';
+  }
 });
 
 </script>
