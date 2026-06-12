@@ -253,6 +253,18 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
   #categoryTabsWrap{top:72px;}
   #categoryTabs{justify-content:center;}
 }
+
+/* IMMERSIVE BROWSING MODE - hide UI to admire art */
+#categoryTabsWrap,#artInfo,#diffRow,#playBtn,#puzzleDots{
+  transition:opacity 0.4s ease,transform 0.4s ease;
+}
+body.browsing #categoryTabsWrap,
+body.browsing #artInfo,
+body.browsing #diffRow,
+body.browsing #playBtn,
+body.browsing #puzzleDots{
+  opacity:0;pointer-events:none;transform:translateY(8px);
+}
 .yt-tri{width:0;height:0;border-style:solid;border-width:10px 0 10px 18px;border-color:transparent transparent transparent #fff;margin-left:3px;}
 
 /* ── PAYWALL OVERLAY ── */
@@ -375,8 +387,8 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
     <button id="playBtn" onclick="showPaywall();startGame();">✦ PLAY THIS PUZZLE ✦<span class="play-sub">Tap to begin</span></button>
   </div>
 </div>
-<div id="prevArrow" onclick="prevPuzzle()"><span class="arrow-icon">‹</span></div>
-<div id="nextArrow" onclick="nextPuzzle()"><span class="arrow-icon">›</span></div>
+<div id="prevArrow" onclick="prevPuzzle();enterBrowsing();"><span class="arrow-icon">‹</span></div>
+<div id="nextArrow" onclick="nextPuzzle();enterBrowsing();"><span class="arrow-icon">›</span></div>
 <div id="landscapeBtn" onclick="goLandscape()" title="Switch to landscape">
   <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path d="M16.48 2.52c3.27 1.55 5.61 4.72 5.97 8.48h1.5C23.44 4.84 18.29 0 12 0l-.66.03 3.81 3.81 1.33-1.32zm-6.25-.77c-.59-.59-1.54-.59-2.12 0L1.75 8.11c-.59.59-.59 1.54 0 2.12l12.02 12.02c.59.59 1.54.59 2.12 0l6.36-6.36c.59-.59.59-1.54 0-2.12L10.23 1.75zm4.6 19.44L2.81 9.17l6.36-6.36 12.02 12.02-6.36 6.36zm-7.31.29C4.25 19.94 1.91 16.76 1.55 13H.05C.56 19.16 5.71 24 12 24l.66-.03-3.81-3.81-1.33 1.32z"/>
@@ -492,7 +504,7 @@ function selectCategory(cat){
 // ── HOME ──────────────────────────────────────
 function buildDots(){
   const w=document.getElementById('puzzleDots');w.innerHTML='';
-  PUZZLES.forEach((_,i)=>{const d=document.createElement('div');d.className='pdot'+(i===curIdx?' active':'');d.onclick=()=>{goTo(i);stopSlideshow();};w.appendChild(d);});
+  PUZZLES.forEach((_,i)=>{const d=document.createElement('div');d.className='pdot'+(i===curIdx?' active':'');d.onclick=()=>{goTo(i);stopSlideshow();enterBrowsing();};w.appendChild(d);});
 }
 function updateHero(){
   if(!PUZZLES.length)return;
@@ -527,6 +539,7 @@ function buildCarousel(){
     c.onclick=()=>{
         goTo(i);
         stopSlideshow(); // stays paused until arrow clicked!!
+        enterBrowsing();
         const b=document.getElementById('playBtn');
         b.style.transform='scale(1.12)';
         setTimeout(()=>b.style.transform='',400);
