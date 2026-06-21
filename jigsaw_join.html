@@ -3,309 +3,346 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Join jigsaw.games — Free for 30 Days</title>
+<title>Join jigsaw.games — One Month Free</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Inter:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--black:#080808;--gold:#c9a84c;--gold2:#ffd700;--white:#f0ede8;--muted:rgba(240,237,232,0.5);--border:rgba(255,255,255,0.07);}
+:root{
+  --black:#070708;--gold:#c9a84c;--gold2:#e8c96a;
+  --white:#f0efe8;--muted:rgba(240,239,232,0.5);
+  --border:rgba(255,255,255,0.07);
+  --purple:#764ba2;--purple2:#9b59b6;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(201,168,76,0.05),transparent);pointer-events:none;}
-nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--border);}
-.nav-logo{font-family:'Cinzel Decorative',serif;font-size:20px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;}
+body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;font-weight:300;min-height:100vh;display:flex;flex-direction:column;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(118,75,162,0.06),transparent);pointer-events:none;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--gold);text-decoration:none;}
 .nav-back{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;}
 .nav-back:hover{color:var(--gold);}
-.wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
-.card{width:100%;max-width:420px;background:#0d0d0f;border:1px solid rgba(201,168,76,0.3);border-radius:24px;padding:40px 32px;box-shadow:0 0 60px rgba(201,168,76,0.08);}
-.card-icon{font-size:48px;text-align:center;margin-bottom:12px;}
-.card-title{font-family:'Cinzel Decorative',serif;font-size:clamp(22px,5vw,28px);font-weight:900;background:linear-gradient(135deg,#ffd700,#c9a84c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;text-align:center;}
-.card-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px;font-family:'Cinzel',serif;font-style:italic;text-align:center;}
-.price-box{background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:14px;margin-bottom:20px;text-align:center;}
-.price-free{font-size:24px;font-weight:900;color:#22c55e;}
-.price-then{font-size:12px;color:var(--muted);margin-top:2px;}
-.price-then span{color:var(--gold2);}
-.form-group{margin-bottom:14px;}
-.form-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:5px;display:block;}
-.form-input{width:100%;padding:13px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--white);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s;}
-.form-input:focus{border-color:rgba(201,168,76,0.5);}
-.form-input::placeholder{color:rgba(240,237,232,0.2);}
-.password-strength{height:3px;border-radius:99px;margin-top:5px;background:rgba(255,255,255,0.08);overflow:hidden;}
-.strength-bar{height:100%;width:0%;border-radius:99px;transition:all 0.3s;}
-.cta-btn{width:100%;padding:16px;border:none;border-radius:12px;font-family:'Cinzel Decorative',serif;font-size:clamp(14px,3.5vw,16px);font-weight:900;color:#080808;cursor:pointer;background:linear-gradient(135deg,#ffd700,#c9a84c,#ffd700);background-size:200%;box-shadow:0 6px 0 #7a5c14,0 8px 24px rgba(201,168,76,0.4);letter-spacing:1px;animation:shine 3s ease infinite;transition:transform 0.1s;margin-top:4px;}
-.cta-btn:active{transform:translateY(4px);box-shadow:0 2px 0 #7a5c14;}
-.cta-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
-@keyframes shine{0%,100%{background-position:0%}50%{background-position:100%}}
-.msg{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;display:none;text-align:center;line-height:1.6;}
+.hero{text-align:center;padding:48px 20px 32px;}
+.hero-badge{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--purple2);margin-bottom:16px;}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,6vw,56px);font-weight:300;margin-bottom:12px;}
+.hero h1 em{font-style:italic;color:var(--gold);}
+.hero p{font-size:14px;color:var(--muted);line-height:1.8;max-width:480px;margin:0 auto;}
+.pricing-wrap{max-width:900px;margin:0 auto;padding:0 20px 48px;width:100%;}
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:stretch;}
+.pc{background:#0d0d0f;border:1px solid rgba(201,168,76,0.15);border-radius:8px;padding:28px 22px;position:relative;transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.pc:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.4);border-color:rgba(201,168,76,0.3);}
+.pc.selected{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 16px 48px rgba(201,168,76,0.15);}
+.pc.featured{background:linear-gradient(160deg,#0f0e06,#0d0d0f);border-color:rgba(201,168,76,0.4);box-shadow:0 0 60px rgba(201,168,76,0.08);transform:scale(1.02);}
+.pc.featured:hover{transform:scale(1.02) translateY(-4px);}
+.pc.featured.selected{border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2),0 0 60px rgba(201,168,76,0.2);}
+.best-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#ffd700,#c9a84c);color:#0a0a00;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 14px;border-radius:20px;white-space:nowrap;}
+.pc-site{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;font-weight:600;}
+.pc-icon{font-size:32px;margin-bottom:12px;}
+.pc-price{font-family:'Cormorant Garamond',serif;font-size:44px;font-weight:600;color:var(--white);line-height:1;margin-bottom:2px;}
+.pc-price sup{font-size:20px;vertical-align:top;margin-top:8px;}
+.pc-price sub{font-size:14px;color:var(--muted);font-family:'Inter',sans-serif;font-weight:300;}
+.pc-save{font-size:11px;color:#22c55e;font-weight:600;margin-bottom:12px;}
+.pc-desc{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:16px;}
+.pc-perks{margin-bottom:20px;margin-top:auto;width:100%;text-align:left;}
+.pc-perk{font-size:11px;color:rgba(201,168,76,0.75);padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;gap:6px;}
+.pc-perk:last-child{border-bottom:none;}
+.pc-btn{width:100%;padding:13px;border:none;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;}
+.btn-jigsaw{background:linear-gradient(135deg,var(--purple),#4a2580);color:#fff;box-shadow:0 4px 0 #2a1040;}
+.btn-bundle{background:linear-gradient(135deg,#ffd700,#c9a84c);color:#0a0a00;font-size:12px;box-shadow:0 4px 0 #7a5c00;}
+.btn-fab{background:linear-gradient(135deg,var(--gold),#8a6420);color:#000;box-shadow:0 4px 0 #5a3d0a;}
+.pc-btn:hover{transform:translateY(-2px);filter:brightness(1.1);}
+.pc-btn:active{transform:translateY(2px);box-shadow:none;}
+.signup-wrap{max-width:480px;margin:0 auto;padding:0 20px 60px;display:none;}
+.signup-card{background:#0d0d0f;border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:32px 28px;}
+.selected-plan-box{background:rgba(118,75,162,0.08);border:1px solid rgba(118,75,162,0.25);border-radius:6px;padding:14px 16px;margin-bottom:24px;text-align:center;}
+.selected-plan-name{font-size:13px;color:var(--gold);font-weight:600;}
+.selected-plan-price{font-size:11px;color:var(--muted);margin-top:3px;}
+.change-plan{font-size:11px;color:var(--muted);cursor:pointer;margin-top:6px;display:inline-block;text-decoration:underline;}
+.change-plan:hover{color:var(--gold);}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;display:block;}
+.form-input{width:100%;padding:13px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:4px;color:var(--white);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:rgba(118,75,162,0.5);}
+.form-input::placeholder{color:rgba(240,239,232,0.2);}
+.pw-wrap{position:relative;}
+.pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;opacity:0.4;}
+.strength-bar-wrap{height:3px;background:rgba(255,255,255,0.06);border-radius:99px;margin-top:6px;overflow:hidden;}
+.strength-bar{height:100%;width:0;border-radius:99px;transition:all 0.3s;}
+.submit-btn{width:100%;padding:16px;border:none;border-radius:4px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:linear-gradient(135deg,var(--purple),#4a2580);color:#fff;box-shadow:0 6px 0 #2a1040,0 8px 24px rgba(118,75,162,0.3);transition:all 0.15s;margin-top:4px;}
+.submit-btn:hover{transform:translateY(-2px);}
+.submit-btn:active{transform:translateY(4px);box-shadow:0 2px 0 #2a1040;}
+.submit-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;box-shadow:none;}
+.fine-print{font-size:11px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.8;}
+.msg{padding:12px 16px;border-radius:4px;font-size:13px;margin-bottom:16px;display:none;text-align:center;line-height:1.6;}
 .msg.success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#86efac;}
 .msg.error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;}
-.msg.info{background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:var(--gold);}
-.fine-print{font-size:11px;color:var(--muted);margin-top:12px;line-height:1.7;text-align:center;}
-.already{text-align:center;margin-top:16px;font-size:12px;color:var(--muted);}
+.msg.info{background:rgba(118,75,162,0.1);border:1px solid rgba(118,75,162,0.3);color:#c77dff;}
+.already{text-align:center;margin-top:20px;font-size:12px;color:var(--muted);}
 .already a{color:var(--gold);text-decoration:none;}
-
-/* ── PRICING CARDS ── */
-.pricing-cards{display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap;justify-content:center;}
-.price-card{flex:1;min-width:140px;max-width:200px;background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.15);border-radius:16px;padding:18px 14px;text-align:center;position:relative;transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;}
-.price-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.4);}
-.pc-featured{border-color:rgba(201,168,76,0.5);background:linear-gradient(145deg,rgba(201,168,76,0.06),rgba(0,0,0,0.2));box-shadow:0 0 40px rgba(201,168,76,0.1);transform:scale(1.03);}
-.pc-featured:hover{transform:scale(1.03) translateY(-4px);}
-.pc-best{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#ffd700,#c9a84c);color:#0d0d0f;font-size:9px;font-weight:800;letter-spacing:2px;padding:4px 12px;border-radius:20px;white-space:nowrap;}
-.pc-badge{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;font-weight:700;}
-.bundle-badge{color:#ffd700;}
-.pc-icon{font-size:26px;margin-bottom:8px;}
-.pc-price{font-family:'Cinzel Decorative',serif;font-size:28px;font-weight:900;color:#fff;line-height:1;}
-.pc-price span{font-size:12px;color:var(--muted);font-family:'Inter',sans-serif;}
-.pc-save{font-size:11px;color:#22c55e;font-weight:700;margin:4px 0;}
-.pc-desc{font-size:11px;color:var(--muted);line-height:1.6;margin:10px 0;min-height:52px;}
-.pc-perks{text-align:left;margin-bottom:14px;}
-.pc-perk{font-size:10px;color:rgba(201,168,76,0.8);margin-bottom:4px;}
-.pc-btn{width:100%;padding:10px 8px;border:none;border-radius:8px;font-family:'Cinzel',serif;font-size:10px;font-weight:600;letter-spacing:1px;cursor:pointer;transition:all 0.2s;}
-.fab-btn{background:linear-gradient(135deg,#c9a84c,#a87d2a);color:#000;}
-.bundle-btn{background:linear-gradient(135deg,#ffd700,#c9a84c);color:#0d0d0f;font-size:11px;font-weight:700;}
-.jigsaw-btn{background:linear-gradient(135deg,#764ba2,#667eea);color:#fff;}
-.pc-btn:hover{filter:brightness(1.1);transform:translateY(-1px);}
-.price-card.selected{border-color:rgba(201,168,76,0.8);box-shadow:0 0 30px rgba(201,168,76,0.2);}
-@media(max-width:480px){.pricing-cards{flex-direction:column;align-items:center;}.price-card{max-width:100%;width:100%;}.pc-featured{transform:none;}}
-footer{text-align:center;padding:20px;font-size:11px;color:rgba(240,237,232,0.2);}
+/* FAB GAMES CROSSPROMO */
+.fab-promo{max-width:500px;margin:0 auto 40px;padding:0 20px;}
+.fab-promo-inner{background:linear-gradient(135deg,#0a0a1a,#0d0d0f);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:32px 28px;text-align:center;}
+.trust-bar{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;padding:20px 20px 40px;border-top:1px solid var(--border);}
+.trust-item{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+footer{text-align:center;padding:20px;font-size:11px;color:rgba(240,239,232,0.2);border-top:1px solid var(--border);}
+@media(max-width:700px){.pricing-grid{grid-template-columns:1fr;}.pc.featured{transform:none;}.pc.featured:hover{transform:translateY(-4px);}nav{padding:16px 20px;}}
 </style>
 </head>
 <body>
+
 <nav>
   <a href="/" class="nav-logo">🧩 jigsaw.games</a>
   <a href="/login" class="nav-back">Sign In →</a>
 </nav>
-<div class="wrap">
-  <div class="card">
-    <div class="card-icon">🧩</div>
-    <div class="card-title">Start Free Today</div>
-    <div class="card-sub">Create your account — first 30 days completely free!!</div>
-    <div class="price-box">
-      <div class="price-free">30 Days Free</div>
-      <div class="price-then">Then <span>$4.99/month</span> · Cancel anytime</div>
+
+<div class="hero">
+  <div class="hero-badge">— Join Today</div>
+  <h1>One Month <em>Free</em></h1>
+  <p>No credit card needed for your first 30 days. Hundreds of stunning puzzles. Cancel anytime.</p>
+</div>
+
+<div class="pricing-wrap">
+  <div class="pricing-grid">
+
+    <!-- jigsaw only -->
+    <div class="pc" id="card-jigsaw" onclick="selectPlan('jigsaw')">
+      <div class="pc-site">jigsaw.games</div>
+      <div class="pc-icon">🧩</div>
+      <div class="pc-price"><sup>$</sup>4<sub>.99/mo</sub></div>
+      <div class="pc-desc">Hundreds of stunning jigsaw puzzles — beautiful original artwork, multiple difficulty levels.</div>
+      <div class="pc-perks">
+        <div class="pc-perk">✦ All jigsaw puzzles</div>
+        <div class="pc-perk">✦ 30 day free trial</div>
+        <div class="pc-perk">✦ No credit card today</div>
+        <div class="pc-perk">✦ Cancel anytime</div>
+      </div>
+      <button class="pc-btn btn-jigsaw" onclick="selectPlan('jigsaw')">Start Free Month →</button>
     </div>
 
+    <!-- BUNDLE featured -->
+    <div class="pc featured" id="card-bundle" onclick="selectPlan('bundle')">
+      <div class="best-badge">⭐ Best Value</div>
+      <div class="pc-site" style="color:#ffd700;">fab.games + jigsaw.games</div>
+      <div class="pc-icon">🎮🧩</div>
+      <div class="pc-price"><sup>$</sup>7<sub>.99/mo</sub></div>
+      <div class="pc-save">Save $2 every month!</div>
+      <div class="pc-desc">Get both worlds for less! An ever-growing library of incredible games PLUS hundreds of stunning puzzles — like getting one site completely free!</div>
+      <div class="pc-perks">
+        <div class="pc-perk">✦ Everything on jigsaw.games</div>
+        <div class="pc-perk">✦ Everything on fab.games</div>
+        <div class="pc-perk">✦ 30 day free trial</div>
+        <div class="pc-perk">✦ No credit card today</div>
+        <div class="pc-perk">✦ Cancel anytime</div>
+      </div>
+      <button class="pc-btn btn-bundle" onclick="selectPlan('bundle')">Get The Bundle →</button>
+    </div>
+
+    <!-- fab only -->
+    <div class="pc" id="card-fab" onclick="selectPlan('fab')">
+      <div class="pc-site">fab.games</div>
+      <div class="pc-icon">🎮</div>
+      <div class="pc-price"><sup>$</sup>4<sub>.99/mo</sub></div>
+      <div class="pc-desc">An ever-growing library of incredible games — ad-free, family friendly, built with love.</div>
+      <div class="pc-perks">
+        <div class="pc-perk">✦ All fab.games games</div>
+        <div class="pc-perk">✦ 30 day free trial</div>
+        <div class="pc-perk">✦ No credit card today</div>
+        <div class="pc-perk">✦ Cancel anytime</div>
+      </div>
+      <button class="pc-btn btn-fab" onclick="selectPlan('fab')">Start Free Month →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- SIGNUP FORM -->
+<div class="signup-wrap" id="signupWrap">
+  <div class="signup-card">
+    <div class="selected-plan-box">
+      <div class="selected-plan-name" id="planName">—</div>
+      <div class="selected-plan-price" id="planPrice">—</div>
+      <span class="change-plan" onclick="changePlan()">← Change plan</span>
+    </div>
     <div id="msgBox" class="msg"></div>
-
-    <!-- ── 3 PRICING CARDS ── -->
-    <div class="pricing-cards">
-
-      <!-- CARD 1: jigsaw.games only -->
-      <div class="price-card" id="card-jigsaw">
-        <div class="pc-badge">jigsaw.games</div>
-        <div class="pc-icon">🧩</div>
-        <div class="pc-price">$4.99<span>/mo</span></div>
-        <div class="pc-desc">Hundreds of stunning jigsaw puzzles — beautiful original artwork, multiple difficulty levels.</div>
-        <div class="pc-perks">
-          <div class="pc-perk">✦ All jigsaw puzzles</div>
-          <div class="pc-perk">✦ 30 day free trial</div>
-          <div class="pc-perk">✦ Cancel anytime</div>
-        </div>
-        <button class="pc-btn jigsaw-btn" onclick="selectPlan('jigsaw')">Start Free Month →</button>
-      </div>
-
-      <!-- CARD 2: BUNDLE (featured) -->
-      <div class="price-card pc-featured" id="card-bundle">
-        <div class="pc-best">⭐ BEST VALUE</div>
-        <div class="pc-badge bundle-badge">fab.games + jigsaw.games</div>
-        <div class="pc-icon">🎮🧩</div>
-        <div class="pc-price">$7.99<span>/mo</span></div>
-        <div class="pc-save">Save $2 every month!</div>
-        <div class="pc-desc">Get both worlds for less! An ever-growing library of incredible games PLUS hundreds of stunning puzzles — like getting one site completely free!</div>
-        <div class="pc-perks">
-          <div class="pc-perk">✦ Everything on fab.games</div>
-          <div class="pc-perk">✦ Everything on jigsaw.games</div>
-          <div class="pc-perk">✦ 30 day free trial</div>
-          <div class="pc-perk">✦ Cancel anytime</div>
-        </div>
-        <button class="pc-btn bundle-btn" onclick="selectPlan('bundle')">Get The Bundle →</button>
-      </div>
-
-      <!-- CARD 3: fab.games only -->
-      <div class="price-card" id="card-fab">
-        <div class="pc-badge">fab.games</div>
-        <div class="pc-icon">🎮</div>
-        <div class="pc-price">$4.99<span>/mo</span></div>
-        <div class="pc-desc">Ever-growing library of incredible games — ad-free, family friendly, cancel anytime.</div>
-        <div class="pc-perks">
-          <div class="pc-perk">✦ All fab.games games</div>
-          <div class="pc-perk">✦ 30 day free trial</div>
-          <div class="pc-perk">✦ Cancel anytime</div>
-        </div>
-        <button class="pc-btn fab-btn" onclick="selectPlan('fab')">Start Free Month →</button>
-      </div>
-
+    <div class="form-group">
+      <label class="form-label">Your Name</label>
+      <input class="form-input" id="signupName" type="text" placeholder="What do we call you?">
     </div>
-
-    <!-- SIGNUP FORM -->
-    <div id="signupForm" style="display:none;margin-top:24px;">
-      <div id="selectedPlanBox" style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:10px;padding:12px 16px;margin-bottom:18px;text-align:center;"></div>
-      <div class="form-group">
-        <label class="form-label">Your Name</label>
-        <input class="form-input" id="signupName" type="text" placeholder="What do we call you?">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Email Address</label>
-        <input class="form-input" id="signupEmail" type="email" placeholder="your@email.com">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Choose a Password</label>
-        <div style="position:relative;">
-          <input class="form-input" id="signupPassword" type="password" placeholder="Min 8 characters" oninput="checkStrength(this.value)" style="padding-right:44px;">
-          <span onclick="togglePw('signupPassword',this)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;opacity:0.5;">👁</span>
-        </div>
-        <div class="password-strength"><div class="strength-bar" id="strengthBar"></div></div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Confirm Password</label>
-        <div style="position:relative;">
-          <input class="form-input" id="signupPassword2" type="password" placeholder="Repeat your password" style="padding-right:44px;">
-          <span onclick="togglePw('signupPassword2',this)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;opacity:0.5;">👁</span>
-        </div>
-      </div>
-      <button class="cta-btn" id="signupBtn" onclick="startSignup()">🎁 Start My Free Month →</button>
-      <div class="fine-print">
-        🔒 Secure · No violence · No ads · Built with love in Hawaii 🌺<br>
-        Cancel before trial ends and you won't be charged
-      </div>
-      <button onclick="document.getElementById('signupForm').style.display='none';"
-        style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;margin-top:8px;display:block;width:100%;text-align:center;">
-        ← Choose a different plan
-      </button>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input class="form-input" id="signupEmail" type="email" placeholder="your@email.com">
     </div>
-
+    <div class="form-group">
+      <label class="form-label">Choose a Password</label>
+      <div class="pw-wrap">
+        <input class="form-input" id="signupPassword" type="password" placeholder="Min 8 characters" oninput="checkStrength(this.value)" style="padding-right:44px;">
+        <span class="pw-toggle" onclick="togglePw('signupPassword',this)">👁</span>
+      </div>
+      <div class="strength-bar-wrap"><div class="strength-bar" id="strengthBar"></div></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Confirm Password</label>
+      <div class="pw-wrap">
+        <input class="form-input" id="signupPassword2" type="password" placeholder="Repeat your password" style="padding-right:44px;">
+        <span class="pw-toggle" onclick="togglePw('signupPassword2',this)">👁</span>
+      </div>
+    </div>
+    <button class="submit-btn" id="submitBtn" onclick="startSignup()">🎁 Start My Free Month →</button>
+    <div class="fine-print">
+      🔒 Secure payment via Stripe · $0.00 today<br>
+      Cancel before 30 days and you'll never be charged<br>
+      No violence · No ads · Built with love in Hawaii 🌺
+    </div>
     <div class="already">Already have an account? <a href="/login">Sign in →</a></div>
   </div>
 </div>
+
+<!-- FAB GAMES CROSSPROMO -->
+<div class="fab-promo">
+  <div class="fab-promo-inner">
+    <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;font-weight:600;">Also from the same team</div>
+    <div style="font-size:56px;margin-bottom:12px;">🎮</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--white);margin-bottom:10px;">fab.games</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:20px;">An ever-growing library of incredible games — ad-free, family friendly, no violence. Built with love in Hawaii!</div>
+    <a href="https://www.fab.games" target="_blank" style="display:inline-block;background:linear-gradient(135deg,var(--gold),#8a6420);color:#000;padding:13px 32px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;text-decoration:none;">Visit fab.games →</a>
+  </div>
+</div>
+
+<div class="trust-bar">
+  <div class="trust-item">🔒 Secure via Stripe</div>
+  <div class="trust-item">🧩 Beautiful puzzles</div>
+  <div class="trust-item">👨‍👩‍👧‍👦 Safe for all ages</div>
+  <div class="trust-item">🌺 Made in Hawaii</div>
+  <div class="trust-item">❌ Cancel anytime</div>
+</div>
+
 <footer>© 2026 jigsaw.games — Made with 🌺 in Hawaii</footer>
 
 <script>
-let sbClient;
-
-<script>
 const PRICES = {
-  fab:    'price_1TemBdRszIkvwb2pMlZbPBjC',
   jigsaw: 'price_1TgXljRszIkvwb2pYi75vBvK',
-  bundle: 'price_1TkbaVRszIkvwb2peR2Ne9Vb'
+  bundle: 'price_1TkbaVRszIkvwb2peR2Ne9Vb',
+  fab:    'price_1TemBdRszIkvwb2pMlZbPBjC'
 };
-const PLAN_LABELS = {
-  fab:    '🎮 fab.games — $4.99/month',
-  jigsaw: '🧩 jigsaw.games — $4.99/month',
-  bundle: '🎮🧩 fab.games + jigsaw.games Bundle — $7.99/month'
+const PLAN_NAMES = {
+  jigsaw: '🧩 jigsaw.games Premium',
+  bundle: '🎮🧩 fab.games + jigsaw.games Bundle',
+  fab:    '🎮 fab.games Premium'
 };
-let selectedPlan = null;
+const PLAN_PRICES = {
+  jigsaw: '30 days free · then $4.99/month',
+  bundle: '30 days free · then $7.99/month · Save $2/month!',
+  fab:    '30 days free · then $4.99/month'
+};
 
-async function init(){
+var selectedPlan = null;
+var supabase = null;
+
+window.addEventListener('load', function(){
   try{
-    sbClient = window.supabase.createClient(
-      'https://xbzeakoypdyslnnriaef.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiemVha295cGR5c2xubnJpYWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NDI5MzIsImV4cCI6MjA5NjIxODkzMn0.-pS2FE-Q-_EetM5ONbJycZWFm336wJ-z4MTOGCdA1LE'
-    );
-    const{data:{session}}=await sbClient.auth.getSession();
-    if(session) window.location.href='/';
-  }catch(e){ console.log('Init:',e); }
-}
-init();
+    const SB = window.supabase;
+    if(SB && SB.createClient){
+      supabase = SB.createClient(
+        'https://xbzeakoypdyslnnriaef.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiemVha295cGR5c2xubnJpYWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NDI5MzIsImV4cCI6MjA5NjIxODkzMn0.-pS2FE-Q-_EetM5ONbJycZWFm336wJ-z4MTOGCdA1LE'
+      );
+    }
+  }catch(e){ console.log('Supabase init:', e); }
+});
 
-function showMsg(msg,type='error'){
-  const el=document.getElementById('msgBox');
-  el.innerHTML=msg;el.className='msg '+type;el.style.display='block';
+function selectPlan(plan){
+  selectedPlan = plan;
+  document.querySelectorAll('.pc').forEach(c => c.classList.remove('selected'));
+  document.getElementById('card-'+plan).classList.add('selected');
+  document.getElementById('planName').textContent = PLAN_NAMES[plan];
+  document.getElementById('planPrice').textContent = PLAN_PRICES[plan];
+  const wrap = document.getElementById('signupWrap');
+  wrap.style.display = 'block';
+  setTimeout(() => wrap.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+  hideMsg();
 }
-function hideMsg(){document.getElementById('msgBox').style.display='none';}
 
-function togglePw(id,icon){
-  const el=document.getElementById(id);
-  el.type=el.type==='password'?'text':'password';
-  icon.style.opacity=el.type==='text'?'1':'0.5';
+function changePlan(){
+  document.getElementById('signupWrap').style.display = 'none';
+  document.querySelectorAll('.pc').forEach(c => c.classList.remove('selected'));
+  selectedPlan = null;
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function showMsg(msg, type='error'){
+  const el = document.getElementById('msgBox');
+  el.innerHTML = msg; el.className = 'msg ' + type; el.style.display = 'block';
+}
+function hideMsg(){ document.getElementById('msgBox').style.display = 'none'; }
+
+function togglePw(id, icon){
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+  icon.style.opacity = el.type === 'text' ? '1' : '0.4';
 }
 
 function checkStrength(pw){
-  const bar=document.getElementById('strengthBar');
-  let s=0;
-  if(pw.length>=8)s++;if(/[A-Z]/.test(pw))s++;
-  if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;
-  bar.style.width=pw.length>0?['25%','50%','75%','100%'][s-1]||'10%':'0%';
-  bar.style.background=pw.length>0?['#ef4444','#f97316','#eab308','#22c55e'][s-1]||'#ef4444':'';
-}
-
-function selectPlan(plan){
-  selectedPlan=plan;
-  document.querySelectorAll('.price-card').forEach(c=>c.classList.remove('selected'));
-  document.getElementById('card-'+plan).classList.add('selected');
-  document.getElementById('signupForm').style.display='block';
-  document.getElementById('selectedPlanBox').innerHTML=
-    '<div style="font-size:13px;color:var(--gold);font-weight:700;">Selected: '+PLAN_LABELS[plan]+'</div>';
-  setTimeout(()=>document.getElementById('signupForm').scrollIntoView({behavior:'smooth'}),100);
-  hideMsg();
+  const bar = document.getElementById('strengthBar');
+  let s = 0;
+  if(pw.length >= 8) s++;
+  if(/[A-Z]/.test(pw)) s++;
+  if(/[0-9]/.test(pw)) s++;
+  if(/[^A-Za-z0-9]/.test(pw)) s++;
+  bar.style.width = pw.length > 0 ? ['25%','50%','75%','100%'][s-1] || '10%' : '0';
+  bar.style.background = pw.length > 0 ? ['#ef4444','#f97316','#eab308','#22c55e'][s-1] || '#ef4444' : '';
 }
 
 async function startSignup(){
   if(!selectedPlan){ showMsg('Please choose a plan above!'); return; }
-  const name=document.getElementById('signupName').value.trim();
-  const email=document.getElementById('signupEmail').value.trim().toLowerCase();
-  const password=document.getElementById('signupPassword').value;
-  const password2=document.getElementById('signupPassword2').value;
+  const name      = document.getElementById('signupName').value.trim();
+  const email     = document.getElementById('signupEmail').value.trim().toLowerCase();
+  const password  = document.getElementById('signupPassword').value;
+  const password2 = document.getElementById('signupPassword2').value;
 
-  if(!name){showMsg('Please enter your name!');return;}
-  if(!email||!email.includes('@')){showMsg('Please enter a valid email!');return;}
-  if(password.length<8){showMsg('Password must be at least 8 characters!');return;}
-  if(password!==password2){showMsg('Passwords don't match!');return;}
+  if(!name)   { showMsg('Please enter your name!'); return; }
+  if(!email || !email.includes('@')) { showMsg('Please enter a valid email!'); return; }
+  if(password.length < 8) { showMsg('Password must be at least 8 characters!'); return; }
+  if(password !== password2) { showMsg('Passwords don\'t match!'); return; }
 
-  const btn=document.getElementById('signupBtn');
-  btn.disabled=true;btn.textContent='Creating your account...';
-  showMsg('Setting up your account...','info');
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Creating your account...';
+  showMsg('Setting up your account...', 'info');
 
   try{
-    const{data,error}=await sbClient.auth.signUp({
-      email,password,
-      options:{
-        data:{name,status:'pending',plan:selectedPlan},
-        emailRedirectTo:'https://www.jigsaw.games/'
-      }
-    });
-
-    if(error){
-      if(error.message.includes('already')){
-        showMsg('This email already has an account. <a href="/login" style="color:var(--gold2);">Sign in →</a>','info');
-      } else {
-        showMsg(error.message);
-      }
-      btn.disabled=false;btn.textContent='🎁 Start My Free Month →';
-      return;
-    }
-
-    // Save to members table
-    try{
-      await fetch('/api/register',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({name,email,plan:selectedPlan})
-      });
-    }catch(e){}
-
-    showMsg('Account created!! Redirecting to payment...','info');
-
-    // Stripe checkout with correct price
-    const res=await fetch('/api/create-checkout',{
+    // Register via server
+    await fetch('/api/register',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email,name,price_id:PRICES[selectedPlan],plan:selectedPlan})
+      body:JSON.stringify({ name, email, password, plan:selectedPlan })
     });
-    const checkoutData=await res.json();
-    if(checkoutData.ok && checkoutData.url){
-      window.location.href=checkoutData.url;
-    } else {
-      window.location.href='https://buy.stripe.com/7sY5kF2RMdk9bk8f7JbMQ00?prefilled_email='+encodeURIComponent(email);
-    }
 
+    showMsg('Account created!! Redirecting to payment...', 'info');
+
+    // Stripe checkout
+    const res = await fetch('/api/create-checkout',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ email, name, plan:selectedPlan })
+    });
+    const checkout = await res.json();
+
+    if(checkout.ok && checkout.url){
+      window.location.href = checkout.url;
+    } else {
+      showMsg(checkout.error || 'Something went wrong — please try again!');
+      btn.disabled = false;
+      btn.textContent = '🎁 Start My Free Month →';
+    }
   }catch(e){
     showMsg('Connection error — please try again!');
-    btn.disabled=false;btn.textContent='🎁 Start My Free Month →';
+    btn.disabled = false;
+    btn.textContent = '🎁 Start My Free Month →';
   }
 }
 
-// Legacy compat
-async function joinAndPay(){ selectPlan('jigsaw'); }
+document.addEventListener('keydown', e => {
+  if(e.key === 'Enter') startSignup();
+});
 </script>
 </body>
 </html>
