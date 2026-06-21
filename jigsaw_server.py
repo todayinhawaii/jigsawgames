@@ -78,11 +78,39 @@ def config():
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
-    email = data.get('email', '').strip().lower()
-    name  = data.get('name', '').strip()
+    email    = data.get('email', '').strip().lower()
+    name     = data.get('name', '').strip()
+    password = data.get('password', '').strip()
+    plan     = data.get('plan', 'jigsaw')
     if not email or '@' not in email:
         return jsonify({'ok': False, 'msg': 'Invalid email'})
     trial_end = (datetime.utcnow() + timedelta(days=30)).isoformat()
+
+    # Create Supabase Auth user
+    if password:
+        try:
+            auth_url = f"{SUPABASE_URL}/auth/v1/admin/users"
+            auth_headers = {
+                'apikey': SUPABASE_SERVICE_KEY,
+                'Authorization': f'Bearer {SUPABASE_SERVICE_KEY}',
+                'Content-Type': 'application/json'
+            }
+            auth_body = json.dumps({
+                'email': email,
+                'password': password,
+                'email_confirm': True,
+                'user_metadata': {'name': name, 'plan': plan}
+            }).encode()
+            req = urllib.request.Request(auth_url, data=auth_body, headers=auth_headers, method='POST')
+            try:
+                with urllib.request.urlopen(req) as res:
+                    print(f"Auth user created: {email}", flush=True)
+            except urllib.error.HTTPError as e:
+                err = e.read().decode()
+                print(f"Auth error: {err}", flush=True)
+        except Exception as e:
+            print(f"Auth exception: {e}", flush=True)
+
     existing = supabase_request('GET',
         f"members?email=eq.{urllib.parse.quote(email)}&select=*",
         use_service_key=True)
@@ -93,7 +121,7 @@ def register():
         'name': name,
         'status': 'trial',
         'trial_end': trial_end,
-        'plan': 'free_trial',
+        'plan': plan,
         'subscription_status': 'trialing'
     }, use_service_key=True)
     return jsonify({'ok': True})
