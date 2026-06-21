@@ -1305,12 +1305,18 @@ async function checkMembership(){
 }
 
 function showPaywall(){
+  // Redirect directly to join page
+  window.location.href='/join';
+  return;
   const ov=document.getElementById('paywallOverlay');
   if(ov){ov.style.display='flex';ov.classList.add('visible');}
   const btn=document.getElementById('playBtn');
   if(btn)btn.style.animationPlayState='paused';
 }
 function closePaywall(){
+  // Redirect non-members to join page instead of closing
+  window.location.href='/join';
+  return;
   const ov=document.getElementById('paywallOverlay');
   if(ov) ov.classList.remove('visible');
   const btn=document.getElementById('playBtn');
@@ -1363,7 +1369,7 @@ window.addEventListener('load',async()=>{
 <!-- PAYWALL OVERLAY -->
 <div id="paywallOverlay">
   <div id="paywallCard">
-    <button class="pw-close" onclick="closePaywall()">✕</button>
+    <!-- X button removed - paywall cannot be dismissed -->
     <span class="pw-lock">🔐</span>
     <div class="pw-title">Unlock All Puzzles</div>
     <div class="pw-sub">Original artwork puzzles crafted with love — first month always free!!</div>
