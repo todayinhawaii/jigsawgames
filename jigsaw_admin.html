@@ -337,9 +337,20 @@ async function deletePuzzle(id, filename, title, btn){
     const{error:storageError} = await sbClient.storage.from('puzzles').remove([filename]);
     if(storageError) console.log('Storage delete warning:', storageError.message);
 
-    // 2. Remove the row from the database
-    const{error:dbError} = await sbClient.from('jigsaw_puzzles').delete().eq('id', id);
+    // 2. Remove the row from the database — .select() so we can confirm a row actually got deleted
+    const{data:deletedRows, error:dbError} = await sbClient
+      .from('jigsaw_puzzles')
+      .delete()
+      .eq('id', id)
+      .select();
+
     if(dbError) throw dbError;
+
+    if(!deletedRows || deletedRows.length === 0){
+      // No error, but nothing was actually deleted — almost always a Supabase
+      // Row Level Security policy silently blocking the delete for the anon key.
+      throw new Error('Nothing was deleted — this is very likely a Supabase Row Level Security policy blocking DELETE on the jigsaw_puzzles table. Ask your developer to add a DELETE policy for this table (see chat for the exact SQL).');
+    }
 
     // 3. Reload the list
     loadPuzzles();
