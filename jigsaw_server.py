@@ -215,6 +215,41 @@ def webhook():
 
     return jsonify({'ok': True})
 
+# ── DELETE PUZZLE (admin only, uses service key — bypasses anon RLS) ──
+@app.route('/api/delete-puzzle', methods=['POST'])
+def delete_puzzle():
+    data = request.get_json()
+    puzzle_id = data.get('id')
+    filename = data.get('filename')
+
+    if not puzzle_id:
+        return jsonify({'ok': False, 'error': 'Missing puzzle id'})
+
+    try:
+        # 1. Delete the image from Supabase Storage using the service key
+        if filename:
+            storage_url = f"{SUPABASE_URL}/storage/v1/object/puzzles/{urllib.parse.quote(filename)}"
+            headers = {
+                'apikey': SUPABASE_SERVICE_KEY,
+                'Authorization': f'Bearer {SUPABASE_SERVICE_KEY}',
+            }
+            req = urllib.request.Request(storage_url, headers=headers, method='DELETE')
+            try:
+                urllib.request.urlopen(req)
+            except urllib.error.HTTPError as e:
+                print(f"Storage delete warning: {e.read().decode()}", flush=True)
+
+        # 2. Delete the row from the database using the service key (bypasses RLS)
+        result = supabase_request('DELETE',
+            f"jigsaw_puzzles?id=eq.{urllib.parse.quote(str(puzzle_id))}",
+            use_service_key=True)
+
+        return jsonify({'ok': True})
+
+    except Exception as e:
+        print(f'DELETE PUZZLE ERROR: {e}', flush=True)
+        return jsonify({'ok': False, 'error': str(e)})
+
 # ── STATIC ────────────────────────────────────────
 @app.route('/<path:filename>')
 def static_files(filename):

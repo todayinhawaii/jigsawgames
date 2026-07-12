@@ -333,29 +333,18 @@ async function deletePuzzle(id, filename, title, btn){
   btn.textContent = '⏳';
 
   try{
-    // 1. Remove the image from Supabase Storage
-    const{error:storageError} = await sbClient.storage.from('puzzles').remove([filename]);
-    if(storageError) console.log('Storage delete warning:', storageError.message);
+    const res = await fetch('/api/delete-puzzle', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id, filename})
+    });
+    const result = await res.json();
 
-    // 2. Remove the row from the database (no .select() chained on — verify separately below)
-    const{error:dbError} = await sbClient
-      .from('jigsaw_puzzles')
-      .delete()
-      .eq('id', id);
-
-    if(dbError) throw dbError;
-
-    // 3. Confirm it's actually gone with a fresh, independent check
-    const{data:stillThere} = await sbClient
-      .from('jigsaw_puzzles')
-      .select('id')
-      .eq('id', id);
-
-    if(stillThere && stillThere.length > 0){
-      throw new Error('The delete request completed without an error, but the puzzle is still in the database. This may be a Supabase Row Level Security policy issue — check the DELETE policy on jigsaw_puzzles.');
+    if(!result.ok){
+      throw new Error(result.error || 'Unknown error from server');
     }
 
-    // 4. Reload the list
+    // Reload the list
     loadPuzzles();
 
   }catch(e){
