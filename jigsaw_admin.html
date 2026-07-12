@@ -92,6 +92,15 @@ body{display:flex;flex-direction:column;align-items:center;padding:30px 16px 60p
 .puzzle-status{font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;}
 .puzzle-status.live{background:rgba(50,255,100,0.1);color:#50fa7b;border:1px solid rgba(50,255,100,0.2);}
 .puzzle-status.soon{background:rgba(255,165,0,0.1);color:#ffa500;border:1px solid rgba(255,165,0,0.2);}
+.del-btn{
+  flex-shrink:0;width:32px;height:32px;border-radius:8px;
+  border:1px solid rgba(255,50,50,0.25);background:rgba(255,50,50,0.08);
+  color:#ff6b6b;font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;
+}
+.del-btn:hover{background:rgba(255,50,50,0.2);border-color:rgba(255,50,50,0.5);}
+.del-btn:disabled{opacity:0.4;cursor:not-allowed;}
 
 /* Progress */
 .progress-wrap{margin-bottom:20px;}
@@ -196,7 +205,7 @@ body{display:flex;flex-direction:column;align-items:center;padding:30px 16px 60p
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 // ════════════════════════════════════════════════
 // JIGSAW.GAMES ADMIN PANEL
@@ -281,6 +290,12 @@ function updateProgress(puzzles){
   }
 }
 
+function escapeHtml(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 function renderPuzzleList(puzzles){
   const list = document.getElementById('puzzleList');
   if(!puzzles.length){
@@ -288,8 +303,8 @@ function renderPuzzleList(puzzles){
     return;
   }
   list.innerHTML = puzzles.map(p=>`
-    <div class="puzzle-item has-image">
-      <img class="puzzle-thumb" src="/${p.filename}" alt="${p.title}"
+    <div class="puzzle-item has-image" data-id="${escapeHtml(p.id)}" data-filename="${escapeHtml(p.filename)}" data-title="${escapeHtml(p.title)}">
+      <img class="puzzle-thumb" src="/${p.filename}" alt="${escapeHtml(p.title)}"
         onerror="this.style.background='rgba(255,255,255,0.05)'">
       <div class="puzzle-info">
         <div class="puzzle-num">Puzzle ${p.num}</div>
@@ -298,8 +313,42 @@ function renderPuzzleList(puzzles){
         <div class="puzzle-num" style="margin-top:2px;color:var(--gold);">${p.category||"village"}</div>
       </div>
       <span class="puzzle-status live">✅ Live</span>
+      <button class="del-btn" data-action="delete" title="Delete this puzzle">🗑️</button>
     </div>
   `).join('');
+}
+
+// ── DELETE PUZZLE ─────────────────────────────────
+document.getElementById('puzzleList').addEventListener('click', function(e){
+  const btn = e.target.closest('[data-action="delete"]');
+  if(!btn) return;
+  const item = btn.closest('.puzzle-item');
+  deletePuzzle(item.dataset.id, item.dataset.filename, item.dataset.title, btn);
+});
+
+async function deletePuzzle(id, filename, title, btn){
+  if(!confirm(`Delete "${title}"?\n\nThis removes it from jigsaw.games permanently and cannot be undone.`)) return;
+
+  btn.disabled = true;
+  btn.textContent = '⏳';
+
+  try{
+    // 1. Remove the image from Supabase Storage
+    const{error:storageError} = await sbClient.storage.from('puzzles').remove([filename]);
+    if(storageError) console.log('Storage delete warning:', storageError.message);
+
+    // 2. Remove the row from the database
+    const{error:dbError} = await sbClient.from('jigsaw_puzzles').delete().eq('id', id);
+    if(dbError) throw dbError;
+
+    // 3. Reload the list
+    loadPuzzles();
+
+  }catch(e){
+    alert('❌ Delete failed: '+e.message);
+    btn.disabled = false;
+    btn.textContent = '🗑️';
+  }
 }
 
 // ── PREVIEW IMAGE ─────────────────────────────────
