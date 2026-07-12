@@ -225,6 +225,7 @@ def delete_puzzle():
     if not puzzle_id:
         return jsonify({'ok': False, 'error': 'Missing puzzle id'})
 
+    storage_status = None
     try:
         # 1. Delete the image from Supabase Storage using the service key
         if filename:
@@ -235,16 +236,38 @@ def delete_puzzle():
             }
             req = urllib.request.Request(storage_url, headers=headers, method='DELETE')
             try:
-                urllib.request.urlopen(req)
+                with urllib.request.urlopen(req) as res:
+                    storage_status = res.status
             except urllib.error.HTTPError as e:
-                print(f"Storage delete warning: {e.read().decode()}", flush=True)
+                storage_status = f"HTTP {e.code}: {e.read().decode()}"
 
-        # 2. Delete the row from the database using the service key (bypasses RLS)
-        result = supabase_request('DELETE',
-            f"jigsaw_puzzles?id=eq.{urllib.parse.quote(str(puzzle_id))}",
-            use_service_key=True)
+        # 2. Delete the row from the database directly (not via the shared helper)
+        #    so we can see the REAL status code and response, not a swallowed error.
+        db_url = f"{SUPABASE_URL}/rest/v1/jigsaw_puzzles?id=eq.{urllib.parse.quote(str(puzzle_id))}"
+        db_headers = {
+            'apikey': SUPABASE_SERVICE_KEY,
+            'Authorization': f'Bearer {SUPABASE_SERVICE_KEY}',
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+        }
+        db_req = urllib.request.Request(db_url, headers=db_headers, method='DELETE')
+        try:
+            with urllib.request.urlopen(db_req) as res:
+                db_status = res.status
+                db_body = res.read().decode()
+        except urllib.error.HTTPError as e:
+            db_status = e.code
+            db_body = e.read().decode()
 
-        return jsonify({'ok': True})
+        deleted_rows = json.loads(db_body) if db_body else []
+
+        if db_status >= 400:
+            return jsonify({'ok': False, 'error': f'Supabase returned HTTP {db_status}: {db_body}'})
+
+        if not deleted_rows:
+            return jsonify({'ok': False, 'error': f'Delete request succeeded (HTTP {db_status}) but matched 0 rows. Check that id={puzzle_id} actually exists and matches the column type in jigsaw_puzzles.'})
+
+        return jsonify({'ok': True, 'deleted': deleted_rows, 'storage_status': str(storage_status)})
 
     except Exception as e:
         print(f'DELETE PUZZLE ERROR: {e}', flush=True)
