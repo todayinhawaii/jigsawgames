@@ -327,7 +327,6 @@ document.getElementById('puzzleList').addEventListener('click', function(e){
 });
 
 async function deletePuzzle(id, filename, title, btn){
-  alert('DEBUG — id: ' + JSON.stringify(id) + '\nfilename: ' + filename + '\ntitle: ' + title);
   if(!confirm(`Delete "${title}"?\n\nThis removes it from jigsaw.games permanently and cannot be undone.`)) return;
 
   btn.disabled = true;
@@ -338,23 +337,25 @@ async function deletePuzzle(id, filename, title, btn){
     const{error:storageError} = await sbClient.storage.from('puzzles').remove([filename]);
     if(storageError) console.log('Storage delete warning:', storageError.message);
 
-    // 2. Remove the row from the database — .select() so we can confirm a row actually got deleted
-    const{data:deletedRows, error:dbError} = await sbClient
+    // 2. Remove the row from the database (no .select() chained on — verify separately below)
+    const{error:dbError} = await sbClient
       .from('jigsaw_puzzles')
       .delete()
-      .eq('id', id)
-      .select();
+      .eq('id', id);
 
     if(dbError) throw dbError;
-    alert('DEBUG — deletedRows: ' + JSON.stringify(deletedRows));
 
-    if(!deletedRows || deletedRows.length === 0){
-      // No error, but nothing was actually deleted — almost always a Supabase
-      // Row Level Security policy silently blocking the delete for the anon key.
-      throw new Error('Nothing was deleted — this is very likely a Supabase Row Level Security policy blocking DELETE on the jigsaw_puzzles table. Ask your developer to add a DELETE policy for this table (see chat for the exact SQL).');
+    // 3. Confirm it's actually gone with a fresh, independent check
+    const{data:stillThere} = await sbClient
+      .from('jigsaw_puzzles')
+      .select('id')
+      .eq('id', id);
+
+    if(stillThere && stillThere.length > 0){
+      throw new Error('The delete request completed without an error, but the puzzle is still in the database. This may be a Supabase Row Level Security policy issue — check the DELETE policy on jigsaw_puzzles.');
     }
 
-    // 3. Reload the list
+    // 4. Reload the list
     loadPuzzles();
 
   }catch(e){
