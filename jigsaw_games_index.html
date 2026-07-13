@@ -550,6 +550,19 @@ function buildCarousel(){
       };
     t.appendChild(c);
   }));
+
+  // Keep scroll SPEED constant across every category (gentle, comfortable pace),
+  // instead of a fixed animation DURATION — which made categories with more
+  // cards (like "All") cover much more distance in the same time, i.e. scroll
+  // much faster than smaller categories.
+  if(PUZZLES.length >= 5){
+    requestAnimationFrame(()=>{
+      const fullSetWidth = t.scrollWidth / 2; // content is duplicated for the infinite loop
+      const PX_PER_SECOND = 40; // gentle pace — same for every category
+      const duration = Math.max(25, fullSetWidth / PX_PER_SECOND);
+      t.style.animationDuration = duration + 's';
+    });
+  }
 }
 
 // ── START GAME ────────────────────────────────
