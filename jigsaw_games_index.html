@@ -570,13 +570,9 @@ async function startGame(){
   // Check membership first - members go straight to game!!
   try{
     let t=0;
-    while(!window.supabase&&t++<10) await new Promise(r=>setTimeout(r,100));
-    if(window.supabase){
-      const sb2=window.supabase.createClient(
-        'https://xbzeakoypdyslnnriaef.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiemVha295cGR5c2xubnJpYWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NDI5MzIsImV4cCI6MjA5NjIxODkzMn0.-pS2FE-Q-_EetM5ONbJycZWFm336wJ-z4MTOGCdA1LE'
-      );
-      const{data:{session}}=await sb2.auth.getSession();
+    while(!sb&&t++<10) await new Promise(r=>setTimeout(r,100));
+    if(sb){
+      const{data:{session}}=await sb.auth.getSession();
       if(session){
         // Logged in = play!! No extra check needed!!
         if(!PUZZLES.length)return;
@@ -1337,13 +1333,36 @@ function closePaywall(){
 }
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 
 
 
+// ── FAB.GAMES BUNDLE HAND-OFF ─────────────────────
+// If arriving from fab.games' "Continue to jigsaw.games" button (bundle
+// subscribers only), the URL hash carries a short-lived access/refresh
+// token pair. Use it to establish a real session here too, then clean
+// the URL. This must run BEFORE loadPuzzles()/checkMembership() so any
+// getSession() call afterwards already sees the handed-off session.
+async function handleFabHandoff(){
+  const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const at = params.get('fab_at');
+  const rt = params.get('fab_rt');
+  if(!at || !rt) return;
+  try{
+    if(!sb) return; // loadPuzzles() should have already created the shared client
+    await sb.auth.setSession({access_token: at, refresh_token: rt});
+  }catch(e){
+    console.log('Fab hand-off error:', e.message||e);
+  }finally{
+    // Always scrub the tokens from the URL, whether it worked or not
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+}
+
 window.addEventListener('load',async()=>{
-  await loadPuzzles();
+  await loadPuzzles(); // creates the single shared `sb` client
+  await handleFabHandoff(); // reuses that same client — no new instance
   if(!PUZZLES.length){
     document.getElementById('artTitle').textContent='Coming Soon!';
     document.getElementById('artDesc').textContent='Beautiful original art puzzles on their way!!';
@@ -1362,13 +1381,8 @@ window.addEventListener('load',async()=>{
   }
   // Show My Account button if logged in
   try{
-    let t=0;while(!window.supabase&&t++<20)await new Promise(r=>setTimeout(r,100));
-    if(window.supabase){
-      const sb3=window.supabase.createClient(
-        'https://xbzeakoypdyslnnriaef.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiemVha295cGR5c2xubnJpYWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NDI5MzIsImV4cCI6MjA5NjIxODkzMn0.-pS2FE-Q-_EetM5ONbJycZWFm336wJ-z4MTOGCdA1LE'
-      );
-      const{data:{session}}=await sb3.auth.getSession();
+    if(sb){
+      const{data:{session}}=await sb.auth.getSession();
       if(session){
         const ab=document.getElementById('accountBtn');
         if(ab) ab.style.display='inline-block';
