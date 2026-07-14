@@ -6,7 +6,7 @@
 <title>Welcome to jigsaw.games!! 🧩</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&display=block" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root{--black:#080808;--gold:#c9a84c;--gold2:#ffd700;--white:#f0ede8;--muted:rgba(240,237,232,0.5);}
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -34,8 +34,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <body>
 <div class="card">
   <div class="confetti">🧩</div>
+  <div id="bundleBadge" style="display:none;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#c9a84c;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);padding:6px 18px;border-radius:20px;margin-bottom:16px;display:inline-block;">🎮 Bundle Unlocked</div>
   <div class="welcome">Welcome to the Family!!</div>
-  <div class="tagline">Your puzzles are ready and waiting — let's play!!</div>
+  <div class="tagline" id="tagline">Your puzzles are ready and waiting — let's play!!</div>
 
   <div class="trial-box">
     <div class="trial-label">Your Free Trial Ends</div>
@@ -52,6 +53,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   </div>
 
   <a href="/" class="play-btn">🎨 Start Playing Now →</a>
+  <a href="#" id="fabBtn" class="play-btn" style="display:none;margin-top:12px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);box-shadow:0 6px 0 #4c1d95,0 8px 24px rgba(139,92,246,0.4);color:#fff;">🎮 Play fab.games →</a>
 
   <div class="fine">
     Questions? Email us at <a href="mailto:hello@jigsaw.games">hello@jigsaw.games</a><br>
@@ -105,6 +107,44 @@ window.addEventListener('load', ()=>{
   burst();
   setTimeout(burst, 800);
 });
+
+// ── BUNDLE-AWARE WELCOME ───────────────────────────
+(async function(){
+  const params = new URLSearchParams(window.location.search);
+  const plan = params.get('plan');
+  if(plan !== 'bundle') return; // single-site plan — default messaging above is correct
+
+  document.getElementById('bundleBadge').style.display = 'inline-block';
+  document.getElementById('tagline').textContent =
+    "You're now able to play jigsaw.games AND fab.games — every puzzle, every game, all yours!";
+
+  const fabBtn = document.getElementById('fabBtn');
+  fabBtn.style.display = 'block';
+  fabBtn.href = 'https://www.fab.games/';
+
+  // If a live session already exists in this browser, hand it off so
+  // clicking the fab.games button logs them straight in — no extra
+  // sign-in step needed. If no session exists yet, the plain link above
+  // still works fine; they'll just sign in there once with the same
+  // email/password they just created.
+  try{
+    let t=0; while(!window.supabase && t++<30) await new Promise(r=>setTimeout(r,100));
+    if(!window.supabase) return;
+    const sbClient = window.supabase.createClient(
+      'https://xbzeakoypdyslnnriaef.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiemVha295cGR5c2xubnJpYWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NDI5MzIsImV4cCI6MjA5NjIxODkzMn0.-pS2FE-Q-_EetM5ONbJycZWFm336wJ-z4MTOGCdA1LE'
+    );
+    const {data:{session}} = await sbClient.auth.getSession();
+    if(session){
+      fabBtn.onclick = function(e){
+        e.preventDefault();
+        const at = encodeURIComponent(session.access_token);
+        const rt = encodeURIComponent(session.refresh_token);
+        window.location.href = 'https://www.fab.games/#jigsaw_at='+at+'&jigsaw_rt='+rt;
+      };
+    }
+  }catch(e){ console.log('Session check error:', e.message||e); }
+})();
 </script>
 </body>
 </html>
