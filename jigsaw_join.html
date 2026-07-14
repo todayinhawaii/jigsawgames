@@ -235,13 +235,13 @@ const PLAN_PRICES = {
 };
 
 var selectedPlan = null;
-var supabase = null;
+var sbClient = null;
 
 window.addEventListener('load', function(){
   try{
     const SB = window.supabase;
     if(SB && SB.createClient){
-      supabase = SB.createClient(
+      sbClient = SB.createClient(
         'https://xbzeakoypdyslnnriaef.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiemVha295cGR5c2xubnJpYWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NDI5MzIsImV4cCI6MjA5NjIxODkzMn0.-pS2FE-Q-_EetM5ONbJycZWFm336wJ-z4MTOGCdA1LE'
       );
@@ -315,6 +315,16 @@ async function startSignup(){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ name, email, password, plan:selectedPlan })
     });
+
+    // Sign in client-side so a REAL session exists in this browser.
+    // Without this, jigsaw.games' own membership check still works fine
+    // (it re-checks Supabase directly), but fab.games would have no
+    // session at all to recognize if the bundle cross-link is used.
+    if(sbClient){
+      try{
+        await sbClient.auth.signInWithPassword({ email, password });
+      }catch(e){ console.log('Post-signup sign-in error:', e.message||e); }
+    }
 
     showMsg('Account created!! Redirecting to payment...', 'info');
 
