@@ -53,8 +53,11 @@ body{background:#080808;color:#f0ede8;font-family:'Inter',sans-serif;
   </div>
   <div class="form-group">
     <label class="form-label">Password</label>
-    <input class="form-input" id="loginPw" type="password" placeholder="Your password"
-      onkeydown="if(event.key==='Enter')signIn()">
+    <div style="position:relative;">
+      <input class="form-input" id="loginPw" type="password" placeholder="Your password" style="padding-right:44px;"
+        onkeydown="if(event.key==='Enter')signIn()">
+      <span onclick="togglePw('loginPw',this)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;color:rgba(240,237,232,0.5);user-select:none;">👁</span>
+    </div>
   </div>
   <button class="btn" onclick="signIn()">Sign In →</button>
   <div class="links">
@@ -64,6 +67,17 @@ body{background:#080808;color:#f0ede8;font-family:'Inter',sans-serif;
 </div>
 <script>
 let sbClient;
+
+function togglePw(id, el){
+  const input = document.getElementById(id);
+  if(input.type === 'password'){
+    input.type = 'text';
+    el.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    el.textContent = '👁';
+  }
+}
 async function init(){
   try{
     const res=await fetch('/api/config');
