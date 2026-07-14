@@ -131,24 +131,45 @@ def register():
 def create_checkout():
     data = request.get_json()
     email = data.get('email', '').strip().lower()
+    plan = data.get('plan', 'jigsaw')
     # Use client-provided price or configured price - never empty!!
     price = data.get('price_id') or STRIPE_PRICE_ID
-    print(f'CHECKOUT: email={email} price={price}', flush=True)
+    print(f'CHECKOUT: email={email} price={price} plan={plan}', flush=True)
     try:
+        origin = request.headers.get('Origin') or request.headers.get('Referer') or BASE_URL
+        origin = origin.rstrip('/').split('/join')[0]  # strip any path, keep just the domain
         session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             mode='subscription',
             customer_email=email,
             line_items=[{'price': price, 'quantity': 1}],
             subscription_data={'trial_period_days': 30},
-            success_url=BASE_URL + '/success?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=BASE_URL + '/join',
+            success_url=origin + '/success?session_id={CHECKOUT_SESSION_ID}&plan=' + plan,
+            cancel_url=origin + '/join',
             allow_promotion_codes=True,
         )
         return jsonify({'ok': True, 'url': session.url})
     except Exception as e:
         print(f'STRIPE ERROR: {e}', flush=True)
         return jsonify({'ok': False, 'error': str(e)})
+
+# ── GET PLAN (used to decide whether to show the fab.games cross-site button) ──
+@app.route('/api/get-plan')
+def get_plan():
+    email = request.args.get('email', '').strip().lower()
+    if not email:
+        return jsonify({'ok': False, 'error': 'Missing email'})
+    members = supabase_request('GET',
+        f"members?email=eq.{urllib.parse.quote(email)}&select=plan,status,subscription_status",
+        use_service_key=True)
+    if not members or len(members) == 0:
+        return jsonify({'ok': False, 'error': 'No member found'})
+    return jsonify({
+        'ok': True,
+        'plan': members[0].get('plan'),
+        'status': members[0].get('status'),
+        'subscription_status': members[0].get('subscription_status'),
+    })
 
 # ── STRIPE BILLING PORTAL ──────────────────────────
 @app.route('/api/create-portal-session', methods=['POST'])
