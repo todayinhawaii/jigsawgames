@@ -193,6 +193,41 @@ def create_portal_session():
         print(f'PORTAL ERROR: {e}', flush=True)
         return jsonify({'ok': False, 'error': str(e)})
 
+# ── CANCEL SUBSCRIPTION (direct, no portal redirect needed) ──
+@app.route('/api/cancel-subscription', methods=['POST'])
+def cancel_subscription():
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    try:
+        members = supabase_request('GET',
+            f"members?email=eq.{urllib.parse.quote(email)}&select=stripe_customer",
+            use_service_key=True)
+        if not members or not members[0].get('stripe_customer'):
+            return jsonify({'ok': False, 'error': 'No active subscription found for this account.'})
+        customer_id = members[0]['stripe_customer']
+
+        subs = stripe.Subscription.list(customer=customer_id, status='active', limit=1)
+        if not subs.data:
+            subs = stripe.Subscription.list(customer=customer_id, status='trialing', limit=1)
+        if not subs.data:
+            return jsonify({'ok': False, 'error': 'No active subscription found for this account.'})
+
+        sub = subs.data[0]
+        updated = stripe.Subscription.modify(sub.id, cancel_at_period_end=True)
+
+        supabase_request('PATCH',
+            f"members?email=eq.{urllib.parse.quote(email)}",
+            {'subscription_status': 'cancel_at_period_end'},
+            use_service_key=True)
+
+        return jsonify({
+            'ok': True,
+            'cancel_at': updated.current_period_end,  # unix timestamp
+        })
+    except Exception as e:
+        print(f'CANCEL ERROR: {e}', flush=True)
+        return jsonify({'ok': False, 'error': str(e)})
+
 # ── STRIPE WEBHOOK ────────────────────────────────
 @app.route('/api/webhook', methods=['POST'])
 def webhook():

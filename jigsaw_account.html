@@ -6,7 +6,7 @@
 <title>My Account — jigsaw.games</title>
 <link rel="icon" type="image/png" href="/jigsaw-logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&display=block" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root{--black:#080808;--gold:#c9a84c;--gold2:#ffd700;--white:#f0ede8;--muted:rgba(240,237,232,0.5);--border:rgba(255,255,255,0.07);}
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -39,6 +39,14 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 4
 .btn-danger{background:rgba(239,68,68,0.08);color:#fca5a5;border:1px solid rgba(239,68,68,0.25);}
 .loading{text-align:center;color:var(--muted);font-size:13px;padding:30px 0;}
 footer{text-align:center;padding:20px;font-size:11px;color:rgba(240,237,232,0.2);}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal-box{width:100%;max-width:400px;background:#0d0d0f;border:1px solid rgba(201,168,76,0.35);border-radius:20px;padding:32px 28px;text-align:center;}
+.modal-icon{font-size:40px;margin-bottom:12px;}
+.modal-title{font-family:'Cinzel',serif;font-size:19px;font-weight:700;color:var(--white);margin-bottom:14px;}
+.modal-text{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:24px;}
+.modal-text strong{color:var(--gold2);}
+.modal-btns{display:flex;flex-direction:column;gap:10px;}
 </style>
 </head>
 <body>
@@ -58,6 +66,10 @@ footer{text-align:center;padding:20px;font-size:11px;color:rgba(240,237,232,0.2)
   </div>
 </div>
 <footer>© 2026 jigsaw.games — Made with 🌺 in Hawaii</footer>
+
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal-box" id="cancelModalBox"></div>
+</div>
 
 <script>
 let sbClient;
@@ -128,9 +140,61 @@ async function openPortal(){
   else { alert('Unable to open billing portal: '+(data.error||'unknown error')); }
 }
 
+function showModal(html){
+  document.getElementById('cancelModalBox').innerHTML = html;
+  document.getElementById('cancelModal').classList.add('show');
+}
+function hideModal(){
+  document.getElementById('cancelModal').classList.remove('show');
+}
+
 async function cancelMembership(){
-  if(!confirm('Are you sure you want to cancel? You can resume anytime before your access ends.')) return;
-  await openPortal(); // Stripe portal handles the actual cancellation
+  showModal(`
+    <div class="modal-icon">🤔</div>
+    <div class="modal-title">Cancel your membership?</div>
+    <div class="modal-text">You'll keep full access until the end of your current billing period, and your card won't be charged again after that. You can resume anytime before then.</div>
+    <div class="modal-btns">
+      <button class="btn btn-danger" style="margin-bottom:0;" onclick="confirmCancel()">Yes, Cancel My Membership</button>
+      <button class="btn btn-ghost" style="margin-bottom:0;" onclick="hideModal()">Never Mind, Keep Playing</button>
+    </div>
+  `);
+}
+
+async function confirmCancel(){
+  showModal(`<div class="modal-icon">⏳</div><div class="modal-title">Cancelling...</div>`);
+  try{
+    const{data:{session}}=await sbClient.auth.getSession();
+    const res=await fetch('/api/cancel-subscription',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:session.user.email})
+    });
+    const result=await res.json();
+
+    if(!result.ok){
+      showModal(`
+        <div class="modal-icon">😕</div>
+        <div class="modal-title">Something went wrong</div>
+        <div class="modal-text">${result.error || 'Please try again, or contact us for help.'}</div>
+        <div class="modal-btns"><button class="btn btn-ghost" style="margin-bottom:0;" onclick="hideModal()">Close</button></div>
+      `);
+      return;
+    }
+
+    const endDate = new Date(result.cancel_at * 1000).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    showModal(`
+      <div class="modal-icon">✅</div>
+      <div class="modal-title">You're all set</div>
+      <div class="modal-text">Your subscription will end on <strong>${endDate}</strong>, and your card won't be charged again after that.<br><br>You can keep playing until then — and you can resume anytime before that date if you change your mind!</div>
+      <div class="modal-btns"><button class="btn btn-gold" style="margin-bottom:0;" onclick="window.location.reload();">Got It</button></div>
+    `);
+  }catch(e){
+    showModal(`
+      <div class="modal-icon">😕</div>
+      <div class="modal-title">Connection error</div>
+      <div class="modal-text">Please try again in a moment.</div>
+      <div class="modal-btns"><button class="btn btn-ghost" style="margin-bottom:0;" onclick="hideModal()">Close</button></div>
+    `);
+  }
 }
 
 async function logout(){
