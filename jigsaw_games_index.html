@@ -1293,10 +1293,16 @@ async function checkMembership(){
 
     if(!planData.ok){ memberChecked=true; isMember=false; return false; }
 
+    // CRITICAL: must actually have paid for jigsaw.games specifically —
+    // either the 'jigsaw' single-site plan or the 'bundle' plan. Just
+    // being "active" isn't enough, since a fab.games-only subscriber's
+    // account is also "active" — just not for THIS site.
+    const hasRightPlan = planData.plan==='jigsaw' || planData.plan==='bundle';
     const now=new Date();
-    isMember = planData.subscription_status==='active' ||
+    isMember = hasRightPlan && (
+               planData.subscription_status==='active' ||
                planData.plan==='free_trial' ||
-               (planData.trial_end && new Date(planData.trial_end)>now);
+               (planData.trial_end && new Date(planData.trial_end)>now));
     memberChecked=true;
     return isMember;
   }catch(e){
