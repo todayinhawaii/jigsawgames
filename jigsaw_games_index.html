@@ -369,6 +369,7 @@ body.browsing #puzzleDots{
       <div><div class="nav-logo">🧩 jigsaw.games</div><div class="nav-sub" id="navSub">Original Art Puzzles</div></div>
     </div>
     <div style="display:flex;gap:8px;">
+      <button class="nav-btn" id="signInBtn" onclick="location.href='/login'">Sign In</button>
       <button class="nav-btn" id="accountBtn" onclick="location.href='/account'" style="display:none;">👤 My Account</button>
       <button class="nav-btn" onclick="location.href='https://www.fab.games'">fab.games</button>
       <button class="nav-btn gold" onclick="startGame();">▶ Play Now</button>
@@ -1283,19 +1284,19 @@ async function checkMembership(){
     const{data:{session},error:sErr}=await sb.auth.getSession();
     if(sErr||!session){ memberChecked=true; isMember=false; return false; }
 
-    // Check members table
-    const{data,error}=await sb
-      .from('members')
-      .select('plan,trial_end,subscription_status')
-      .eq('email',session.user.email)
-      .single();
+    // Check via the server (service key) instead of querying the members
+    // table directly from the browser — a direct anon-key query can be
+    // silently blocked by Supabase Row Level Security with no error at
+    // all, always reporting "not a member" even when the data is correct.
+    const res = await fetch('/api/get-plan?email='+encodeURIComponent(session.user.email));
+    const planData = await res.json();
 
-    if(error||!data){ memberChecked=true; isMember=false; return false; }
+    if(!planData.ok){ memberChecked=true; isMember=false; return false; }
 
     const now=new Date();
-    isMember = data.subscription_status==='active' ||
-               data.plan==='free_trial' ||
-               (data.trial_end && new Date(data.trial_end)>now);
+    isMember = planData.subscription_status==='active' ||
+               planData.plan==='free_trial' ||
+               (planData.trial_end && new Date(planData.trial_end)>now);
     memberChecked=true;
     return isMember;
   }catch(e){
@@ -1370,13 +1371,15 @@ window.addEventListener('load',async()=>{
     const lb=document.getElementById('landscapeBtn');
     if(lb) lb.style.display='flex';
   }
-  // Show My Account button if logged in
+  // Show My Account button if logged in, hide Sign In (and vice versa)
   try{
     if(sb){
       const{data:{session}}=await sb.auth.getSession();
       if(session){
         const ab=document.getElementById('accountBtn');
         if(ab) ab.style.display='inline-block';
+        const sib=document.getElementById('signInBtn');
+        if(sib) sib.style.display='none';
       }
     }
   }catch(e){}

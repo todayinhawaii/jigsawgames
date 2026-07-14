@@ -160,7 +160,7 @@ def get_plan():
     if not email:
         return jsonify({'ok': False, 'error': 'Missing email'})
     members = supabase_request('GET',
-        f"members?email=eq.{urllib.parse.quote(email)}&select=plan,status,subscription_status",
+        f"members?email=eq.{urllib.parse.quote(email)}&select=plan,status,subscription_status,trial_end",
         use_service_key=True)
     if not members or len(members) == 0:
         return jsonify({'ok': False, 'error': 'No member found'})
@@ -169,6 +169,7 @@ def get_plan():
         'plan': members[0].get('plan'),
         'status': members[0].get('status'),
         'subscription_status': members[0].get('subscription_status'),
+        'trial_end': members[0].get('trial_end'),
     })
 
 # ── STRIPE BILLING PORTAL ──────────────────────────
