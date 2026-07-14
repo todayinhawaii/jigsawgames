@@ -332,7 +332,7 @@ async function startSignup(){
     const res = await fetch('/api/create-checkout',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ email, name, plan:selectedPlan })
+      body:JSON.stringify({ email, name, plan:selectedPlan, price_id:PRICES[selectedPlan] })
     });
     const checkout = await res.json();
 
