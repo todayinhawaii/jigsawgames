@@ -129,7 +129,7 @@ footer{text-align:center;padding:20px;font-size:11px;color:rgba(240,239,232,0.2)
     <div class="selected-plan-box">
       <div class="selected-plan-name" id="planName">—</div>
       <div class="selected-plan-price" id="planPrice">—</div>
-      <span class="change-plan" onclick="changePlan()">← Change plan</span>
+      <span class="change-plan" onclick="location.href='/'">← Back to home</span>
     </div>
     <div id="msgBox" class="msg"></div>
     <div class="form-group">
@@ -219,13 +219,6 @@ function selectPlan(plan){
   wrap.style.display = 'block';
   setTimeout(() => wrap.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
   hideMsg();
-}
-
-function changePlan(){
-  document.getElementById('signupWrap').style.display = 'none';
-  document.querySelectorAll('.pc').forEach(c => c.classList.remove('selected'));
-  selectedPlan = null;
-  window.scrollTo({ top:0, behavior:'smooth' });
 }
 
 function showMsg(msg, type='error'){
