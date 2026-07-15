@@ -108,6 +108,16 @@ def register():
             except urllib.error.HTTPError as e:
                 err = e.read().decode()
                 print(f"Auth error: {err}", flush=True)
+                if 'already registered' in err or 'already been registered' in err:
+                    # This email already has an account. Do NOT silently overwrite
+                    # its password (that would let anyone hijack any email just by
+                    # typing it into the signup form) — stop here and tell them
+                    # clearly, BEFORE any payment is taken.
+                    return jsonify({
+                        'ok': False,
+                        'msg': 'This email is already registered. Please sign in instead, or use "Forgot Password" if you don\'t remember your login.',
+                        'already_registered': True
+                    })
         except Exception as e:
             print(f"Auth exception: {e}", flush=True)
 

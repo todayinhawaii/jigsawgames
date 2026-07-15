@@ -310,11 +310,18 @@ async function startSignup(){
 
   try{
     // Register via server
-    await fetch('/api/register',{
+    const regRes = await fetch('/api/register',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ name, email, password, plan:selectedPlan })
     });
+    const regData = await regRes.json();
+
+    if(!regData.ok){
+      showMsg(regData.msg || 'Something went wrong creating your account.');
+      btn.disabled = false;
+      return;
+    }
 
     // Sign in client-side so a REAL session exists in this browser.
     // Without this, jigsaw.games' own membership check still works fine
