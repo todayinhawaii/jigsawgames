@@ -101,54 +101,23 @@ footer{text-align:center;padding:20px;font-size:11px;color:rgba(240,239,232,0.2)
 </div>
 
 <div class="pricing-wrap">
-  <div class="pricing-grid">
+  <div class="pricing-grid" style="grid-template-columns:1fr;max-width:420px;margin:0 auto;">
 
-    <!-- jigsaw only -->
-    <div class="pc" id="card-jigsaw" onclick="selectPlan('jigsaw')">
-      <div class="pc-site">jigsaw.games</div>
-      <div class="pc-icon">🧩</div>
-      <div class="pc-price"><sup>$</sup>4<sub>.99/mo</sub></div>
-      <div class="pc-desc">Hundreds of stunning jigsaw puzzles — beautiful original artwork, multiple difficulty levels.</div>
-      <div class="pc-perks">
-        <div class="pc-perk">✦ All jigsaw puzzles</div>
-        <div class="pc-perk">✦ 30 day free trial</div>
-        <div class="pc-perk">✦ No credit card today</div>
-        <div class="pc-perk">✦ Cancel anytime</div>
-      </div>
-      <button class="pc-btn btn-jigsaw" onclick="selectPlan('jigsaw')">Start Free Month →</button>
-    </div>
-
-    <!-- BUNDLE featured -->
-    <div class="pc featured" id="card-bundle" onclick="selectPlan('bundle')">
-      <div class="best-badge">⭐ Best Value</div>
+    <div class="pc featured" id="card-all" onclick="selectPlan('all')">
+      <div class="best-badge">⭐ Everything, Always</div>
       <div class="pc-site" style="color:#ffd700;">fab.games + jigsaw.games</div>
       <div class="pc-icon">🎮🧩</div>
-      <div class="pc-price"><sup>$</sup>7<sub>.99/mo</sub></div>
-      <div class="pc-save">Save $2 every month!</div>
-      <div class="pc-desc">Get both worlds for less! An ever-growing library of incredible games PLUS hundreds of stunning puzzles — like getting one site completely free!</div>
+      <div class="pc-price"><sup>$</sup>5<sub>.99/mo</sub></div>
+      <div class="pc-desc">One membership, both worlds — every puzzle on jigsaw.games, every game on fab.games. Sign in with the same email and password on either site, always.</div>
       <div class="pc-perks">
         <div class="pc-perk">✦ Everything on jigsaw.games</div>
         <div class="pc-perk">✦ Everything on fab.games</div>
+        <div class="pc-perk">✦ One login works on both sites</div>
         <div class="pc-perk">✦ 30 day free trial</div>
         <div class="pc-perk">✦ No credit card today</div>
         <div class="pc-perk">✦ Cancel anytime</div>
       </div>
-      <button class="pc-btn btn-bundle" onclick="selectPlan('bundle')">Get The Bundle →</button>
-    </div>
-
-    <!-- fab only -->
-    <div class="pc" id="card-fab" onclick="selectPlan('fab')">
-      <div class="pc-site">fab.games</div>
-      <div class="pc-icon">🎮</div>
-      <div class="pc-price"><sup>$</sup>4<sub>.99/mo</sub></div>
-      <div class="pc-desc">An ever-growing library of incredible games — ad-free, family friendly, built with love.</div>
-      <div class="pc-perks">
-        <div class="pc-perk">✦ All fab.games games</div>
-        <div class="pc-perk">✦ 30 day free trial</div>
-        <div class="pc-perk">✦ No credit card today</div>
-        <div class="pc-perk">✦ Cancel anytime</div>
-      </div>
-      <button class="pc-btn btn-fab" onclick="selectPlan('fab')">Start Free Month →</button>
+      <button class="pc-btn btn-bundle" onclick="selectPlan('all')">Start Free Month →</button>
     </div>
 
   </div>
@@ -218,20 +187,11 @@ footer{text-align:center;padding:20px;font-size:11px;color:rgba(240,239,232,0.2)
 <footer>© 2026 jigsaw.games — Made with 🌺 in Hawaii</footer>
 
 <script>
-const PRICES = {
-  jigsaw: 'price_1TgXljRszIkvwb2pYi75vBvK',
-  bundle: 'price_1TkbaVRszIkvwb2peR2Ne9Vb',
-  fab:    'price_1TemBdRszIkvwb2pMlZbPBjC'
-};
 const PLAN_NAMES = {
-  jigsaw: '🧩 jigsaw.games Premium',
-  bundle: '🎮🧩 fab.games + jigsaw.games Bundle',
-  fab:    '🎮 fab.games Premium'
+  all: '🎮🧩 fab.games + jigsaw.games'
 };
 const PLAN_PRICES = {
-  jigsaw: '30 days free · then $4.99/month',
-  bundle: '30 days free · then $7.99/month · Save $2/month!',
-  fab:    '30 days free · then $4.99/month'
+  all: '30 days free · then $5.99/month'
 };
 
 var selectedPlan = null;
@@ -339,7 +299,7 @@ async function startSignup(){
     const res = await fetch('/api/create-checkout',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ email, name, plan:selectedPlan, price_id:PRICES[selectedPlan] })
+      body:JSON.stringify({ email, name, plan:selectedPlan })
     });
     const checkout = await res.json();
 

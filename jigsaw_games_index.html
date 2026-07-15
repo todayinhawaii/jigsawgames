@@ -371,7 +371,7 @@ body.browsing #puzzleDots{
     <div style="display:flex;gap:8px;">
       <button class="nav-btn" id="signInBtn" onclick="location.href='/login'">Sign In</button>
       <button class="nav-btn" id="accountBtn" onclick="location.href='/account'" style="display:none;">👤 My Account</button>
-      <button class="nav-btn" onclick="location.href='https://www.fab.games'">fab.games</button>
+      <button class="nav-btn" id="fabCrossLink" onclick="location.href='https://www.fab.games'">fab.games</button>
       <button class="nav-btn gold" onclick="startGame();">▶ Play Now</button>
     </div>
   </div>
@@ -1271,7 +1271,7 @@ window.addEventListener('orientationchange',()=>{
 
 
 // ── MEMBERSHIP CHECK ─────────────────────────
-let memberChecked=false, isMember=false;
+let memberChecked=false, isMember=false, noAccessReason='';
 
 async function checkMembership(){
   if(memberChecked) return isMember;
@@ -1282,7 +1282,7 @@ async function checkMembership(){
     if(!sb){ isMember=false; memberChecked=true; return false; }
 
     const{data:{session},error:sErr}=await sb.auth.getSession();
-    if(sErr||!session){ memberChecked=true; isMember=false; return false; }
+    if(sErr||!session){ memberChecked=true; isMember=false; noAccessReason='not_logged_in'; return false; }
 
     // Check via the server (service key) instead of querying the members
     // table directly from the browser — a direct anon-key query can be
@@ -1291,18 +1291,18 @@ async function checkMembership(){
     const res = await fetch('/api/get-plan?email='+encodeURIComponent(session.user.email));
     const planData = await res.json();
 
-    if(!planData.ok){ memberChecked=true; isMember=false; return false; }
+    if(!planData.ok){ memberChecked=true; isMember=false; noAccessReason='no_account'; return false; }
 
-    // CRITICAL: must actually have paid for jigsaw.games specifically —
-    // either the 'jigsaw' single-site plan or the 'bundle' plan. Just
-    // being "active" isn't enough, since a fab.games-only subscriber's
-    // account is also "active" — just not for THIS site.
-    const hasRightPlan = planData.plan==='jigsaw' || planData.plan==='bundle';
+    // SIMPLIFIED: one membership now covers both sites, so we just check
+    // whether the account is active/trialing at all — no more per-plan
+    // gating logic needed.
     const now=new Date();
-    isMember = hasRightPlan && (
-               planData.subscription_status==='active' ||
+    isMember = planData.subscription_status==='active' ||
                planData.plan==='free_trial' ||
-               (planData.trial_end && new Date(planData.trial_end)>now));
+               (planData.trial_end && new Date(planData.trial_end)>now);
+    if(!isMember){
+      noAccessReason = 'expired';
+    }
     memberChecked=true;
     return isMember;
   }catch(e){
@@ -1312,14 +1312,67 @@ async function checkMembership(){
 }
 
 function showPaywall(){
-  // Redirect directly to join page
+  // Logged in but wrong plan (or expired) — show a clear message explaining
+  // exactly why, instead of silently redirecting with no explanation at all.
+  if(noAccessReason === 'expired'){
+    showNoAccessModal();
+    return;
+  }
+  // Not logged in at all, or no account found — just go straight to join,
+  // which is the normal, expected path for a brand new visitor.
   window.location.href='/join';
-  return;
-  const ov=document.getElementById('paywallOverlay');
-  if(ov){ov.style.display='flex';ov.classList.add('visible');}
-  const btn=document.getElementById('playBtn');
-  if(btn)btn.style.animationPlayState='paused';
 }
+
+function showNoAccessModal(){
+  if(document.getElementById('__noAccessOverlay')) return;
+
+  const style = document.createElement('style');
+  style.textContent = `
+    #__noAccessOverlay{
+      position:fixed;inset:0;z-index:999999;
+      background:rgba(5,5,8,0.92);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Inter',sans-serif;
+    }
+    #__noAccessBox{
+      max-width:420px;width:90%;background:#0d0d0f;
+      border:1px solid rgba(201,168,76,0.4);border-radius:20px;
+      padding:36px 32px;text-align:center;color:#f0ede8;
+      box-shadow:0 0 80px rgba(201,168,76,0.15);
+    }
+    #__noAccessBox .__naEmoji{font-size:44px;margin-bottom:14px;}
+    #__noAccessBox h2{font-size:21px;font-weight:900;margin-bottom:12px;color:#ffd700;font-family:'Cinzel',serif;}
+    #__noAccessBox p{font-size:14px;color:rgba(240,237,232,0.7);line-height:1.7;margin-bottom:24px;}
+    #__noAccessBox button{
+      display:inline-block;padding:14px 32px;border-radius:10px;border:none;
+      background:linear-gradient(135deg,#ffd700,#c9a84c);color:#080808;
+      font-weight:800;font-size:13px;letter-spacing:1px;text-transform:uppercase;
+      cursor:pointer;font-family:'Inter',sans-serif;margin:4px;
+    }
+    #__noAccessBox .__naGhost{background:rgba(255,255,255,0.06);color:#f0ede8;}
+  `;
+  document.head.appendChild(style);
+
+  const isExpired = noAccessReason === 'expired';
+  const overlay = document.createElement('div');
+  overlay.id = '__noAccessOverlay';
+  overlay.innerHTML =
+    '<div id="__noAccessBox">' +
+      '<div class="__naEmoji">🔒</div>' +
+      '<h2>'+(isExpired ? 'Membership Expired' : 'No Membership Found')+'</h2>' +
+      '<p>'+(isExpired
+        ? 'Your jigsaw.games membership has ended. Please renew to keep playing!'
+        : 'Sorry, we have no jigsaw.games membership subscription on file for your email. Please join jigsaw.games and subscribe to start playing!'
+      )+'</p>' +
+      '<button id="__naJoinBtn">Join jigsaw.games →</button>' +
+      '<button id="__naCloseBtn" class="__naGhost">Not Now</button>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  document.getElementById('__naJoinBtn').onclick = function(){ window.location.href='/join'; };
+  document.getElementById('__naCloseBtn').onclick = function(){ overlay.remove(); };
+}
+
 function closePaywall(){
   // Redirect non-members to join page instead of closing
   window.location.href='/join';
@@ -1377,7 +1430,10 @@ window.addEventListener('load',async()=>{
     const lb=document.getElementById('landscapeBtn');
     if(lb) lb.style.display='flex';
   }
-  // Show My Account button if logged in, hide Sign In (and vice versa)
+  // Show My Account button if logged in, hide Sign In (and vice versa).
+  // Every active member now gets both sites, so also wire up the
+  // fab.games button to hand off the session, same as play.html does
+  // in reverse for the jigsaw.games button.
   try{
     if(sb){
       const{data:{session}}=await sb.auth.getSession();
@@ -1386,6 +1442,16 @@ window.addEventListener('load',async()=>{
         if(ab) ab.style.display='inline-block';
         const sib=document.getElementById('signInBtn');
         if(sib) sib.style.display='none';
+
+        const fabBtn=document.getElementById('fabCrossLink');
+        if(fabBtn){
+          fabBtn.onclick=function(e){
+            e.preventDefault();
+            const at=encodeURIComponent(session.access_token);
+            const rt=encodeURIComponent(session.refresh_token);
+            window.location.href='https://www.fab.games/#jigsaw_at='+at+'&jigsaw_rt='+rt;
+          };
+        }
       }
     }
   }catch(e){}

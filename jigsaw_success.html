@@ -34,14 +34,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <body>
 <div class="card">
   <div class="confetti">🧩</div>
-  <div id="bundleBadge" style="display:none;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#c9a84c;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);padding:6px 18px;border-radius:20px;margin-bottom:16px;display:inline-block;">🎮 Bundle Unlocked</div>
   <div class="welcome">Welcome to the Family!!</div>
-  <div class="tagline" id="tagline">Your puzzles are ready and waiting — let's play!!</div>
+  <div class="tagline" id="tagline">You now have full access to jigsaw.games AND fab.games — every puzzle, every game, all yours!</div>
 
   <div class="trial-box">
     <div class="trial-label">Your Free Trial Ends</div>
     <div class="trial-date" id="trialDate">Loading...</div>
-    <div class="trial-sub" id="trialSub">30 days free · then $4.99/month · cancel anytime</div>
+    <div class="trial-sub" id="trialSub">30 days free · then $5.99/month · cancel anytime</div>
   </div>
 
   <div class="features">
@@ -53,7 +52,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   </div>
 
   <a href="/" class="play-btn">🎨 Start Playing Now →</a>
-  <a href="#" id="fabBtn" class="play-btn" style="display:none;margin-top:12px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);box-shadow:0 6px 0 #4c1d95,0 8px 24px rgba(139,92,246,0.4);color:#fff;">🎮 Play fab.games →</a>
+  <a href="#" id="fabBtn" class="play-btn" style="margin-top:12px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);box-shadow:0 6px 0 #4c1d95,0 8px 24px rgba(139,92,246,0.4);color:#fff;">🎮 Play fab.games →</a>
 
   <div class="fine">
     Questions? Email us at <a href="mailto:hello@jigsaw.games">hello@jigsaw.games</a><br>
@@ -108,18 +107,11 @@ window.addEventListener('load', ()=>{
   setTimeout(burst, 800);
 });
 
-// ── BUNDLE-AWARE WELCOME ───────────────────────────
+// ── SET UP THE FAB.GAMES CROSS-LINK ────────────────
+// One membership now covers both sites, so every new member gets this
+// link, always — no more checking which plan they picked.
 (async function(){
-  const params = new URLSearchParams(window.location.search);
-  const plan = params.get('plan');
-  if(plan !== 'bundle') return; // single-site plan — default messaging above is correct
-
-  document.getElementById('bundleBadge').style.display = 'inline-block';
-  document.getElementById('tagline').textContent =
-    "You're now able to play jigsaw.games AND fab.games — every puzzle, every game, all yours!";
-
   const fabBtn = document.getElementById('fabBtn');
-  fabBtn.style.display = 'block';
   fabBtn.href = 'https://www.fab.games/';
 
   // If a live session already exists in this browser, hand it off so
