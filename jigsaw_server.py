@@ -280,6 +280,20 @@ def webhook():
             {'status': 'cancelled', 'subscription_status': 'cancelled'},
             use_service_key=True)
 
+    elif event['type'] == 'invoice.payment_failed':
+        # A renewal charge failed (expired card, insufficient funds, etc).
+        # Mark the account as past_due so access checks correctly deny
+        # them, instead of letting them keep playing for free forever
+        # after Stripe has already given up trying to charge them.
+        invoice = event['data']['object']
+        customer_id = invoice.get('customer')
+        if customer_id:
+            supabase_request('PATCH',
+                f"members?stripe_customer=eq.{customer_id}",
+                {'status': 'past_due', 'subscription_status': 'past_due'},
+                use_service_key=True)
+            print(f'PAYMENT FAILED: customer={customer_id} marked past_due', flush=True)
+
     return jsonify({'ok': True})
 
 # ── DELETE PUZZLE (admin only, uses service key — bypasses anon RLS) ──
